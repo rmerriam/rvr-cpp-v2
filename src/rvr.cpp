@@ -17,6 +17,7 @@ using namespace std;
 #include "Drive.h"
 #include "IoLed.h"
 #include "Power.h"
+#include "SystemInfo.h"
 
 int main() {
 
@@ -28,19 +29,75 @@ int main() {
     rvr::Drive drive(req);
     rvr::Power pow(req);
     rvr::IoLed led(req);
+    rvr::SystemInfo sys(req);
 
-#if 1
-    led.allLed(true);
+#if 0
+
+    sys.getMainAppVersion();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getBootloaderVersion();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getBoardRevision();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getMacId();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getStatsId();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getProcessorName();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getUpTime();
+    resp.read();
+    std::cerr << std::endl;
+
+    sys.getSku();
+    resp.read();
+    std::cerr << std::endl;
+
+#elif 1
+    uint32_t led32 { Led::right_brakelight_blue | Led::right_brakelight_red | Led::right_brakelight_green | //
+        Led::power_button_rear_blue | Led::power_button_rear_red | Led::power_button_rear_green };
+
+    rvr::MsgArray colors { 0x00, 0x00, 0xFF, //
+        0x00, 0x00, 0xFF, //
+    };
+    led.allLed(led32, colors, true);
+    resp.read();
+    std::cerr << std::endl;
+
+    led32 = Led::undercarriage_white;
+    colors.clear();
+    colors.push_back(0x00);
+//    colors.push_back(0xFF);
+//    colors.push_back(0xFF);
+
+    led.allLed(led32, colors, true);
     resp.read();
     std::cerr << std::endl;
 
 //    led.getColorId();
 //    resp.read();
 //    std::cerr << std::endl;
-//
-//    led.getColorPalette();
+
+//    led.getActiveColorPalette();
 //    resp.read();
 //    std::cerr << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
+    led.idleLeds();
+    resp.read();
+    std::cerr << std::endl;
 
 #elif 0
 //    pow.awake();

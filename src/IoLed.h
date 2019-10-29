@@ -26,6 +26,12 @@
 #include "CommandBase.h"
 
 namespace rvr {
+    class IoLed;
+}
+using Led = rvr::IoLed;
+// defined to make it easier to access LedMask enum, i.e. Led::right_headlight_red
+
+namespace rvr {
 
     class IoLed : protected CommandBase {
 
@@ -73,45 +79,33 @@ namespace rvr {
         IoLed(IoLed&& other) = delete;
         IoLed& operator=(IoLed const& other) = delete;
 
-        void allLed(bool const get_response = false) { // uint32_t const& led_group, LedArray const& right, bool const get_response = false) {
+        void allLed(uint32_t const led_bits, MsgArray const& colors, bool const get_response = false) {
 
-            // uniform initialization using {} causes a narrowing warning
-            uint8_t flags = (get_response ? Request::request_response : 0) | Request::has_target;
+            // need static_cast because of narrowing warning
+            uint8_t flags { static_cast<uint8_t>((get_response ? Request::request_response : 0) | Request::has_target) };
 
             MsgArray msg { flags, serial, mDevice, set_all_leds, mRequest.sequence() };
 
-            uint32_t led32 {    //
-            right_brakelight_blue | right_brakelight_red | right_brakelight_green | //
-                power_button_rear_blue | power_button_rear_red | power_button_rear_green | //
-//                undercarriage_white | //
-                0 };
-
-            MsgArray leds { led32 >> 24, (led32 >> 16) & 0xFF, (led32 >> 8) & 0xFF, (led32 & 0xFF) };
-
-//            MsgArray colors { 0xFF, 0xFF, 0xFF, };
-            MsgArray colors { 0x00, 0x00, 0xFF, 0x00, 0x00, 0xFF, //
-//                0xff, 0xff, 0xff, 0xff, //
-            };
+            MsgArray leds { //
+            static_cast<uint8_t>(led_bits >> 24), //
+                static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
+                static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
+                static_cast<uint8_t>(led_bits & 0xFF) };
 
             msg.insert(msg.end(), leds.begin(), leds.end());
             msg.insert(msg.end(), colors.begin(), colors.end());
 
+            // error 1 - missing "has_target"
             // error 4 - more leds than colors
-            //
             // error 7 - more colors than leds
 
             mRequest.send(msg);
         }
 
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getColorPalette() {
-            do_request(get_active_color_palette, true);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getColorId() {
-            do_request(get_color_identification_report, true);
-        }
-//-
+        void getActiveColorPalette();
+        void getColorId();
+        void idleLeds();
+
     private:
 
         enum Cmd : uint8_t {
@@ -125,6 +119,18 @@ namespace rvr {
         };
     }
     ;
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::getActiveColorPalette() {
+        do_request(get_active_color_palette, true);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::getColorId() {
+        do_request(get_color_identification_report, true);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::idleLeds() {
+        do_request(release_led_requests, true);
+    }
 
 } /* namespace rvr */
 

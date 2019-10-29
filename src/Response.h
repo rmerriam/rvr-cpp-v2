@@ -37,11 +37,18 @@ namespace rvr {
         Response& operator=(Response const& other) = delete;
 
         void read() {
-            uint8_t resp[40];
-            int cnt = mSerialPort.read(resp, 20);
+            uint8_t resp[120];
+            int cnt = mSerialPort.read(resp, 120);
             mMsg.assign(resp, &resp[cnt]);
 
             tracenl(std::cerr, "resp: ", cnt);
+//            trace(std::cerr, mMsg);
+//            tracenl(std::cerr);
+//
+//            trace(std::cerr, "UnEsc: ");
+//            tracenl(std::cerr);
+
+            unescape_msg(mMsg);
             trace(std::cerr, mMsg);
             tracenl(std::cerr);
         }
