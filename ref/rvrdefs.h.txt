@@ -1,0 +1,52 @@
+#ifndef __RVRDEFS_H
+#define __RVRDEFS_H 1
+
+#include <sys/types.h>
+
+struct header {
+    struct flag_bits flags;         
+    struct locationID targetID;     /* optional, depends on flags */
+    struct locationID sourceID;     /* optional, depends on flags */
+    uint8_t deviceID;     /* command group ... see defines below */
+    uint8_t commandID;
+    uint8_t sequence_num;
+};
+
+struct flag_bits {
+    unsigned int is_response:1;
+    unsigned int response_requested:1;
+    unsigned int response_requested_if_error:1;
+    unsigned int is_activity:1;
+    unsigned int has_target:1;
+    unsigned int has_source:1;
+    unsigned int UNUSED:1;
+    unsigned int has_more_flags:1;
+};
+
+struct locationID {
+    unsigned int port:4;
+    unsigned int node:4;
+}
+
+#define DRIVE_GROUP   0x13
+#define POWER_GROUP   0x16
+#define LED_GROUP     0x1a
+
+#define MESSAGE_START 0x8D
+#define MESSAGE_END   0xD8
+
+struct message {
+    struct header msghdr;
+    char * payload;
+    uint8_t checksum;
+};
+
+#define ECHO_COMMAND             0x00
+#define RAW_MOTOR_COMMAND        0x01
+#define GET_BLUETOOTH_ADVERT     0x05
+#define RESET_YAW_COMMAND        0x07
+#define WAKE_COMMAND             0x0D
+#define GET_BATT_LEVEL_COMMAND   0x10
+#define SET_ALL_LEDS_COMMAND     0x1A
+
+
