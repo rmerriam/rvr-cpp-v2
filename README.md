@@ -14,7 +14,7 @@ Here is what I'm using to decipher the protocol.
 
 * [RVR SDK](https://sdk.sphero.com/)
 * [RVR Sensor & Colors Cards](https://sdk.sphero.com/docs/general_documentation/sensors/)
-* [RVR Docs](https://sdk.sphero.com/docs/sdk_documentation/connection/) - reference to API
+* [RVR Docs](https://sdk.sphero.com/docs/sdk_documentation/connection/) - reference to API 
 
 
 The [Wiki](https://bitbucket.org/rmerriam/rvr-cpp/wiki/Home) I'm writing as I go explains the details of the protocol with some code snippets.

@@ -35,6 +35,13 @@ void trace(std::ostream& os, std::vector<T> const& data) {
 }
 //----------------------------------------------------------------------------------------------------------------------
 template <typename T>
+void trace(std::ostream& os, std::vector<T> const& data, char const* const text) {
+    os << text << ' ';
+    std::copy(data.begin(), data.end(), std::ostream_iterator<int>(os, " "));
+    os << nl;
+}
+//----------------------------------------------------------------------------------------------------------------------
+template <typename T>
 inline void trace(std::ostream& os, T const& data) {
     os << data;
 }

@@ -18,6 +18,44 @@ using namespace std;
 #include "Connection.h"
 #include "SystemInfo.h"
 
+namespace rvr {
+
+    void Response::readx() {
+        rvr::MsgArray in;
+        in.reserve(40);
+
+        uint8_t const EopSop[] { 0xD8, 0x8D };
+
+        for (auto i { 0 }; i < 25; ++i) {
+            std::cerr << dec << i << " size " << in.size() << '\n';
+            std::cerr << "buf " << mSerialPort.count() << '\n';
+            std::cerr << hex;
+
+            if (mSerialPort.count() != 0) {
+                uint8_t r[in.capacity()];
+                int cnt = mSerialPort.read(r, in.capacity());
+
+                in.insert(in.end(), r, &r[cnt]);
+
+                trace(std::cerr, in);
+                tracenl(std::cerr);
+            }
+
+            auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
+            trace(std::cerr, pos - in.begin());
+            tracenl(std::cerr);
+
+            rvr::MsgArray packet { in.begin(), pos + 1 };
+            trace(std::cerr, packet, "Packet:");
+            tracenl(std::cerr);
+
+            in.erase(in.begin(), pos + 1);
+            trace(std::cerr, in);
+            tracenl(std::cerr);
+
+        }
+    }
+}
 int main() {
 
     cerr << std::hex << setfill('0') << std::uppercase;
@@ -54,36 +92,5 @@ int main() {
 #endif
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     std::cerr << "===================\n";
-    rvr::MsgArray in;
-    in.reserve(40);
-
-    uint8_t const EopSop[] { 0xD8, 0x8D };
-
-    for (auto i { 0 }; i < 25; ++i) {
-        std::cerr << dec << i << " size " << in.size() << '\n';
-        std::cerr << "buf " << serial.count() << '\n';
-        std::cerr << hex;
-
-        if (serial.count() != 0) {
-            uint8_t r[in.capacity()];
-            int cnt = serial.read(r, in.capacity());
-
-            in.insert(in.end(), r, &r[cnt]);
-
-            trace(std::cerr, in);
-            tracenl(std::cerr);
-        }
-
-        auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
-        trace(std::cerr, pos - in.begin());
-        tracenl(std::cerr);
-
-        rvr::MsgArray packet { in.begin(), pos + 1 };
-        trace(std::cerr, packet);
-        tracenl(std::cerr);
-
-        in.erase(in.begin(), pos + 1);
-        trace(std::cerr, in);
-        tracenl(std::cerr);
-    }
+    resp.readx();
 }

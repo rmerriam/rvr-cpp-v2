@@ -1,5 +1,3 @@
-#ifndef Connection_H_
-#define Connection_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -19,36 +17,24 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 29, 2019
+//     Created: Oct 25, 2019
 //
 //======================================================================================================================
-#include "Request.h"
-#include "CommandBase.h"
-
+#include "Response.h"
 namespace rvr {
-
-    class Connection : protected CommandBase {
-    public:
-        Connection(Request& req) :
-            CommandBase { Devices::connection, req, bluetoothSOC } {
-        }
-        Connection(Connection const& other) = delete;
-        Connection(Connection&& other) = delete;
-        Connection& operator=(Connection const& other) = delete;
-
-        void bluetoothName();
-
-    private:
-        enum Cmd : uint8_t {
-            get_bluetooth_advertising_name = 0x05, //
-        };
-
-    };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Connection::bluetoothName() {
-        do_request(get_bluetooth_advertising_name, true);
+    int Response::read() {
+        uint8_t resp[120];
+        int cnt = mSerialPort.read(resp, 120);
+        mMsg.assign(resp, &resp[cnt]);
+
+        tracenl(std::cerr, "resp: ", cnt);
+
+        unescape_msg(mMsg);
+        trace(std::cerr, mMsg);
+        tracenl(std::cerr);
+
+        return cnt;
     }
 
-} /* namespace rvr */
-
-#endif /* Connection_H_ */
+}

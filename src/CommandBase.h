@@ -47,9 +47,7 @@ namespace rvr {
             microcontroller = 0x02,
 
         };
-        explicit CommandBase(Devices const device, Request& request, uint8_t const target) :
-            mDevice { device }, mRequest { request }, mTarget { target } {
-        }
+        explicit CommandBase(Devices const device, Request& request, uint8_t const target);
         uint8_t buildFlags(bool const get_response) const;
         void do_request(uint8_t const cmd, bool const get_response = false);
 
@@ -61,6 +59,10 @@ namespace rvr {
         CommandBase(CommandBase&& other) = delete;
         CommandBase& operator=(CommandBase const& other) = delete;
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline explicit CommandBase::CommandBase(Devices const device, Request& request, uint8_t const target) :
+        mDevice { device }, mRequest { request }, mTarget { target } {
+    }
     //----------------------------------------------------------------------------------------------------------------------
     inline uint8_t CommandBase::buildFlags(bool const get_response) const {
         uint8_t flags { static_cast<uint8_t>((get_response ? Request::request_response : 0) | Request::has_target) };

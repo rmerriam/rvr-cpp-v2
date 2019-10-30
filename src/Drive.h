@@ -39,12 +39,6 @@ namespace rvr {
         Drive(Drive const& other) = delete;
         Drive& operator=(Drive const& other) = delete;
 
-        /*
-         *  speed inputs are 0-100%, positive or negative
-         *  heading is in degrees
-         */
-
-        // inputs are +- 100%
         void drive(double const& left, double const& right, bool const get_response = false);
         void stop(int const& heading, bool const get_response = false);
         void spin_drive(double const& speed, int const& heading, bool const get_response = false);

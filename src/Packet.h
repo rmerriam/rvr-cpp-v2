@@ -24,11 +24,6 @@
 //======================================================================================================================
 //  Base class for building packets which are either Requests or Response
 
-#include <cstddef>
-#include <iterator>
-#include <ostream>
-#include <vector>
-
 #include "SerialPort.h"
 
 namespace rvr {
@@ -36,11 +31,11 @@ namespace rvr {
 
     class Packet {
     public:
-        Packet(SerialPort &s) :
+        Packet(SerialPort& s) :
             mSerialPort { s } {
         }
 
-        const uint8_t sequence() {
+        uint8_t const sequence() {
             return ++mSeq;
         }
     protected:
@@ -49,19 +44,19 @@ namespace rvr {
             SOP = 0x8D, EOP = 0xD8, ESC = 0xAB, escaped_SOP = 0x05, escaped_EOP = 0x50, escaped_ESC = 0x23,
         };
 
-        uint8_t checksum(const MsgArray &payload) const;
+        uint8_t checksum(MsgArray const& payload) const;
 
-        static bool isPacketChar(const uint8_t c);
+        static bool isPacketChar(uint8_t const c);
 
-        void escape_msg(MsgArray &payload);
-        void unescape_msg(MsgArray &payload);
+        void escape_msg(MsgArray& payload);
+        void unescape_msg(MsgArray& payload);
 
-        SerialPort &mSerialPort;
+        SerialPort& mSerialPort;
         MsgArray mMsg { 40 };
 
     private:
-        auto escape_char(MsgArray::iterator &p, MsgArray &payload);
-        void unescape_char(auto &p, MsgArray &payload);
+        auto escape_char(MsgArray::iterator& p, MsgArray& payload);
+        void unescape_char(auto& p, MsgArray& payload);
 
         static uint8_t mSeq;
     };

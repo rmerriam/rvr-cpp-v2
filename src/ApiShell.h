@@ -36,18 +36,20 @@ namespace rvr {
         ApiShell(ApiShell&& other) = delete;
         ApiShell& operator=(ApiShell const& other) = delete;
 
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void echo(MsgArray const& data, bool const get_response = false) {
-            MsgArray msg { buildFlags(get_response), mTarget, mDevice, echo_cmd, mRequest.sequence() };
-            msg.insert(msg.end(), data.begin(), data.end());
-            mRequest.send(msg);
-        }
+        void echo(MsgArray const& data, bool const get_response = false);
 
     private:
         enum Cmd : uint8_t {
             echo_cmd = 0x00, //
         };
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void ApiShell::echo(MsgArray const& data, bool const get_response) {
+        MsgArray msg { buildFlags(get_response), mTarget, mDevice, echo_cmd, mRequest.sequence() };
+        msg.insert(msg.end(), data.begin(), data.end());
+        mRequest.send(msg);
+    }
+
 } /* namespace rvr */
 
 #endif /* ApiShell_H_ */

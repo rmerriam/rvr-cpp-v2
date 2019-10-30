@@ -36,7 +36,7 @@ namespace rvr {
     class IoLed : protected CommandBase {
 
     public:
-
+        //----------------------------------------------------------------------------------------------------------------------
         enum LedMask : uint32_t {
             right_headlight_red = 0x00000001,   //
             right_headlight_green = 0x00000002,   //
@@ -70,7 +70,7 @@ namespace rvr {
             right_brakelight_blue = 0x20000000,   //
             undercarriage_white = 0x40000000,   //
         };
-
+        //----------------------------------------------------------------------------------------------------------------------
         enum LedGroup : uint32_t {
             status_indication_left = left_status_indication_red |    //
                 left_status_indication_green |    //
@@ -125,7 +125,7 @@ namespace rvr {
 
             undercarriage = undercarriage_white
         };
-
+        //----------------------------------------------------------------------------------------------------------------------
         IoLed(Request& req) :
             CommandBase { Devices::io_led, req, bluetoothSOC } {
         }
@@ -151,9 +151,7 @@ namespace rvr {
             save_color_palette = 0x48, //
             release_led_requests = 0x4E, //
         };
-    }
-    ;
-
+    };
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getActiveColorPalette() {
         do_request(get_active_color_palette, true);

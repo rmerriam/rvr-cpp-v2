@@ -37,11 +37,7 @@ public:
 
     void flush();
 
-    int count() const {
-        int bytes_avail;
-        ::ioctl(mFd, FIONREAD, &bytes_avail);
-        return bytes_avail;
-    }
+    int count() const;
     uint8_t read() const;
 
     int64_t read(uint8_t buffer[], uint32_t const len = 1) const;
@@ -56,4 +52,11 @@ private:
     int mFd;
 
 };
+//----------------------------------------------------------------------------------------------------------------------
+inline int SerialPort::count() const {
+    int bytes_avail;
+    ::ioctl(mFd, FIONREAD, &bytes_avail);
+    return bytes_avail;
+}
+
 #endif
