@@ -30,7 +30,7 @@ namespace rvr {
     class ApiShell : protected CommandBase {
     public:
         ApiShell(Request& req) :
-            CommandBase { Devices::api, req } {
+            CommandBase { Devices::api, req, microcontroller } {
         }
         ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;
@@ -38,12 +38,8 @@ namespace rvr {
 
         //----------------------------------------------------------------------------------------------------------------------
         inline void echo(MsgArray const& data, bool const get_response = false) {
-            uint8_t flags = (get_response ? Request::request_response : 0) | Request::has_target;
-
-            MsgArray msg { flags, serial, mDevice, echo_cmd, mRequest.sequence() };
-
+            MsgArray msg { buildFlags(get_response), mTarget, mDevice, echo_cmd, mRequest.sequence() };
             msg.insert(msg.end(), data.begin(), data.end());
-
             mRequest.send(msg);
         }
 
@@ -51,7 +47,6 @@ namespace rvr {
         enum Cmd : uint8_t {
             echo_cmd = 0x00, //
         };
-
     };
 } /* namespace rvr */
 

@@ -64,7 +64,6 @@ namespace rvr {
             get_current_sense_amplifier_current = 0x27, //
         };
     };
-
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::awake() {
         do_request(wake, true);

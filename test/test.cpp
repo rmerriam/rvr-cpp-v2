@@ -36,7 +36,7 @@ int main() {
     rvr::IoLed led(req);
     rvr::SystemInfo sys(req);
 
-#if 1
+#if 0
     rvr::MsgArray dead { 0xDE, 0xAD };
     api.echo(dead, true);
     resp.read();
@@ -114,7 +114,7 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-#elif 1
+#elif 0
     pow.awake();
     resp.read();
     std::cerr << std::endl;
@@ -148,14 +148,14 @@ int main() {
 //    resp.read();
 //    std::cerr << std::endl;
 
-#elif 0
+#elif 1
 
 //    pow.sleep();
 //    resp.read();
 //    std::cerr << std::endl;
 //    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-    drive.drive(20, 40);
+    drive.drive(20, 40, true);
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     resp.read();
     std::cerr << std::endl;
@@ -168,7 +168,7 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-    drive.spin_drive(0, 20);
+    drive.spin_drive(0, 20, true);
     resp.read();
     std::cerr << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));

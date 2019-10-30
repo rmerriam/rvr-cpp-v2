@@ -34,6 +34,7 @@ namespace rvr {
     public:
 
         enum flags : uint8_t {
+            no_response = 0x00,
             response = 0x01,
             request_response = 0x02,
             request_error_response = 0x04,

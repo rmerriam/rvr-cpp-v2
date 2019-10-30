@@ -30,7 +30,7 @@ namespace rvr {
     class SystemInfo : protected CommandBase {
     public:
         SystemInfo(Request& req) :
-            CommandBase { Devices::system, req } {
+            CommandBase { Devices::system, req, microcontroller } {
         }
         SystemInfo(SystemInfo const& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;

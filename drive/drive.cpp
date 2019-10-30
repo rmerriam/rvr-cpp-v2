@@ -14,7 +14,7 @@ using namespace std;
 
 #include "Response.h"
 
-#include "IoLed.h"
+#include "Drive.h"
 
 int main() {
 
@@ -24,37 +24,27 @@ int main() {
     rvr::Request req { serial };
     rvr::Response resp { serial };
 
-    rvr::IoLed led(req);
+    rvr::Drive drive(req);
 
-    uint32_t led32 { Led::headlight_left | Led::headlight_right };
-
-    rvr::MsgArray colors { 0x00, 0x00, 0xFF, //
-        0xFF, 0x00, 0x00, //
-    };
-    led.allLed(led32, colors, true);
+    drive.drive(20, 40, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
     resp.read();
     std::cerr << std::endl;
 
-    led32 = Led::undercarriage_white;
-    colors.clear();
-    colors.push_back(0x00);
-//    colors.push_back(0xFF);
-//    colors.push_back(0xFF);
-
-    led.allLed(led32, colors, true);
+    drive.getMotorFault();
     resp.read();
     std::cerr << std::endl;
 
-//    led.getColorId();
-//    resp.read();
-//    std::cerr << std::endl;
-
-    led.getActiveColorPalette();
+    drive.getMotorStall();
     resp.read();
     std::cerr << std::endl;
 
-//    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
-//    led.idleLeds();
-//    resp.read();
-//    std::cerr << std::endl;
+    drive.spin_drive(0, 20);
+    resp.read();
+    std::cerr << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
+    drive.fixHeading();
+    resp.read();
+    std::cerr << std::endl;
 }

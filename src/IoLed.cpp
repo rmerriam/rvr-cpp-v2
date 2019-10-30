@@ -1,5 +1,3 @@
-#ifndef Connection_H_
-#define Connection_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -19,34 +17,30 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 29, 2019
+//     Created: Oct 22, 2019
 //
 //======================================================================================================================
-#include "Request.h"
-#include "CommandBase.h"
-
+#include "IoLed.h"
 namespace rvr {
 
-    class Connection : protected CommandBase {
-    public:
-        Connection(Request& req) :
-            CommandBase { Devices::connection, req, bluetoothSOC } {
-        }
-        Connection(Connection const& other) = delete;
-        Connection(Connection&& other) = delete;
-        Connection& operator=(Connection const& other) = delete;
+    void IoLed::allLed(uint32_t const led_bits, MsgArray const& colors, bool const get_response) {
 
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void bluetoothName() {
-            do_request(get_bluetooth_advertising_name, true);
-        }
+        MsgArray msg { buildFlags(get_response), mTarget, mDevice, set_all_leds, mRequest.sequence() };
 
-    private:
-        enum Cmd : uint8_t {
-            get_bluetooth_advertising_name = 0x05, //
-        };
+        MsgArray leds { //
+        static_cast<uint8_t>(led_bits >> 24), //
+            static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
+            static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
+            static_cast<uint8_t>(led_bits & 0xFF) };
 
-    };
-} /* namespace rvr */
+        msg.insert(msg.end(), leds.begin(), leds.end());
+        msg.insert(msg.end(), colors.begin(), colors.end());
 
-#endif /* Connection_H_ */
+        // error 1 - missing "has_target"
+        // error 4 - more leds than colors
+        // error 7 - more colors than leds
+
+        mRequest.send(msg);
+    }
+
+}

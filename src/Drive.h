@@ -32,7 +32,7 @@ namespace rvr {
     class Drive : protected CommandBase {
     public:
         Drive(Request& req) :
-            CommandBase { Devices::drive, req } {
+            CommandBase { Devices::drive, req, microcontroller } {
 
         }
         Drive(Drive&& other) = delete;
@@ -55,8 +55,6 @@ namespace rvr {
         void fixHeading();
 
     private:
-
-        constexpr static uint8_t device { 0x16 };
 
         // drive raw modes
         enum Mode : uint8_t {

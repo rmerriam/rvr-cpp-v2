@@ -127,35 +127,14 @@ namespace rvr {
         };
 
         IoLed(Request& req) :
-            CommandBase { Devices::io_led, req } {
+            CommandBase { Devices::io_led, req, bluetoothSOC } {
         }
 
         IoLed(IoLed const& other) = delete;
         IoLed(IoLed&& other) = delete;
         IoLed& operator=(IoLed const& other) = delete;
 
-        void allLed(uint32_t const led_bits, MsgArray const& colors, bool const get_response = false) {
-
-            // need static_cast because of narrowing warning
-            uint8_t flags { static_cast<uint8_t>((get_response ? Request::request_response : 0) | Request::has_target) };
-
-            MsgArray msg { flags, serial, mDevice, set_all_leds, mRequest.sequence() };
-
-            MsgArray leds { //
-            static_cast<uint8_t>(led_bits >> 24), //
-                static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
-                static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
-                static_cast<uint8_t>(led_bits & 0xFF) };
-
-            msg.insert(msg.end(), leds.begin(), leds.end());
-            msg.insert(msg.end(), colors.begin(), colors.end());
-
-            // error 1 - missing "has_target"
-            // error 4 - more leds than colors
-            // error 7 - more colors than leds
-
-            mRequest.send(msg);
-        }
+        void allLed(uint32_t const led_bits, MsgArray const& colors, bool const get_response = false);
 
         void getActiveColorPalette();
         void getColorId();
@@ -174,6 +153,7 @@ namespace rvr {
         };
     }
     ;
+
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getActiveColorPalette() {
         do_request(get_active_color_palette, true);

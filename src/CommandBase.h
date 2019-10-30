@@ -38,27 +38,39 @@ namespace rvr {
             api_and_shell = 0x10
         };
 
-        enum Ports : uint8_t {
-            serial = 0x01,
+        enum SourcePort : uint8_t {
+            serial = 0x01, //
+            bluetooth = 0x02,
         };
-        explicit CommandBase(Devices const device, Request& request) :
-            mDevice { device }, mRequest(request) {
-        }
+        enum TargetPort : uint8_t {
+            bluetoothSOC = 0x01, //
+            microcontroller = 0x02,
 
-        void do_request(uint8_t const cmd, bool const get_response = false) {
-            // uniform initialization using {} causes a narrowing warning
-            uint8_t flags = (get_response ? Request::request_response : 0) | Request::has_target;
-            MsgArray msg { flags, serial, mDevice, cmd, mRequest.sequence() };
-            mRequest.send(msg);
+        };
+        explicit CommandBase(Devices const device, Request& request, uint8_t const target) :
+            mDevice { device }, mRequest { request }, mTarget { target } {
         }
+        uint8_t buildFlags(bool const get_response) const;
+        void do_request(uint8_t const cmd, bool const get_response = false);
 
         uint8_t const mDevice;
         Request& mRequest;
+        uint8_t const mTarget;
 
         CommandBase(CommandBase const& other) = delete;
         CommandBase(CommandBase&& other) = delete;
         CommandBase& operator=(CommandBase const& other) = delete;
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline uint8_t CommandBase::buildFlags(bool const get_response) const {
+        uint8_t flags { static_cast<uint8_t>((get_response ? Request::request_response : 0) | Request::has_target) };
+        return flags;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::do_request(uint8_t const cmd, bool const get_response) {
+        MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence() };
+        mRequest.send(msg);
+    }
 
 } /* namespace rvr */
 
