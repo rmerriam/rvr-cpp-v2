@@ -60,7 +60,7 @@ namespace rvr {
         CommandBase& operator=(CommandBase const& other) = delete;
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline explicit CommandBase::CommandBase(Devices const device, Request& request, uint8_t const target) :
+    inline CommandBase::CommandBase(Devices const device, Request& request, uint8_t const target) :
         mDevice { device }, mRequest { request }, mTarget { target } {
     }
     //----------------------------------------------------------------------------------------------------------------------
