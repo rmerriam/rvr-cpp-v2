@@ -67,31 +67,31 @@ namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::awake() {
-        do_request(wake);
+        do_request(wake, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::sleep() {
-        do_request(snooze);
+        do_request(snooze, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_precentage() {
-        do_request(get_battery_percentage);
+        do_request(get_battery_percentage, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_voltage_state() {
-        do_request(get_battery_voltage_state);
+        do_request(get_battery_voltage_state, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_voltage() {
-        do_request(get_battery_voltage_in_volts);
+        do_request(get_battery_voltage_in_volts, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_volt_thresholds() {
-        do_request(get_battery_voltage_state_thresholds);
+        do_request(get_battery_voltage_state_thresholds, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_current() {
-        do_request(get_current_sense_amplifier_current);
+        do_request(get_current_sense_amplifier_current, true);
     }
 
 } /* namespace rvr */

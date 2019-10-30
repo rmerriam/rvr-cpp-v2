@@ -14,6 +14,8 @@ using namespace std;
 
 #include "Response.h"
 
+#include "ApiShell.h"
+#include "Connection.h"
 #include "Drive.h"
 #include "IoLed.h"
 #include "Power.h"
@@ -26,12 +28,25 @@ int main() {
     SerialPort serial { "/dev/ttyUSB0", 115200 };
     rvr::Request req { serial };
     rvr::Response resp { serial };
+
+    rvr::ApiShell api(req);
+    rvr::Connection cmd(req);
     rvr::Drive drive(req);
     rvr::Power pow(req);
     rvr::IoLed led(req);
     rvr::SystemInfo sys(req);
 
-#if 0
+#if 1
+    rvr::MsgArray dead { 0xDE, 0xAD };
+    api.echo(dead, true);
+    resp.read();
+    std::cerr << std::endl;
+
+    cmd.bluetoothName();
+    resp.read();
+    std::cerr << std::endl;
+
+#elif 0
 
     sys.getMainAppVersion();
     resp.read();
@@ -65,12 +80,12 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-#elif 1
-    uint32_t led32 { Led::right_brakelight_blue | Led::right_brakelight_red | Led::right_brakelight_green | //
-        Led::power_button_rear_blue | Led::power_button_rear_red | Led::power_button_rear_green };
+#elif 0
+
+    uint32_t led32 { Led::headlight_left | Led::headlight_right };
 
     rvr::MsgArray colors { 0x00, 0x00, 0xFF, //
-        0x00, 0x00, 0xFF, //
+        0xFF, 0x00, 0x00, //
     };
     led.allLed(led32, colors, true);
     resp.read();
@@ -99,11 +114,11 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-#elif 0
-//    pow.awake();
-//    resp.read();
-//    std::cerr << std::endl;
-//    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+#elif 1
+    pow.awake();
+    resp.read();
+    std::cerr << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
 //    resp.read();
 //    std::cerr << std::endl;
@@ -133,7 +148,7 @@ int main() {
 //    resp.read();
 //    std::cerr << std::endl;
 
-#elif 1
+#elif 0
 
 //    pow.sleep();
 //    resp.read();
