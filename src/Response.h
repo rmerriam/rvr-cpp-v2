@@ -36,7 +36,7 @@ namespace rvr {
         Response(Response&& other) = delete;
         Response& operator=(Response const& other) = delete;
 
-        void read() {
+        int read() {
             uint8_t resp[120];
             int cnt = mSerialPort.read(resp, 120);
             mMsg.assign(resp, &resp[cnt]);
@@ -51,6 +51,27 @@ namespace rvr {
             unescape_msg(mMsg);
             trace(std::cerr, mMsg);
             tracenl(std::cerr);
+            return cnt;
+        }
+
+        rvr::MsgArray readx() {
+            uint8_t resp[120];
+            int cnt = mSerialPort.read(resp, 120);
+
+            rvr::MsgArray msg;
+            msg.assign(resp, &resp[cnt]);
+
+//            tracenl(std::cerr, "resp: ", cnt);
+//            trace(std::cerr, mMsg);
+//            tracenl(std::cerr);
+//
+//            trace(std::cerr, "UnEsc: ");
+//            tracenl(std::cerr);
+
+//            unescape_msg(msg);
+//            trace(std::cerr, msg);
+//            tracenl(std::cerr);
+            return msg;
         }
 
     private:

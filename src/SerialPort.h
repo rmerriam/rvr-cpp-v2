@@ -24,23 +24,33 @@
 //======================================================================================================================
 //
 
+#include <fcntl.h>
+#include <sys/ioctl.h>
 #include <cstdint>
 using namespace std;
 //-----------------------------------------------------------------------------
 class SerialPort {
 
 public:
-    SerialPort(const char* port_name, const uint32_t baud);
+    SerialPort(char const* port_name, uint32_t const baud);
     ~SerialPort();
 
     void flush();
 
-    uint8_t read() const;;
-    int64_t read(uint8_t buffer[], const uint32_t len = 1) const;
+    int count() const {
+        int bytes_avail;
+        ::ioctl(mFd, FIONREAD, &bytes_avail);
+        return bytes_avail;
+    }
+    uint8_t read() const;
 
-    int64_t write(const uint8_t buffer[], const uint32_t cnt) const;
-    void write(const uint8_t& ch) const;
-    void write(const uint8_t buffer[]) const { write(buffer+1, buffer[0]); }
+    int64_t read(uint8_t buffer[], uint32_t const len = 1) const;
+
+    int64_t write(uint8_t const buffer[], uint32_t const cnt) const;
+    void write(uint8_t const& ch) const;
+    void write(uint8_t const buffer[]) const {
+        write(buffer + 1, buffer[0]);
+    }
 
 private:
     int mFd;
