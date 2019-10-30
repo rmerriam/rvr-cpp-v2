@@ -19,7 +19,7 @@ Here is what I'm using to decipher the protocol.
 
 The [Wiki](https://bitbucket.org/rmerriam/rvr-cpp/wiki/Home) I'm writing as I go explains the details of the protocol with some code snippets.
 
-# Organization (or lack thereof)
+# Organization (or lack thereof) 
 
 This is a work in progress so the organization of the repository is not as clean as one might like. That's how I work when tackling a new project. Eventually it gets better organized. 
 
