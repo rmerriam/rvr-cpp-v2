@@ -43,7 +43,7 @@ namespace rvr {
         mSerialPort.write(mMsg.data(), mMsg.size());
 
         trace(std::cerr, mMsg);
-        tracenl(std::cerr);
+        traceln(std::cerr);
     }
 
 }

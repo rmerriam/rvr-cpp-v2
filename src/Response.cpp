@@ -28,11 +28,11 @@ namespace rvr {
         int cnt = mSerialPort.read(resp, 120);
         mMsg.assign(resp, &resp[cnt]);
 
-        tracenl(std::cerr, "resp: ", cnt);
+        traceln(std::cerr, "resp: ", cnt);
 
         unescape_msg(mMsg);
         trace(std::cerr, mMsg);
-        tracenl(std::cerr);
+        traceln(std::cerr);
 
         return cnt;
     }

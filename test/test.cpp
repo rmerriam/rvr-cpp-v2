@@ -46,7 +46,7 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-#elif 0
+#elif 1
 
     sys.getMainAppVersion();
     resp.read();

@@ -1,0 +1,232 @@
+//============================================================================
+// Name        : rvr_serial.cpp
+// Author      :
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
+#include <chrono>
+#include <iomanip>
+#include <iostream>
+#include <thread>
+using namespace std;
+
+#include "trace.h"
+#include "Response.h"
+
+#include "ApiShell.h"
+#include "Connection.h"
+#include "SystemInfo.h"
+
+namespace rvr {
+    // 8D 21 2 11 13 87 2 2F D8
+    //----------------------------------------------------------------------------------------------------------------------
+    enum BytePositions : uint8_t {
+        flags = 0x01,   //
+        targ = 0x02,   //
+        //        src = 0x02,   //
+        dev = 0x03,   //
+        cmd = 0x04,   //
+        seq = 0x04,   //
+        err = 0x06,     //
+        data = 0x06,    //
+    };
+//--------------------------------------------------------------------------------------------------------------------
+    void decode_device(uint8_t const device, rvr::MsgArray const packet) {
+        enum Devices : uint8_t {
+            api_and_shell = 0x10,    //
+            system = 0x11,   //
+            power = 0x13,   //
+            drive = 0x16,   //
+            sensors = 0x18,   //
+            connection = 0x19,   //
+            io_led = 0x1A,   //
+        };
+        switch (device) {
+            case api_and_shell:
+                trace_tab(std::cerr, "api_and_shell");
+                break;
+            case system:
+                trace_tab(std::cerr, "system");
+                SystemInfo::decode_cmd(packet[cmd], packet);
+                break;
+            case power:
+                trace_tab(std::cerr, "power");
+                break;
+            case drive:
+                trace_tab(std::cerr, "drive");
+                break;
+            case sensors:
+                trace_tab(std::cerr, "sensors");
+                break;
+            case connection:
+                trace_tab(std::cerr, "connection");
+                break;
+            case io_led:
+                trace_tab(std::cerr, "io_led");
+                break;
+        }
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void CommandBase::decode_target(uint8_t const target) {
+        switch (target) {
+            case bluetoothSOC:
+                traceln(std::cerr, "bluetoothSOC");
+                break;
+
+            case microcontroller:
+                traceln(std::cerr, "microcontroller");
+                break;
+        }
+    }
+ //----------------------------------------------------------------------------------------------------------------------
+    void decode_flags(uint8_t const f) {
+        using RFlags = Request::flags;
+
+        for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
+            switch (mask & f) {
+                case RFlags::response:
+                    trace_tab(std::cerr, "response | ");
+                    break;
+                case RFlags::request_response:
+                    trace_tab(std::cerr, "request_response | ");
+                    break;
+                case RFlags::request_error_response:
+                    trace_tab(std::cerr, "request_error_response | ");
+                    break;
+                case RFlags::activity:
+                    trace_tab(std::cerr, "activity | ");
+                    break;
+                case RFlags::has_target:
+                    trace_tab(std::cerr, "has_target | ");
+                    break;
+                case RFlags::has_source:
+                    trace_tab(std::cerr, "has_source | ");
+                    break;
+                case RFlags::has_more_flags:
+                    trace_tab(std::cerr, "has_more_flags | ");
+                    break;
+            }
+        }
+        traceln(std::cerr);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+     void SystemInfo::decode_cmd(uint8_t const cmd, rvr::MsgArray const packet) {
+         switch (cmd) {
+             case get_main_application_version:
+                 traceln(std::cerr, "get_main_application_version");
+                 break;
+             case get_bootloader_version:
+                 traceln(std::cerr, "get_bootloader_version");
+                 break;
+             case get_board_revision:
+                 traceln(std::cerr, "get_board_revision");
+                 break;
+             case get_mac_address:
+                 traceln(std::cerr, "get_mac_address");
+                 break;
+             case get_stats_id:
+                 traceln(std::cerr, "get_stats_id");
+                 break;
+             case get_processor_name:
+                 traceln(std::cerr, "get_processor_name");
+                 break;
+             case get_sku:
+                 traceln(std::cerr, "get_sku");
+                 break;
+             case get_core_up_time_in_milliseconds:
+                 traceln(std::cerr, "get_core_up_time_in_milliseconds");
+                 break;
+         }
+     }
+   //----------------------------------------------------------------------------------------------------------------------
+    void decode(rvr::MsgArray const packet) {
+        decode_flags(packet[flags]);
+
+        CommandBase::decode_target(packet[targ]);
+        decode_device(packet[dev], packet);
+
+        if (packet[err]) {
+            trace(std::cerr, "error ", (uint16_t)packet[err]);
+            traceln(std::cerr);
+        }
+        
+        traceln(std::cerr);
+    }
+//----------------------------------------------------------------------------------------------------------------------
+    void Response::readx() {
+        rvr::MsgArray in;
+        in.reserve(40);
+
+        uint8_t const EopSop[] { 0xD8, 0x8D };
+
+        for (auto i { 0 }; i < 25; ++i) {
+//            std::cerr << dec << i << " size " << in.size() << '\n';
+//            std::cerr << "buf " << mSerialPort.count() << '\n';
+            std::cerr << hex;
+
+            if (mSerialPort.count() != 0) {
+                uint8_t r[in.capacity()];
+                int cnt = mSerialPort.read(r, in.capacity());
+
+                in.insert(in.end(), r, &r[cnt]);
+
+                trace(std::cerr, in, "In:");
+                traceln(std::cerr);
+            }
+
+            while (in.size() > 20) {
+                auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
+//                trace(std::cerr, pos - in.begin());
+//                traceln(std::cerr);
+
+                rvr::MsgArray packet { in.begin(), pos + 1 };
+                trace(std::cerr, packet);
+                decode(packet);
+                in.erase(in.begin(), pos + 1);
+//                trace(std::cerr, in);
+//                traceln(std::cerr);
+            }
+        }
+    }
+}
+//----------------------------------------------------------------------------------------------------------------------
+int main() {
+
+    cerr << std::hex << setfill('0') << std::uppercase;
+
+    SerialPort serial { "/dev/ttyUSB0", 115200 };
+    rvr::Request req { serial };
+    rvr::Response resp { serial };
+
+    rvr::ApiShell api(req);
+    rvr::Connection cmd(req);
+    rvr::SystemInfo sys(req);
+
+    rvr::MsgArray dead { 0xDE, 0xAD };
+    api.echo(dead, true);
+
+    cmd.bluetoothName();
+
+#if 1
+    sys.getMainAppVersion();
+
+    sys.getBootloaderVersion();
+
+    sys.getBoardRevision();
+
+    sys.getMacId();
+
+    sys.getStatsId();
+
+    sys.getProcessorName();
+
+    sys.getUpTime();
+
+    sys.getSku();
+#endif
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::cerr << "===================\n";
+    resp.readx();
+}

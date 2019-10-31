@@ -47,18 +47,32 @@ inline void trace(std::ostream& os, T const& data) {
 }
 //----------------------------------------------------------------------------------------------------------------------
 template <typename T>
+inline void traceln(std::ostream& os, T const& data) {
+    os << data << '\n';
+}
+//----------------------------------------------------------------------------------------------------------------------
+template <typename T>
+inline void trace_tab(std::ostream& os, T const& data) {
+    os << data << '\t';
+}
+//----------------------------------------------------------------------------------------------------------------------
+template <typename T>
 inline void trace(std::ostream& os, char const* text, T const& data) {
-    trace(os, "cnt: ");
+    trace(os, text);
     os << data;
 }
 //----------------------------------------------------------------------------------------------------------------------
 template <typename T>
-inline void tracenl(std::ostream& os, char const* text, T const& data) {
+inline void traceln(std::ostream& os, char const* text, T const& data) {
     trace(os, text, data);
     os << nl;
 }
 //----------------------------------------------------------------------------------------------------------------------
-inline void tracenl(std::ostream& os) {
+inline void traceln(std::ostream& os) {
     os << nl;
+}
+//----------------------------------------------------------------------------------------------------------------------
+inline void trace_tab(std::ostream& os) {
+    os << '\t';
 }
 #endif /* TRACE_H_ */

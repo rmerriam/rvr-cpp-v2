@@ -53,5 +53,6 @@ namespace rvr {
 
     };
 }
+using RFlags = rvr::Request::flags;
 
 #endif /* REQUEST_H_ */

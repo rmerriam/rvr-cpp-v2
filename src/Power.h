@@ -31,7 +31,7 @@ namespace rvr {
 
     public:
         Power(Request& req) :
-            CommandBase { Devices::power, req } {
+            CommandBase { Devices::power, req, microcontroller } {
         }
 
         Power(Power const& other) = delete;

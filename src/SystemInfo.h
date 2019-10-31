@@ -38,6 +38,9 @@ namespace rvr {
 
         //----------------------------------------------------------------------------------------------------------------------
         inline void getMainAppVersion() {
+            mTarget = bluetoothSOC;
+            do_request(get_main_application_version, true);
+            mTarget = microcontroller;
             do_request(get_main_application_version, true);
         }
         //----------------------------------------------------------------------------------------------------------------------
@@ -46,18 +49,29 @@ namespace rvr {
         }
         //----------------------------------------------------------------------------------------------------------------------
         inline void getBoardRevision() {
+            mTarget = bluetoothSOC;
             do_request(get_board_revision, true);
+            mTarget = microcontroller;
+//            do_request(get_board_revision, true);
         }
         //----------------------------------------------------------------------------------------------------------------------
         inline void getMacId() {
+            mTarget = bluetoothSOC;
             do_request(get_mac_address, true);
+            mTarget = microcontroller;
         }
         //----------------------------------------------------------------------------------------------------------------------
         inline void getStatsId() {
+            mTarget = bluetoothSOC;
             do_request(get_stats_id, true);
+            mTarget = microcontroller;
+//            do_request(get_stats_id, true);
         }
         //----------------------------------------------------------------------------------------------------------------------
         inline void getProcessorName() {
+            mTarget = bluetoothSOC;
+            do_request(get_processor_name, true);
+            mTarget = microcontroller;
             do_request(get_processor_name, true);
         }
         //----------------------------------------------------------------------------------------------------------------------
@@ -66,8 +80,13 @@ namespace rvr {
         }
         //----------------------------------------------------------------------------------------------------------------------
         inline void getSku() {
+            mTarget = bluetoothSOC;
             do_request(get_sku, true);
+            mTarget = microcontroller;
+//            do_request(get_sku, true);
         }
+
+        static void decode_cmd(uint8_t const cmd, rvr::MsgArray const packet);
 
     private:
         enum Cmd : uint8_t {

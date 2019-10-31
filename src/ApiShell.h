@@ -30,7 +30,7 @@ namespace rvr {
     class ApiShell : protected CommandBase {
     public:
         ApiShell(Request& req) :
-            CommandBase { Devices::api, req, microcontroller } {
+            CommandBase { Devices::api_and_shell, req, microcontroller } {
         }
         ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;

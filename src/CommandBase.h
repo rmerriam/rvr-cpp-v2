@@ -26,16 +26,20 @@
 namespace rvr {
 
     class CommandBase {
+    public:
+//        static void decode_src(uint8_t const source);
+//        static void decode_target(uint8_t const target);
+//        static void decode_device(uint8_t const device);
+
     protected:
         enum Devices : uint8_t {
-            api = 0x10,     //
+            api_and_shell = 0x10,    //
             system = 0x11,   //
             power = 0x13,   //
             drive = 0x16,   //
             sensors = 0x18,   //
             connection = 0x19,   //
             io_led = 0x1A,   //
-            api_and_shell = 0x10
         };
 
         enum SourcePort : uint8_t {
@@ -53,7 +57,7 @@ namespace rvr {
 
         uint8_t const mDevice;
         Request& mRequest;
-        uint8_t const mTarget;
+        uint8_t mTarget;
 
         CommandBase(CommandBase const& other) = delete;
         CommandBase(CommandBase&& other) = delete;
