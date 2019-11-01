@@ -46,7 +46,7 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-#elif 1
+#elif 0
 
     sys.getMainAppVersion();
     resp.read();
@@ -114,7 +114,7 @@ int main() {
     resp.read();
     std::cerr << std::endl;
 
-#elif 0
+#elif 1
     pow.awake();
     resp.read();
     std::cerr << std::endl;

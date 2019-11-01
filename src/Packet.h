@@ -38,6 +38,9 @@ namespace rvr {
         uint8_t const sequence() {
             return ++mSeq;
         }
+
+        static void unescape_msg(MsgArray& payload);
+        static void escape_msg(MsgArray& payload);
     protected:
 
         enum SpecialChars : uint8_t {
@@ -48,15 +51,12 @@ namespace rvr {
 
         static bool isPacketChar(uint8_t const c);
 
-        void escape_msg(MsgArray& payload);
-        void unescape_msg(MsgArray& payload);
-
         SerialPort& mSerialPort;
         MsgArray mMsg { 40 };
 
     private:
-        auto escape_char(MsgArray::iterator& p, MsgArray& payload);
-        void unescape_char(auto& p, MsgArray& payload);
+        static auto escape_char(MsgArray::iterator& p, MsgArray& payload);
+        static void unescape_char(auto& p, MsgArray& payload);
 
         static uint8_t mSeq;
     };

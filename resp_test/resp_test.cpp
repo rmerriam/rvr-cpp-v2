@@ -20,6 +20,7 @@ using namespace std;
 
 #include "ApiShell.h"
 #include "Connection.h"
+#include "Power.h"
 #include "SystemInfo.h"
 
 namespace rvr {
@@ -77,7 +78,7 @@ namespace rvr {
     };
 
     //----------------------------------------------------------------------------------------------------------------------
-    void copy_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void raw_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         std::copy(begin, end, std::ostream_iterator<int>(cerr, " "));
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -97,12 +98,62 @@ namespace rvr {
         trace(std::cerr, value);
     }
     //----------------------------------------------------------------------------------------------------------------------
+    void float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        uint16_t value { };
+
+        for (auto it { begin }; it != end; ++it) {
+            uint8_t const& v { *it };
+            value <<= 8;
+            value += v;
+            std::cerr << dec;
+        }
+        trace(std::cerr, *reinterpret_cast<float*>( &value));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void tri_float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        float_data(begin, begin + 3);
+        float_data(begin + 4, begin + 7);
+        float_data(begin + 8, end);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void bool_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        bool value { *(begin - 1) == 0 };
+        std::cerr << std::boolalpha;
+        trace(std::cerr, value);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void prrcentage_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        double value { float( *begin) / 100.0 };
+        std::cerr << dec;
+        trace(std::cerr, value);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     void version_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        std::cerr << dec;
         trace(std::cerr, begin[0] << 8 | begin[1]);
         trace(std::cerr, ".");
         trace(std::cerr, begin[2] << 8 | begin[3]);
         trace(std::cerr, ".");
         trace(std::cerr, begin[4] << 8 | begin[5]);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void mac_addr(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        std::cerr << dec;
+        for (auto it = begin; it < end - 2; ++it) {
+            trace(std::cerr, *it++);
+            trace(std::cerr, *it);
+            trace(std::cerr, ":");
+        }
+        trace(std::cerr, *(end - 2));
+        trace(std::cerr, *(end - 1));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void battery_state_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        using char_ptr = char const *;
+        char_ptr state[4] { "unknown", "ok", "low", "critical" };
+
+        std::cerr << dec;
+        trace(std::cerr, state[ *begin]);
     }
 
     //----------------------------------------------------------------------------------------------------------------------
@@ -110,30 +161,42 @@ namespace rvr {
 
     struct RespDecoder {
         string name;
-        FuncPtr func { copy_data };
+        FuncPtr func { raw_data };
     };
 
     using DecoderMap = unordered_map <uint16_t, RespDecoder>;
     //----------------------------------------------------------------------------------------------------------------------
 
     DecoderMap decoder_map { //
-//    { api_and_shell << 8 | 0x00, RespDecoder { "echo", copy_data }, }, //
-    { api_and_shell << 8 | 0x00, RespDecoder { "echo" }, }, //
+    { api_and_shell << 8 | 0x00, RespDecoder { "echo", raw_data } }, //
+        //
+        { connection << 8 | 0x05, RespDecoder { "get_bluetooth_advertising_name", string_data } }, //
+        //
+        { power << 8 | 0x01, RespDecoder { "snooze" } }, //
+        { power << 8 | 0x0D, RespDecoder { "wake", bool_data } }, //
+        { power << 8 | 0x10, RespDecoder { "get_battery_percentage", prrcentage_data } }, //
+        { power << 8 | 0x17, RespDecoder { "get_battery_voltage_state", battery_state_data } }, //
+        { power << 8 | 0x19, RespDecoder { "will_sleep_notify" } }, //
+        { power << 8 | 0x1A, RespDecoder { "did_sleep_notify" } }, //
+        { power << 8 | 0x1B, RespDecoder { "enable_battery_voltage_state_change_notify" } }, //
+        { power << 8 | 0x1C, RespDecoder { "battery_voltage_state_change_notify" } }, //
+        { power << 8 | 0x25, RespDecoder { "get_battery_voltage_in_volts", int_data } }, //
+        { power << 8 | 0x26, RespDecoder { "get_battery_voltage_state_thresholds" } }, //
+        { power << 8 | 0x27, RespDecoder { "get_current_sense_amplifier_current" } }, //
         //
         { system << 8 | 0x00, RespDecoder { "get_main_application_version", version_data } }, //
         { system << 8 | 0x01, RespDecoder { "get_bootloader_version", version_data } }, //
-        { system << 8 | 0x03, RespDecoder { "get_board_revision" } }, //
-        { system << 8 | 0x06, RespDecoder { "get_mac_address", version_data } }, //
-        { system << 8 | 0x13, RespDecoder { "get_stats_id" } }, //
+        { system << 8 | 0x03, RespDecoder { "get_board_revision", int_data } }, //
+        { system << 8 | 0x06, RespDecoder { "get_mac_address", mac_addr } }, //
+        { system << 8 | 0x13, RespDecoder { "get_stats_id", int_data } }, //
         { system << 8 | 0x1F, RespDecoder { "get_processor_name", string_data } }, //
-        { system << 8 | 0x38, RespDecoder { "get_sku" } }, //
+        { system << 8 | 0x38, RespDecoder { "get_sku", string_data } }, //
         { system << 8 | 0x39, RespDecoder { "get_core_up_time_in_milliseconds", int_data } }, //
-        //
-        { connection << 8 | 0x05, RespDecoder { "get_bluetooth_advertising_name", string_data } }, //
+    //
     };
 
     //----------------------------------------------------------------------------------------------------------------------
-    void decode(rvr::MsgArray const& packet) {
+    void decode(rvr::MsgArray packet) {
         enum BytePositions : uint8_t {
             flags = 0x01,   //
 //            targ = 0x02,   //
@@ -145,6 +208,7 @@ namespace rvr {
             data = 0x07,   //
         };
 
+        Packet::unescape_msg(packet);
 // if there is a target byte then increment byte position by 1
         uint8_t offset = (packet[flags] & RFlags::has_target) ? 1 : 0;
         decode_flags(packet[flags]);
@@ -225,12 +289,12 @@ int main() {
     rvr::Connection cmd(req);
     rvr::SystemInfo sys(req);
 
+#if 0
     rvr::MsgArray dead { 0xDE, 0xAD };
     api.echo(dead, true);
 
     cmd.bluetoothName();
 
-#if 1
     sys.getMainAppVersion();
     sys.getBootloaderVersion();
     sys.getBoardRevision();
@@ -239,8 +303,20 @@ int main() {
     sys.getUpTime();
     sys.getProcessorName();
     sys.getSku();
-//    sys.getSku();
     sys.getMainAppVersion();
+#elif 1
+    rvr::Power pow(req);
+
+    pow.awake();
+    pow.battery_precentage();
+    pow.battery_voltage_state();
+    pow.battery_voltage();
+    pow.battery_volt_thresholds();
+    pow.battery_current();
+    pow.awake();
+
+    //    pow.sleep();
+
 #endif
     std::this_thread::sleep_for(std::chrono::milliseconds(200));
     std::cerr << "===================\n";

@@ -31,7 +31,7 @@ namespace rvr {
 
     public:
         Power(Request& req) :
-            CommandBase { Devices::power, req, microcontroller } {
+            CommandBase { Devices::power, req, bluetoothSOC } {
         }
 
         Power(Power const& other) = delete;
@@ -48,8 +48,9 @@ namespace rvr {
         void battery_current();
 
     private:
-        constexpr static uint8_t device { 0x13 };
-
+        enum BatteryVoltageStates : uint8_t {
+            unknown, ok, low, critical,
+        };
         enum Cmd : uint8_t {
             snooze = 0x01, //
             wake = 0x0D, //

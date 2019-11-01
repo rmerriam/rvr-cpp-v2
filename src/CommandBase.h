@@ -54,6 +54,7 @@ namespace rvr {
         explicit CommandBase(Devices const device, Request& request, uint8_t const target);
         uint8_t buildFlags(bool const get_response) const;
         void do_request(uint8_t const cmd, bool const get_response = false);
+        void do_request_alt(uint8_t const cmd, bool const get_response = false);
 
         uint8_t const mDevice;
         Request& mRequest;
@@ -75,6 +76,12 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::do_request(uint8_t const cmd, bool const get_response) {
         MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence() };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::do_request_alt(uint8_t const cmd, bool const get_response) {
+        uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
+        MsgArray msg { buildFlags(get_response), alt_target, mDevice, cmd, mRequest.sequence() };
         mRequest.send(msg);
     }
 
