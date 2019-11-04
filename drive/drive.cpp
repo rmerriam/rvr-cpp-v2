@@ -20,22 +20,36 @@ int main() {
 
     cerr << std::hex << setfill('0') << std::uppercase;
 
-    SerialPort serial { "/dev/ttyUSB0", 115200 };
+    SerialPort serial { "/dev/ttyUSB1", 115200 };
     rvr::Request req { serial };
     rvr::Response resp { serial };
 
     rvr::Drive drive(req);
 
-    drive.drive(20, 40, true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    drive.fixHeading();
+
+    drive.stop(90, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.fixHeading();
+
+    drive.stop(180, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.stop(270, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.stop(0, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+#if 0
+    drive.drive(25, 25, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     resp.read();
     std::cerr << std::endl;
 
-    drive.getMotorFault();
-    resp.read();
-    std::cerr << std::endl;
-
-    drive.getMotorStall();
+    drive.drive( -25, 25, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     resp.read();
     std::cerr << std::endl;
 
@@ -44,7 +58,37 @@ int main() {
     std::cerr << std::endl;
     std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 
-    drive.fixHeading();
+    drive.stop(90, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     resp.read();
     std::cerr << std::endl;
+
+    drive.fixHeading();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    resp.read();
+    std::cerr << std::endl;
+
+    drive.drive(0, 0, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    resp.read();
+    std::cerr << std::endl;
+
+    drive.stop(270, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    resp.read();
+    std::cerr << std::endl;
+
+#endif
+
+    //    drive.getMotorFault();
+//    resp.read();
+//    std::cerr << std::endl;
+//
+//    drive.getMotorStall();
+//    resp.read();
+//    std::cerr << std::endl;
+
+//    drive.fixHeading();
+//    resp.read();
+//    std::cerr << std::endl;
 }

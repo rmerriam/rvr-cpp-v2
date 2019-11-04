@@ -20,12 +20,15 @@ using namespace std;
 
 #include "ApiShell.h"
 #include "Connection.h"
+#include "Drive.h"
 #include "Power.h"
 #include "SystemInfo.h"
 
+using char_ptr = const char *;
+const char_ptr port_name { "/dev/ttyUSB1" };
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void decode_flags(uint8_t const f) {
+    void decode_flags(const uint8_t f) {
         using RFlags = Request::flags;
 
         for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
@@ -89,7 +92,7 @@ namespace rvr {
     void int_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         long long value { };
         for (auto it { begin }; it != end; ++it) {
-            uint8_t const& v { *it };
+            const uint8_t& v { *it };
 
             value <<= 8;
             value += v;
@@ -102,7 +105,7 @@ namespace rvr {
         uint16_t value { };
 
         for (auto it { begin }; it != end; ++it) {
-            uint8_t const& v { *it };
+            const uint8_t& v { *it };
             value <<= 8;
             value += v;
             std::cerr << dec;
@@ -116,10 +119,24 @@ namespace rvr {
         float_data(begin + 8, end);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void bool_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        bool value { *(begin - 1) == 0 };
+    void status_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        char_ptr status[] { "okay", "fail" };
+        trace(std::cerr, status[begin[ -1]]);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void motor_fault_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         std::cerr << std::boolalpha;
-        trace(std::cerr, value);
+        trace(std::cerr, begin[ -1] == 0);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void motor_stall_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
+        char_ptr motor[] { "left", "right" };
+
+        trace(std::cerr, motor[begin[0]]);
+        std::cerr << std::boolalpha;
+        trace(std::cerr, begin[1] == 0);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void prrcentage_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
@@ -149,7 +166,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void battery_state_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        using char_ptr = char const *;
+        using char_ptr = const char *;
         char_ptr state[4] { "unknown", "ok", "low", "critical" };
 
         std::cerr << dec;
@@ -173,7 +190,7 @@ namespace rvr {
         { connection << 8 | 0x05, RespDecoder { "get_bluetooth_advertising_name", string_data } }, //
         //
         { power << 8 | 0x01, RespDecoder { "snooze" } }, //
-        { power << 8 | 0x0D, RespDecoder { "wake", bool_data } }, //
+        { power << 8 | 0x0D, RespDecoder { "wake", status_data } }, //
         { power << 8 | 0x10, RespDecoder { "get_battery_percentage", prrcentage_data } }, //
         { power << 8 | 0x17, RespDecoder { "get_battery_voltage_state", battery_state_data } }, //
         { power << 8 | 0x19, RespDecoder { "will_sleep_notify" } }, //
@@ -192,6 +209,15 @@ namespace rvr {
         { system << 8 | 0x1F, RespDecoder { "get_processor_name", string_data } }, //
         { system << 8 | 0x38, RespDecoder { "get_sku", string_data } }, //
         { system << 8 | 0x39, RespDecoder { "get_core_up_time_in_milliseconds", int_data } }, //
+//
+        { drive << 8 | 0x01, RespDecoder { "raw_motors", status_data } }, //
+        { drive << 8 | 0x06, RespDecoder { "reset_yaw", status_data } }, //
+        { drive << 8 | 0x07, RespDecoder { "drive_with_heading", status_data } }, //
+        { drive << 8 | 0x25, RespDecoder { "enable_motor_stall_notify", status_data } }, //
+        { drive << 8 | 0x26, RespDecoder { "motor_stall_notify", motor_stall_data } }, //
+        { drive << 8 | 0x27, RespDecoder { "enable_motor_fault_notify", status_data } }, //
+        { drive << 8 | 0x28, RespDecoder { "motor_fault_notify", motor_fault_data } }, //
+        { drive << 8 | 0x29, RespDecoder { "get_motor_fault_state", motor_fault_data } }, //
     //
     };
 
@@ -204,7 +230,7 @@ namespace rvr {
             dev = 0x03,   //
             cmd = 0x04,   //
             seq = 0x05,   //
-            err = 0x06,   //
+            status = 0x06,   //
             data = 0x07,   //
         };
 
@@ -215,23 +241,62 @@ namespace rvr {
 
         string device = device_names[packet[dev + offset]];
 
-        uint16_t const key = packet[dev + offset] << 8 | packet[cmd + offset];
+        const uint16_t key = packet[dev + offset] << 8 | packet[cmd + offset];
         string command { decoder_map[key].name };
 
-        if (packet[err + offset]) {
-            trace_tab(std::cerr, "error ");
-            trace_tab(std::cerr, (uint16_t)packet[err]);
-            trace_tab(std::cerr, device);
-            trace_tab(std::cerr, command);
+        trace_tab(std::cerr, device);
+        trace_tab(std::cerr, command);
+        traceln(std::cerr);
+
+        if (packet[status + offset]) {
+            trace_tab(std::cerr, "ERROR: ");
+
+            switch (packet[status + offset]) {
+                case 1: {
+                    trace_tab(std::cerr, "bad_did");
+                    break;
+                }
+                case 2: {
+                    trace_tab(std::cerr, "bad_cid");
+                    break;
+                }
+                case 3: {
+                    trace_tab(std::cerr, "not_yes_implemented");
+                    break;
+                }
+                case 4: {
+                    trace_tab(std::cerr, "restricted");
+                    break;
+                }
+                case 5: {
+                    trace_tab(std::cerr, "bad_data_length");
+                    break;
+                }
+                case 6: {
+                    trace_tab(std::cerr, "failed");
+                    break;
+                }
+                case 7: {
+                    trace_tab(std::cerr, "bad bad_data_value");
+                    break;
+                }
+                case 8: {
+                    trace_tab(std::cerr, "busy");
+                    break;
+                }
+                case 9: {
+                    trace_tab(std::cerr, "bad_tid");
+                    break;
+                }
+                case 0xA: {
+                    trace_tab(std::cerr, "target_unavailable");
+                    break;
+                }
+            }
         }
         else {
-            trace_tab(std::cerr, device);
-            trace_tab(std::cerr, command);
-            traceln(std::cerr);
-
             FuncPtr decode_func { decoder_map[key].func };
-            decode_func(packet.begin() + data, packet.end() - 2);
-
+            decode_func(packet.begin() + data + offset, packet.end() - 2);
         }
         traceln(std::cerr);
         traceln(std::cerr);
@@ -243,7 +308,7 @@ namespace rvr {
         rvr::MsgArray in;
         in.reserve(40);
 
-        uint8_t const EopSop[] { 0xD8, 0x8D };
+        const uint8_t EopSop[] { 0xD8, 0x8D };
 
         for (auto i { 0 }; i < 25; ++i) {
 
@@ -281,15 +346,42 @@ int main() {
 
     cerr << std::hex << setfill('0') << std::uppercase;
 
-    SerialPort serial { "/dev/ttyUSB0", 115200 };
+    SerialPort serial { port_name, 115200 };
     rvr::Request req { serial };
     rvr::Response resp { serial };
 
     rvr::ApiShell api(req);
     rvr::Connection cmd(req);
+    rvr::Drive drive(req);
     rvr::SystemInfo sys(req);
 
-#if 0
+#if 1
+
+    drive.fixHeading(true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.stop(90, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.drive(25, 25, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.spin_drive(0, 20, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.fixHeading(true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.enableMotorStallNotify();
+    drive.enableMotorFaultNotify();
+
+    drive.disableMotorStallNotify();
+    drive.disableMotorFaultNotify();
+
+    drive.getMotorFault();
+    drive.getMotorFault();
+
+#elif 0
     rvr::MsgArray dead { 0xDE, 0xAD };
     api.echo(dead, true);
 
@@ -304,7 +396,7 @@ int main() {
     sys.getProcessorName();
     sys.getSku();
     sys.getMainAppVersion();
-#elif 1
+#elif 0
     rvr::Power pow(req);
 
     pow.awake();

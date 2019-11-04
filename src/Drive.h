@@ -36,17 +36,21 @@ namespace rvr {
 
         }
         Drive(Drive&& other) = delete;
-        Drive(Drive const& other) = delete;
-        Drive& operator=(Drive const& other) = delete;
+        Drive(const Drive& other) = delete;
+        Drive& operator=(const Drive& other) = delete;
 
-        void drive(double const& left, double const& right, bool const get_response = false);
-        void stop(int const& heading, bool const get_response = false);
-        void spin_drive(double const& speed, int const& heading, bool const get_response = false);
+        void drive(const double& left, const double& right, const bool get_response = false);
+        void stop(const int& heading, const bool get_response = false);
+        void spin_drive(const double& speed, const int& heading, const bool get_response = false);
 
         void getMotorFault();
-        void getMotorStall();
 
-        void fixHeading();
+        void enableMotorFaultNotify();
+        void disableMotorFaultNotify();
+        void enableMotorStallNotify();
+        void disableMotorStallNotify();
+
+        void fixHeading(const bool get_response = false);
 
     private:
 
@@ -67,10 +71,10 @@ namespace rvr {
             get_motor_fault_state = 0x29,
         };
 
-        std::tuple<uint8_t, uint8_t> const speed_mode(double const& speed) const;
+        const std::tuple<uint8_t, uint8_t> speed_mode(const double& speed) const;
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::stop(int const& heading, bool const get_response) {
+    inline void Drive::stop(const int& heading, const bool get_response) {
         spin_drive(0, heading, get_response);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -78,11 +82,23 @@ namespace rvr {
         do_request(get_motor_fault_state, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::getMotorStall() {
-        do_request(enable_motor_stall_notify, true);
+    inline void Drive::enableMotorFaultNotify() {
+        enable_request(enable_motor_fault_notify, true, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::fixHeading() {
+    inline void Drive::disableMotorFaultNotify() {
+        enable_request(enable_motor_fault_notify, false, true);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Drive::enableMotorStallNotify() {
+        enable_request(enable_motor_stall_notify, true, true);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Drive::disableMotorStallNotify() {
+        enable_request(enable_motor_stall_notify, false, true);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Drive::fixHeading(const bool get_response) {
         do_request(reset_yaw, true);
     }
 }
