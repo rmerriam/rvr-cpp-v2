@@ -183,7 +183,6 @@ namespace rvr {
 
     using DecoderMap = unordered_map <uint16_t, RespDecoder>;
     //----------------------------------------------------------------------------------------------------------------------
-
     DecoderMap decoder_map { //
     { api_and_shell << 8 | 0x00, RespDecoder { "echo", raw_data } }, //
         //
@@ -217,11 +216,66 @@ namespace rvr {
         { drive << 8 | 0x26, RespDecoder { "motor_stall_notify", motor_stall_data } }, //
         { drive << 8 | 0x27, RespDecoder { "enable_motor_fault_notify", status_data } }, //
         { drive << 8 | 0x28, RespDecoder { "motor_fault_notify", motor_fault_data } }, //
-        { drive << 8 | 0x29, RespDecoder { "get_motor_fault_state", motor_fault_data } }, //
+        { drive << 8 | 0x29, RespDecoder { "get_motor_fault_state", motor_fault_data } },
     //
     };
-
     //----------------------------------------------------------------------------------------------------------------------
+    void decode_error(auto err_byte)
+        {
+        switch (err_byte) {
+            case 1:
+                {
+                trace_tab(std::cerr, "bad_did");
+                break;
+            }
+            case 2:
+                {
+                trace_tab(std::cerr, "bad_cid");
+                break;
+            }
+            case 3:
+                {
+                trace_tab(std::cerr, "not_yes_implemented");
+                break;
+            }
+            case 4:
+                {
+                trace_tab(std::cerr, "restricted");
+                break;
+            }
+            case 5:
+                {
+                trace_tab(std::cerr, "bad_data_length");
+                break;
+            }
+            case 6:
+                {
+                trace_tab(std::cerr, "failed");
+                break;
+            }
+            case 7:
+                {
+                trace_tab(std::cerr, "bad bad_data_value");
+                break;
+            }
+            case 8:
+                {
+                trace_tab(std::cerr, "busy");
+                break;
+            }
+            case 9:
+                {
+                trace_tab(std::cerr, "bad_tid");
+                break;
+            }
+            case 0xA:
+                {
+                trace_tab(std::cerr, "target_unavailable");
+                break;
+            }
+        }
+    }
+//----------------------------------------------------------------------------------------------------------------------
     void decode(rvr::MsgArray packet) {
         enum BytePositions : uint8_t {
             flags = 0x01,   //
@@ -249,50 +303,9 @@ namespace rvr {
         traceln(std::cerr);
 
         if (packet[status + offset]) {
+            auto err_byte { packet[status + offset] };
             trace_tab(std::cerr, "ERROR: ");
-
-            switch (packet[status + offset]) {
-                case 1: {
-                    trace_tab(std::cerr, "bad_did");
-                    break;
-                }
-                case 2: {
-                    trace_tab(std::cerr, "bad_cid");
-                    break;
-                }
-                case 3: {
-                    trace_tab(std::cerr, "not_yes_implemented");
-                    break;
-                }
-                case 4: {
-                    trace_tab(std::cerr, "restricted");
-                    break;
-                }
-                case 5: {
-                    trace_tab(std::cerr, "bad_data_length");
-                    break;
-                }
-                case 6: {
-                    trace_tab(std::cerr, "failed");
-                    break;
-                }
-                case 7: {
-                    trace_tab(std::cerr, "bad bad_data_value");
-                    break;
-                }
-                case 8: {
-                    trace_tab(std::cerr, "busy");
-                    break;
-                }
-                case 9: {
-                    trace_tab(std::cerr, "bad_tid");
-                    break;
-                }
-                case 0xA: {
-                    trace_tab(std::cerr, "target_unavailable");
-                    break;
-                }
-            }
+            decode_error(err_byte);
         }
         else {
             FuncPtr decode_func { decoder_map[key].func };
