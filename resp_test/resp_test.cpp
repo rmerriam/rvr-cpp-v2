@@ -24,11 +24,11 @@ using namespace std;
 #include "Power.h"
 #include "SystemInfo.h"
 
-using char_ptr = const char *;
-const char_ptr port_name { "/dev/ttyUSB1" };
+using char_ptr = char const *;
+char_ptr const port_name { "/dev/rvr" };
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void decode_flags(const uint8_t f) {
+    void decode_flags(uint8_t const f) {
         using RFlags = Request::flags;
 
         for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
@@ -92,7 +92,7 @@ namespace rvr {
     void int_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         long long value { };
         for (auto it { begin }; it != end; ++it) {
-            const uint8_t& v { *it };
+            uint8_t const& v { *it };
 
             value <<= 8;
             value += v;
@@ -105,7 +105,7 @@ namespace rvr {
         uint16_t value { };
 
         for (auto it { begin }; it != end; ++it) {
-            const uint8_t& v { *it };
+            uint8_t const& v { *it };
             value <<= 8;
             value += v;
             std::cerr << dec;
@@ -166,7 +166,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void battery_state_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        using char_ptr = const char *;
+        using char_ptr = char const *;
         char_ptr state[4] { "unknown", "ok", "low", "critical" };
 
         std::cerr << dec;
@@ -197,7 +197,7 @@ namespace rvr {
         { power << 8 | 0x1B, RespDecoder { "enable_battery_voltage_state_change_notify" } }, //
         { power << 8 | 0x1C, RespDecoder { "battery_voltage_state_change_notify" } }, //
         { power << 8 | 0x25, RespDecoder { "get_battery_voltage_in_volts", int_data } }, //
-        { power << 8 | 0x26, RespDecoder { "get_battery_voltage_state_thresholds" } }, //
+        { power << 8 | 0x26, RespDecoder { "get_battery_vupdatoltage_state_thresholds" } }, //
         { power << 8 | 0x27, RespDecoder { "get_current_sense_amplifier_current" } }, //
         //
         { system << 8 | 0x00, RespDecoder { "get_main_application_version", version_data } }, //
@@ -220,56 +220,45 @@ namespace rvr {
     //
     };
     //----------------------------------------------------------------------------------------------------------------------
-    void decode_error(auto err_byte)
-        {
+    void decode_error(auto err_byte) {
         switch (err_byte) {
-            case 1:
-                {
+            case 1: {
                 trace_tab(std::cerr, "bad_did");
                 break;
             }
-            case 2:
-                {
+            case 2: {
                 trace_tab(std::cerr, "bad_cid");
                 break;
             }
-            case 3:
-                {
+            case 3: {
                 trace_tab(std::cerr, "not_yes_implemented");
                 break;
             }
-            case 4:
-                {
+            case 4: {
                 trace_tab(std::cerr, "restricted");
                 break;
             }
-            case 5:
-                {
+            case 5: {
                 trace_tab(std::cerr, "bad_data_length");
                 break;
             }
-            case 6:
-                {
+            case 6: {
                 trace_tab(std::cerr, "failed");
                 break;
             }
-            case 7:
-                {
+            case 7: {
                 trace_tab(std::cerr, "bad bad_data_value");
                 break;
             }
-            case 8:
-                {
+            case 8: {
                 trace_tab(std::cerr, "busy");
                 break;
             }
-            case 9:
-                {
+            case 9: {
                 trace_tab(std::cerr, "bad_tid");
                 break;
             }
-            case 0xA:
-                {
+            case 0xA: {
                 trace_tab(std::cerr, "target_unavailable");
                 break;
             }
@@ -295,7 +284,7 @@ namespace rvr {
 
         string device = device_names[packet[dev + offset]];
 
-        const uint16_t key = packet[dev + offset] << 8 | packet[cmd + offset];
+        uint16_t const key = packet[dev + offset] << 8 | packet[cmd + offset];
         string command { decoder_map[key].name };
 
         trace_tab(std::cerr, device);
@@ -321,7 +310,7 @@ namespace rvr {
         rvr::MsgArray in;
         in.reserve(40);
 
-        const uint8_t EopSop[] { 0xD8, 0x8D };
+        uint8_t const EopSop[] { 0xD8, 0x8D };
 
         for (auto i { 0 }; i < 25; ++i) {
 
