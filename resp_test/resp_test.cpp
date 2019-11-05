@@ -24,39 +24,39 @@ using namespace std;
 #include "Power.h"
 #include "SystemInfo.h"
 
-using char_ptr = char const *;
-char_ptr const port_name { "/dev/rvr" };
+using char_ptr = const char *;
+const char_ptr port_name { "/dev/rvr" };
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void decode_flags(uint8_t const f) {
+    void decode_flags(const uint8_t f) {
         using RFlags = Request::flags;
 
         for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
             switch (mask & f) {
                 case RFlags::response:
-                    trace_tab(std::cerr, "response | ");
+                    mys::trace("response | ");
                     break;
                 case RFlags::request_response:
-                    trace_tab(std::cerr, "request_response | ");
+                    mys::trace("request_response | ");
                     break;
                 case RFlags::request_error_response:
-                    trace_tab(std::cerr, "request_error_response | ");
+                    mys::trace("request_error_response | ");
                     break;
                 case RFlags::activity:
-                    trace_tab(std::cerr, "activity | ");
+                    mys::trace("activity | ");
                     break;
                 case RFlags::has_target:
-                    trace_tab(std::cerr, "has_target | ");
+                    mys::trace("has_target | ");
                     break;
                 case RFlags::has_source:
-                    trace_tab(std::cerr, "has_source | ");
+                    mys::trace("has_source | ");
                     break;
                 case RFlags::has_more_flags:
-                    trace_tab(std::cerr, "has_more_flags | ");
+                    mys::trace("has_more_flags | ");
                     break;
             }
         }
-        traceln(std::cerr);
+        mys::trace() << mys::nl;
     }
 
     enum Devices : uint8_t {
@@ -92,25 +92,25 @@ namespace rvr {
     void int_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         long long value { };
         for (auto it { begin }; it != end; ++it) {
-            uint8_t const& v { *it };
+            const uint8_t& v { *it };
 
             value <<= 8;
             value += v;
         }
         std::cerr << dec;
-        trace(std::cerr, value);
+        mys::trace(value);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         uint16_t value { };
 
         for (auto it { begin }; it != end; ++it) {
-            uint8_t const& v { *it };
+            const uint8_t& v { *it };
             value <<= 8;
             value += v;
             std::cerr << dec;
         }
-        trace(std::cerr, *reinterpret_cast<float*>( &value));
+        mys::trace( *reinterpret_cast<float*>( &value));
     }
     //----------------------------------------------------------------------------------------------------------------------
     void tri_float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
@@ -121,56 +121,56 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void status_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         char_ptr status[] { "okay", "fail" };
-        trace(std::cerr, status[begin[ -1]]);
+        mys::trace(status[begin[ -1]]);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void motor_fault_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         std::cerr << std::boolalpha;
-        trace(std::cerr, begin[ -1] == 0);
+        mys::trace(begin[ -1] == 0);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void motor_stall_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         char_ptr motor[] { "left", "right" };
 
-        trace(std::cerr, motor[begin[0]]);
+        mys::trace(motor[begin[0]]);
         std::cerr << std::boolalpha;
-        trace(std::cerr, begin[1] == 0);
+        mys::trace(begin[1] == 0);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void prrcentage_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         double value { float( *begin) / 100.0 };
         std::cerr << dec;
-        trace(std::cerr, value);
+        mys::trace(value);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void version_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         std::cerr << dec;
-        trace(std::cerr, begin[0] << 8 | begin[1]);
-        trace(std::cerr, ".");
-        trace(std::cerr, begin[2] << 8 | begin[3]);
-        trace(std::cerr, ".");
-        trace(std::cerr, begin[4] << 8 | begin[5]);
+        mys::trace(begin[0] << 8 | begin[1]);
+        mys::trace(".");
+        mys::trace(begin[2] << 8 | begin[3]);
+        mys::trace(".");
+        mys::trace(begin[4] << 8 | begin[5]);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void mac_addr(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         std::cerr << dec;
         for (auto it = begin; it < end - 2; ++it) {
-            trace(std::cerr, *it++);
-            trace(std::cerr, *it);
-            trace(std::cerr, ":");
+            mys::trace( *it++);
+            mys::trace( *it);
+            mys::trace(":");
         }
-        trace(std::cerr, *(end - 2));
-        trace(std::cerr, *(end - 1));
+        mys::trace( *(end - 2));
+        mys::trace( *(end - 1));
     }
     //----------------------------------------------------------------------------------------------------------------------
     void battery_state_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        using char_ptr = char const *;
+        using char_ptr = const char *;
         char_ptr state[4] { "unknown", "ok", "low", "critical" };
 
         std::cerr << dec;
-        trace(std::cerr, state[ *begin]);
+        mys::trace(state[ *begin]);
     }
 
     //----------------------------------------------------------------------------------------------------------------------
@@ -223,43 +223,43 @@ namespace rvr {
     void decode_error(auto err_byte) {
         switch (err_byte) {
             case 1: {
-                trace_tab(std::cerr, "bad_did");
+                mys::trace("bad_did");
                 break;
             }
             case 2: {
-                trace_tab(std::cerr, "bad_cid");
+                mys::trace("bad_cid");
                 break;
             }
             case 3: {
-                trace_tab(std::cerr, "not_yes_implemented");
+                mys::trace("not_yes_implemented");
                 break;
             }
             case 4: {
-                trace_tab(std::cerr, "restricted");
+                mys::trace("restricted");
                 break;
             }
             case 5: {
-                trace_tab(std::cerr, "bad_data_length");
+                mys::trace("bad_data_length");
                 break;
             }
             case 6: {
-                trace_tab(std::cerr, "failed");
+                mys::trace("failed");
                 break;
             }
             case 7: {
-                trace_tab(std::cerr, "bad bad_data_value");
+                mys::trace("bad bad_data_value");
                 break;
             }
             case 8: {
-                trace_tab(std::cerr, "busy");
+                mys::trace("busy");
                 break;
             }
             case 9: {
-                trace_tab(std::cerr, "bad_tid");
+                mys::trace("bad_tid");
                 break;
             }
             case 0xA: {
-                trace_tab(std::cerr, "target_unavailable");
+                mys::trace("target_unavailable");
                 break;
             }
         }
@@ -284,25 +284,22 @@ namespace rvr {
 
         string device = device_names[packet[dev + offset]];
 
-        uint16_t const key = packet[dev + offset] << 8 | packet[cmd + offset];
+        const uint16_t key = packet[dev + offset] << 8 | packet[cmd + offset];
         string command { decoder_map[key].name };
 
-        trace_tab(std::cerr, device);
-        trace_tab(std::cerr, command);
-        traceln(std::cerr);
+        mys::trace(device);
+        mys::trace(command) << mys::nl;
 
         if (packet[status + offset]) {
             auto err_byte { packet[status + offset] };
-            trace_tab(std::cerr, "ERROR: ");
+            mys::trace("ERROR: ");
             decode_error(err_byte);
         }
         else {
             FuncPtr decode_func { decoder_map[key].func };
             decode_func(packet.begin() + data + offset, packet.end() - 2);
         }
-        traceln(std::cerr);
-        traceln(std::cerr);
-        std::cerr << hex;
+        mys::trace() << mys::nl << mys::nl << hex;
 
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -310,7 +307,7 @@ namespace rvr {
         rvr::MsgArray in;
         in.reserve(40);
 
-        uint8_t const EopSop[] { 0xD8, 0x8D };
+        const uint8_t EopSop[] { 0xD8, 0x8D };
 
         for (auto i { 0 }; i < 25; ++i) {
 
@@ -322,8 +319,7 @@ namespace rvr {
 
                 in.insert(in.end(), r, &r[cnt]);
 
-                trace(std::cerr, in, "In:");
-                traceln(std::cerr);
+                mys::trace(in) << mys::nl;
             }
 
             while (in.size() >= 10) {
@@ -331,7 +327,7 @@ namespace rvr {
 
                 if (pos != in.end()) {
                     rvr::MsgArray packet { in.begin(), pos + 1 };
-                    trace(std::cerr, packet);
+                    mys::trace(packet);
                     decode(packet);
                     in.erase(in.begin(), pos + 1);
                 }

@@ -20,6 +20,7 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
+#include "trace.h"
 #include "Response.h"
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
@@ -28,11 +29,10 @@ namespace rvr {
         int cnt = mSerialPort.read(resp, 120);
         mMsg.assign(resp, &resp[cnt]);
 
-        traceln(std::cerr, "resp: ", cnt);
-
         unescape_msg(mMsg);
-        trace(std::cerr, mMsg);
-        traceln(std::cerr);
+
+        mys::trace("resp: ") << cnt;
+        mys::trace(mMsg) << mys::nl;
 
         return cnt;
     }

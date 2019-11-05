@@ -19,12 +19,13 @@
 //
 //     Created: Oct 25, 2019
 //
-//======================================================================================================================#include "Request.h"
+//======================================================================================================================
+#include "trace.h"
 #include "Request.h"
 
 namespace rvr {
 
-    void Request::send(MsgArray const& p) {
+    void Request::send(const MsgArray& p) {
         MsgArray payload { p };
 
         mMsg.clear();
@@ -42,8 +43,7 @@ namespace rvr {
 
         mSerialPort.write(mMsg.data(), mMsg.size());
 
-        trace(std::cerr, mMsg);
-        traceln(std::cerr);
+        mys::trace(mMsg) << mys::nl;
     }
 
 }

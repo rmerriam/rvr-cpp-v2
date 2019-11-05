@@ -23,7 +23,7 @@
 //
 //======================================================================================================================
 //  Base class for building packets which are either Requests or Response
-
+#include <vector>
 #include "SerialPort.h"
 
 namespace rvr {
@@ -35,21 +35,21 @@ namespace rvr {
             mSerialPort { s } {
         }
 
-        uint8_t const sequence() {
+        const uint8_t sequence() {
             return ++mSeq;
         }
 
         static void unescape_msg(MsgArray& payload);
         static void escape_msg(MsgArray& payload);
-    protected:
+        protected:
 
         enum SpecialChars : uint8_t {
             SOP = 0x8D, EOP = 0xD8, ESC = 0xAB, escaped_SOP = 0x05, escaped_EOP = 0x50, escaped_ESC = 0x23,
         };
 
-        uint8_t checksum(MsgArray const& payload) const;
+        uint8_t checksum(const MsgArray& payload) const;
 
-        static bool isPacketChar(uint8_t const c);
+        static bool isPacketChar(const uint8_t c);
 
         SerialPort& mSerialPort;
         MsgArray mMsg { 40 };

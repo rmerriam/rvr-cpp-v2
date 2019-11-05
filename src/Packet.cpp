@@ -55,13 +55,13 @@ namespace rvr {
         return p;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Packet::checksum(MsgArray const& payload) const {
+    uint8_t Packet::checksum(const MsgArray& payload) const {
         unsigned int sum { };
         sum = ~std::accumulate(payload.begin(), payload.end(), 0);
         return sum;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Packet::isPacketChar(uint8_t const c) {
+    bool Packet::isPacketChar(const uint8_t c) {
         return (c == SOP) || (c == EOP) || (c == ESC);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -92,7 +92,6 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Packet::unescape_msg(MsgArray& payload) {
-
         for (auto p { find(payload.begin(), payload.end(), ESC) }; p != payload.end(); p = find(p + 1, payload.end(), ESC)) {
             unescape_char(p, payload);
         }

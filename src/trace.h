@@ -1,78 +1,113 @@
-#ifndef TRACE_H_
-#define TRACE_H_
-//======================================================================================================================
-// 2019 Copyright Mystic Lake Software
-//
-// This is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 3 of the License, or
-// (at your option) any later version.
-//
-// This is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-//======================================================================================================================
-//
-//     Author: rmerriam
-//
-//     Created: Oct 26, 2019
-//
-//======================================================================================================================
+/*
+ * trace.h
+ *
+ *  Created on: Jan 3, 2017
+ *      Author: rmerriam
+ */
+
+#ifndef trace_H_
+#define trace_H_
 #include <iostream>
+#include <iomanip>
 #include <iterator>
 #include <vector>
 
-constexpr char nl { '\n' };
+namespace mys {
+//---------------------------------------------------------------------------------------------------------------------
+    struct trace_off {
+        trace_off() {
+            std::cerr.setstate(std::ios_base::badbit);
+        }
+        ~trace_off() {
+            std::cerr.clear();
+        }
+    };
+//---------------------------------------------------------------------------------------------------------------------
+    struct trace_on {
+        trace_on() {
+            std::cerr.clear();
+        }
+        ~trace_on() {
+            std::cerr.setstate(std::ios_base::badbit);
+        }
+    };
+//---------------------------------------------------------------------------------------------------------------------
+    constexpr char tab { '\t' };
+    constexpr char nl { '\n' };
+    constexpr char sp { ' ' };
+    //---------------------------------------------------------------------------------------------------------------------
+    inline std::ostream& trace(std::ostream& os) {
+        return os;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    inline std::ostream& trace(std::ostream& os, const T& v) {
+        os << '[' << v << ']';
+        return os;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    inline std::ostream& trace(std::ostream& os, const auto& v1, const auto& v2) {
+        os << v1 << mys::tab << v2 << mys::tab;
+        return os;
+    }
+//---------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    std::ostream& trace(std::ostream& os, const T x, const T y, const T z) {
+        os << '[' << x << ", " << y << ", " << z << ']';
+        return os;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    std::ostream& trace(std::ostream& os, const T x, const T y, const T z, const T w) {
+        os << '[' << x << ", " << y << ", " << z << ", " << w << ']';
+        return os;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    std::ostream& trace(auto& os, const auto& x, const auto& y) {
+        os << '[' << x << ", " << y << ']';
+        return os;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    inline std::ostream& trace(const auto& v1, const auto& v2, const auto& v3) {
+        std::cerr << v1 << sp << v2 << mys::tab << v3 << mys::tab;
+        return std::cerr;
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    inline std::ostream& trace() {
+        return trace(std::cerr);
+    }
+    //---------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    inline std::ostream& trace(const T& v) {
+//        std::cerr << '[' << v << ']';
+//        return std::cerr;
+        return trace(std::cerr, v);
+    }
+//---------------------------------------------------------------------------------------------------------------------
+    inline std::ostream& trace(const int& depth) {
+        std::cerr << std::setw(depth * 3) << " ";
+        return std::cerr;
+    }
+//---------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    std::ostream& trace(const T x, const T y, const T z) {
+        std::cerr << '[' << x << ", " << y << ", " << z << ']';
+        return std::cerr;
+    }
+//---------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    std::ostream& trace(const T x, const T y, const T z, const T w) {
+        std::cerr << '[' << x << ", " << y << ", " << z << ", " << w << ']';
+        return std::cerr;
+    }
+
 //----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-void trace(std::ostream& os, std::vector<T> const& data) {
-    std::copy(data.begin(), data.end(), std::ostream_iterator<int>(os, " "));
-    os << nl;
+    template <typename T>
+    std::ostream& trace(const std::vector<T>& data) {
+        std::copy(data.begin(), data.end(), std::ostream_iterator<int>(std::cerr, " "));
+        std::cerr << nl;
+        return std::cerr;
+    }
 }
-//----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-void trace(std::ostream& os, std::vector<T> const& data, char const* const text) {
-    os << text << ' ';
-    std::copy(data.begin(), data.end(), std::ostream_iterator<int>(os, " "));
-    os << nl;
-}
-//----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-inline void trace(std::ostream& os, T const& data) {
-    os << data;
-}
-//----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-inline void traceln(std::ostream& os, T const& data) {
-    os << data << '\n';
-}
-//----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-inline void trace_tab(std::ostream& os, T const& data) {
-    os << data << '\t';
-}
-//----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-inline void trace(std::ostream& os, char const* text, T const& data) {
-    trace(os, text);
-    os << data;
-}
-//----------------------------------------------------------------------------------------------------------------------
-template <typename T>
-inline void traceln(std::ostream& os, char const* text, T const& data) {
-    trace(os, text, data);
-    os << nl;
-}
-//----------------------------------------------------------------------------------------------------------------------
-inline void traceln(std::ostream& os) {
-    os << nl;
-}
-//----------------------------------------------------------------------------------------------------------------------
-inline void trace_tab(std::ostream& os) {
-    os << '\t';
-}
-#endif /* TRACE_H_ */
+
+#endif /* trace_H_ */

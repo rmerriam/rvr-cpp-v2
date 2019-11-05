@@ -24,8 +24,6 @@
 //======================================================================================================================
 //  Build a message to send to the RVR
 
-#include <algorithm>
-#include "trace.h"
 #include "Packet.h"
 
 namespace rvr {
@@ -48,8 +46,8 @@ namespace rvr {
             Packet { s } {
         }
 
-        void send(MsgArray const& p);
-    private:
+        void send(const MsgArray& p);
+        private:
 
     };
 }
