@@ -77,6 +77,7 @@ After entering the command the response is:
 ```
 
 
+
 ## Desktop System
 
 The desktop system needs a version of the Gnu debugger. It is probably already loaded but if not load it with:
