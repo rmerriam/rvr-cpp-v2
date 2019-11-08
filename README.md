@@ -61,22 +61,16 @@ On the remote system install a debug server:
 sudo apt-get install gdbserver
 ```
 
-Create a directory where the executables will reside. Or, use a share on your desktop. 
-When ready to run tests enter the command in a terminal or via SSH:
+Create a directory where the executables will reside. I used ~/Rvr.  
+
+When ready to run tests access the remote through SSH or a terminal, possibly using VNC. First change to the directory  you created and start the `gdbserver` (*responses are in []*):
 
 ```
+cd ~/Rvr
 gdbserver --multi mysticlakelinux.local:2001
-*Listening on port 2001*
+[Listening on port 2001]
 ```
-
-The name of my desktop is `mysticlakelinux`. Use the network name for your desktop in the command. 
-
-After entering the command the response is:
-
-```
-```
-
-
+The name of my desktop is `mysticlakelinux`. Use the network name for your desktop in the command. That's all for now on the remote system.
 
 ## Desktop System
 
@@ -86,23 +80,23 @@ The desktop system needs a version of the Gnu debugger. It is probably already l
 sudo apt install gdb-multiarch
 ```
 
-Begin by entering, which will generate some 
+Change to the directory where the executable reside or something above it so you don't have to type a long path name. Start a seesion by entering the next command. The `-q` option turns off some text output at startup. You'll get a prompt `(gdb)` where you enter the following commands:
+ 
 
 ```
 gdb-multiarch -q
-```
-The `-q` option turns off some text output at startup. You'll get a prompt `(gdb)`. Eneter the following commands:
 
-```
 target extended-remote mystic-rvr.local:2001
-*Remote debugging using mystic-rvr.local:2001*
-set remote exec-file remote/hello
+[Remote debugging using mystic-rvr.local:2001]
 
-remote put hostfile targetfile
-set remote exec-file Rvr/rvrLeds
+remote put rvrLeds rvrLeds
+set remote exec-file rvrLeds
 run
+[bunch of text if it works]
 ```
+You should also see information on the remote system either output from the executable or error messages that may help determine what is not working. 
 
+There is a greaat deal more to working with remote debugging. Do a search for these two versions of GDB for more information. 
 
 
 
