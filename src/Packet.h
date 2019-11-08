@@ -35,7 +35,7 @@ namespace rvr {
             mSerialPort { s } {
         }
 
-        const uint8_t sequence() {
+        uint8_t sequence() {
             return ++mSeq;
         }
 

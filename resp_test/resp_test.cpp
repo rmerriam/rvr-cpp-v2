@@ -25,7 +25,6 @@ using namespace std;
 #include "SystemInfo.h"
 
 using char_ptr = const char *;
-const char_ptr port_name { "/dev/rvr" };
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void decode_flags(const uint8_t f) {
@@ -340,11 +339,12 @@ namespace rvr {
     }
 }
 //----------------------------------------------------------------------------------------------------------------------
-int main() {
+int main(int argc, char* argv[]) {
 
-    cerr << std::hex << setfill('0') << std::uppercase;
+    mys::trace() << std::hex << setfill('0') << std::uppercase;
+    mys::trace() << "Opening serial " << argv[1] << mys::nl;
 
-    SerialPort serial { port_name, 115200 };
+    SerialPort serial { argv[1], 115200 };
     rvr::Request req { serial };
     rvr::Response resp { serial };
 

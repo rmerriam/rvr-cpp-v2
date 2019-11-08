@@ -5,22 +5,23 @@
 // Copyright   : Your copyright notice
 // Description : Hello World in C++, Ansi-style
 //============================================================================
-
 #include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <thread>
 using namespace std;
 
+#include "trace.h"
 #include "Response.h"
 
 #include "IoLed.h"
 
-int main() {
+int main(int argc, char* argv[]) {
 
-    cerr << std::hex << setfill('0') << std::uppercase;
+    mys::trace() << std::hex << setfill('0') << std::uppercase;
+    mys::trace() << "Opening serial " << argv[1] << mys::nl;
 
-    SerialPort serial { "/dev/ttyUSB0", 115200 };
+    SerialPort serial { argv[1], 115200 };
     rvr::Request req { serial };
     rvr::Response resp { serial };
 
