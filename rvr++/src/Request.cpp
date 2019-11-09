@@ -20,7 +20,7 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
-#include "trace.h"
+#include "Trace.h"
 #include "Request.h"
 
 namespace rvr {
@@ -43,7 +43,7 @@ namespace rvr {
 
         mSerialPort.write(mMsg.data(), mMsg.size());
 
-        mys::trace(mMsg) << mys::nl;
+//        mys::terr << mMsg << mys::nl;
     }
 
 }

@@ -3,6 +3,7 @@
 [TOC]
 ***
 # Introduction
+
 This repository is work in progress on a C++ implementation of the  serial communications protocol for the RVR robot. It is being done using an RVR connected to my desktop Ubuntu Mate Linux using an [Adafruit USB to TTL Serial Cable - Debug / Console Cable for Raspberry Pi](https://www.adafruit.com/product/954). The cable works with 3.3v signals so is not actually TTL since that implies 5v signals.
 
 > Note: The document shipped with the RVR has the pinout for the UART incorrect. Sphero has a [note](https://sdk.sphero.com/docs/getting_started/before_you_start/uart_disclaimer/) about this.The pinout on the RVR is correct. 
