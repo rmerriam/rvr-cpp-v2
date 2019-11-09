@@ -3,6 +3,7 @@
 	<name>rvr</name>
 	<comment></comment>
 	<projects>
+		<project>rvr++</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

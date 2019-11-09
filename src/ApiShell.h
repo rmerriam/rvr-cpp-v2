@@ -32,11 +32,11 @@ namespace rvr {
         ApiShell(Request& req) :
             CommandBase { Devices::api_and_shell, req, microcontroller } {
         }
-        ApiShell(ApiShell const& other) = delete;
+        ApiShell(const ApiShell& other) = delete;
         ApiShell(ApiShell&& other) = delete;
-        ApiShell& operator=(ApiShell const& other) = delete;
+        ApiShell& operator=(const ApiShell& other) = delete;
 
-        void echo(MsgArray const& data, bool const get_response = false);
+        void echo(const MsgArray& data, const bool get_response = false);
 
     private:
         enum Cmd : uint8_t {
@@ -44,7 +44,7 @@ namespace rvr {
         };
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void ApiShell::echo(MsgArray const& data, bool const get_response) {
+    inline void ApiShell::echo(const MsgArray& data, const bool get_response) {
         MsgArray msg { buildFlags(get_response), mTarget, mDevice, echo_cmd, mRequest.sequence() };
         msg.insert(msg.end(), data.begin(), data.end());
         mRequest.send(msg);

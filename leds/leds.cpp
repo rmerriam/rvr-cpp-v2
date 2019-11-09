@@ -29,33 +29,41 @@ int main(int argc, char* argv[]) {
 
     uint32_t led32 { Led::headlight_left | Led::headlight_right };
 
-    rvr::MsgArray colors { 0x00, 0x00, 0xFF, //
-        0xFF, 0x00, 0x00, //
+    rvr::MsgArray
+    colors[2] {
+        { 0x00, 0x00, 0xFF, //
+            0xFF, 0x00, 0x00, }, //
+        { 0xFF, 0x00, 0x00, //
+            0x00, 0x00, 0xFF, }, //
     };
-    led.allLed(led32, colors, true);
-    resp.read();
-    std::cerr << std::endl;
 
-    led32 = Led::undercarriage_white;
-    colors.clear();
-    colors.push_back(0x00);
+    for (auto i { 0 }; i < 10; ++i) {
+        led.allLed(led32, colors[i % 2], true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+        resp.read();
+        std::cerr << std::endl;
+    }
+
+//    led32 = Led::undercarriage_white;
+//    colors.clear();
+//    colors.push_back(0x00);
 //    colors.push_back(0xFF);
 //    colors.push_back(0xFF);
 
-    led.allLed(led32, colors, true);
-    resp.read();
-    std::cerr << std::endl;
+//    led.allLed(led32, colors, true);
+//    resp.read();
+//    std::cerr << std::endl;
 
 //    led.getColorId();
 //    resp.read();
 //    std::cerr << std::endl;
 
-    led.getActiveColorPalette();
-    resp.read();
-    std::cerr << std::endl;
-
-//    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
-//    led.idleLeds();
+//    led.getActiveColorPalette();
 //    resp.read();
 //    std::cerr << std::endl;
+
+//    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
+    led.idleLeds();
+    resp.read();
+    std::cerr << std::endl;
 }
