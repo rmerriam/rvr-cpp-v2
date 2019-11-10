@@ -41,6 +41,7 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     void raw_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        std::cerr << std::hex;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -59,21 +60,28 @@ namespace rvr {
         terr << __func__ << mys::sp << value;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    void float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        uint16_t value { };
+    float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        union {
+            uint8_t buf[4];
+            float result;
+        };
 
-        for (auto it { begin }; it != end; ++it) {
-            const uint8_t& v { *it };
-            value <<= 8;
-            value += v;
-        }
-        terr << __func__ << mys::sp << *reinterpret_cast<float*>( &value);
+        buf[0] = *(begin + 2);
+        buf[1] = *(begin + 3);
+        buf[2] = *(begin + 1);
+        buf[3] = *(begin + 0);
+
+        return result;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        terr << __func__ << mys::sp << float_convert(begin, end);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void tri_float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        float_data(begin, begin + 3);
-        float_data(begin + 4, begin + 7);
-        float_data(begin + 8, end);
+        terr << __func__ << mys::sp << float_convert(begin, begin + 4);
+        terr << __func__ << mys::sp << float_convert(begin + 4, begin + 8);
+        terr << __func__ << mys::sp << float_convert(begin + 8, end);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void status_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
@@ -93,7 +101,7 @@ namespace rvr {
         terr << __func__ << mys::sp << motor[begin[0]] << std::boolalpha << (begin[1] == 0);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    void prrcentage_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void percentage_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         double value { float( *begin) / 100.0 };
         terr << __func__ << mys::sp << value;
     }
@@ -126,15 +134,16 @@ namespace rvr {
     //
     { power << 8 | 0x01, Response::RespDecoder { "snooze", raw_data } }, //
     { power << 8 | 0x0D, Response::RespDecoder { "wake", status_data } }, //
-    { power << 8 | 0x10, Response::RespDecoder { "get_battery_percentage", prrcentage_data } }, //
+    { power << 8 | 0x10, Response::RespDecoder { "get_battery_percentage", percentage_data } }, //
+    { power << 8 | 0x11, Response::RespDecoder { "activity_ack", raw_data } }, //
     { power << 8 | 0x17, Response::RespDecoder { "get_battery_voltage_state", battery_state_data } }, //
     { power << 8 | 0x19, Response::RespDecoder { "will_sleep_notify", raw_data } }, //
     { power << 8 | 0x1A, Response::RespDecoder { "did_sleep_notify", raw_data } }, //
     { power << 8 | 0x1B, Response::RespDecoder { "enable_battery_voltage_state_change_notify", raw_data } }, //
     { power << 8 | 0x1C, Response::RespDecoder { "battery_voltage_state_change_notify", raw_data } }, //
-    { power << 8 | 0x25, Response::RespDecoder { "get_battery_voltage_in_volts", int_data } }, //
-    { power << 8 | 0x26, Response::RespDecoder { "get_battery_vupdatoltage_state_thresholds", raw_data } }, //
-    { power << 8 | 0x27, Response::RespDecoder { "get_current_sense_amplifier_current", raw_data } }, //
+    { power << 8 | 0x25, Response::RespDecoder { "get_battery_voltage_in_volts", float_data } }, //
+    { power << 8 | 0x26, Response::RespDecoder { "get_battery_voltage_state_thresholds", tri_float_data } }, //
+    { power << 8 | 0x27, Response::RespDecoder { "get_current_sense_amplifier_current", float_data } }, //
 //
     { system << 8 | 0x00, Response::RespDecoder { "get_main_application_version", version_data } }, //
     { system << 8 | 0x01, Response::RespDecoder { "get_bootloader_version", version_data } }, //
@@ -166,15 +175,7 @@ namespace rvr {
     { 0x19, "connection" }, //
     { 0x1A, "io_led" }, //
     };
-//----------------------------------------------------------------------------------------------------------------------
-    bool Response::operator ()() {
 
-        while (mEnd.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
-            read();
-        }
-        terr << __func__ << mys::sp << " exit";
-        return true;
-    }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::readx() {
         uint8_t resp[120];
@@ -186,26 +187,19 @@ namespace rvr {
         terr << __func__ << mys::sp << __func__ << mys::sp << std::hex << mMsg;
 //        return cnt;
     }
-//----------------------------------------------------------------------------------------------------------------------
-    void Response::read() {
-        rvr::MsgArray in;
-        in.reserve(40);
-
-        const uint8_t EopSop[] { EOP, SOP };
-
-//        for (auto i { 0 }; i < 25; ++i) {
-
+    //----------------------------------------------------------------------------------------------------------------------
+    void Response::checkForData(rvr::MsgArray& in) {
         if (mSerialPort.count() != 0) {
             uint8_t r[in.capacity()];
             int cnt = mSerialPort.read(r, in.capacity());
-//            rvr::MsgArray raw { r, &r[cnt] };
-//            terr << __func__ << mys::sp << "raw: " << std::hex << mys::sp << raw;
             in.insert(in.end(), r, &r[cnt]);
-
-            terr << __func__ << mys::sp << " in: " << std::hex << in;
+//            terr << __func__ << mys::sp << " in: " << std::hex << in;
         }
-
-        while (in.size() >= 0) {
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Response::processData(rvr::MsgArray& in) {
+        constexpr uint8_t EopSop[] { EOP, SOP };
+        while (in.size() > 8) {
             auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
 
             if (pos != in.end()) {
@@ -217,8 +211,23 @@ namespace rvr {
             else {
                 break;
             }
-//            }
         }
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    bool Response::operator ()() {
+        rvr::MsgArray in;
+        in.reserve(80);
+
+        while (mEnd.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
+            read(in);
+        }
+        terr << __func__ << mys::sp << " exit";
+        return true;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Response::read(rvr::MsgArray& in) {
+        processData(in);
+        checkForData(in);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_flags(const uint8_t f) {
@@ -248,6 +257,9 @@ namespace rvr {
                     flags += "has_more_flags | ";
                     break;
             }
+        }
+        if ((f & RFlags::response) == 0) {
+            flags += "no_response";
         }
         terr << __func__ << mys::sp << flags;
     }
@@ -311,8 +323,10 @@ namespace rvr {
 
         Packet::unescape_msg(packet);
 
+        const bool is_resp { (packet[flags] & RFlags::response) == RFlags::response };   // versus notification
+
         // if there is a target byte then increment byte position by 1
-        uint8_t offset = (packet[flags] & RFlags::has_target) ? 1 : 0;
+        int8_t offset = (packet[flags] & RFlags::has_target) ? 1 : 0;
         decode_flags(packet[flags]);
 
         std::string device = device_names[packet[dev + offset]];
@@ -326,15 +340,21 @@ namespace rvr {
         else {
             terr << __func__ << mys::sp << device << mys::sp << command;
 
-            if (packet[status + offset]) {
-                auto err_byte { packet[status + offset] };
-                terr << __func__ << mys::sp << "ERROR: ";
-                decode_error(err_byte);
+            if (is_resp) {
+                if (packet[status + offset]) {
+                    auto err_byte { packet[status + offset] };
+                    terr << __func__ << mys::sp << "ERROR: " << (uint16_t)err_byte;
+                    decode_error(err_byte);
+                }
+                else {
+                    FuncPtr decode_func { decoder_map[key].func };
+                    decode_func(packet.begin() + data + offset, packet.end() - 2);
+                }
             }
-            else {
-                FuncPtr decode_func { decoder_map[key].func };
-                decode_func(packet.begin() + data + offset, packet.end() - 2);
+            else {  // notification - no sequence number
+                terr << __func__ << " notification " << std::hex << (int)packet[seq];
             }
         }
+        terr << __func__ << " **************";
     }
 }

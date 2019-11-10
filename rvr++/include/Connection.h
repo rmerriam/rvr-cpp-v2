@@ -32,9 +32,9 @@ namespace rvr {
         Connection(Request& req) :
             CommandBase { Devices::connection, req, bluetoothSOC } {
         }
-        Connection(Connection const& other) = delete;
+        Connection(const Connection& other) = delete;
         Connection(Connection&& other) = delete;
-        Connection& operator=(Connection const& other) = delete;
+        Connection& operator=(const Connection& other) = delete;
 
         void bluetoothName();
 
@@ -46,7 +46,7 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void Connection::bluetoothName() {
-        do_request(get_bluetooth_advertising_name, true);
+        cmd_basic(get_bluetooth_advertising_name, true);
     }
 
 } /* namespace rvr */

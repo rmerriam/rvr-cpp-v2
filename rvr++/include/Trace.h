@@ -60,7 +60,7 @@ namespace mys {
         void on();
 
     protected:
-        std::ostream &mOs;
+        std::ostream& mOs;
         std::mutex mOutputMutex;
     };
     //=====================================================================================================================
@@ -75,7 +75,7 @@ namespace mys {
         mys::Trace& operator<<(const T& value);
 
     private:
-        Trace &mTrace;
+        Trace& mTrace;
         int16_t mCnt { };
 
         void time_stamp();
@@ -86,7 +86,7 @@ namespace mys {
         TraceOff(Trace& t);
         ~TraceOff();
     private:
-        Trace &mTrace;
+        Trace& mTrace;
     };
     //=====================================================================================================================
     class TraceOn {
@@ -94,7 +94,7 @@ namespace mys {
         TraceOn(Trace& t);
         ~TraceOn();
     private:
-        Trace &mTrace;
+        Trace& mTrace;
     };
 //=====================================================================================================================
 
@@ -147,7 +147,7 @@ namespace mys {
         auto timer = system_clock::to_time_t(now);
 
         mTrace << std::put_time(std::localtime( &timer), "%n%y%m%d.%H%M%S."); //
-        mTrace << std::setfill('0') << std::setw(3);
+        mTrace << std::dec << std::setfill('0') << std::setw(3);
         mTrace << (duration_cast<milliseconds>(now.time_since_epoch()) % 1000).count() << ": ";
     }
     //---------------------------------------------------------------------------------------------------------------------

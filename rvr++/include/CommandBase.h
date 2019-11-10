@@ -51,53 +51,67 @@ namespace rvr {
             microcontroller = 0x02,
 
         };
-        explicit CommandBase(Devices const device, Request& request, uint8_t const target);
-        uint8_t buildFlags(bool const get_response) const;
-        void do_request(uint8_t const cmd, bool const get_response = false);
-        void do_request_alt(uint8_t const cmd, bool const get_response = false);
+        explicit CommandBase(const Devices device, Request& request, const uint8_t target);
+        uint8_t buildFlags(const bool get_response) const;
+        void cmd_basic(const uint8_t cmd, const bool get_response = false);
+        void cmd_basic_alt(const uint8_t cmd, const bool get_response = false);
 
-        void enable_request(uint8_t const cmd, bool const state, bool const get_response = false);
-        void disable_request(uint8_t const cmd, bool const state, bool const get_response = false);
+        void cmd_byte(const uint8_t cmd, const uint8_t data, const bool get_response = false);
+        void cmd_byte_alt(const uint8_t cmd, const uint8_t data, const bool get_response = false);
 
-        uint8_t const mDevice;
+        void cmd_enable(const uint8_t cmd, const bool state, const bool get_response = false);
+        void cmd_disable(const uint8_t cmd, const bool state, const bool get_response = false);
+
+        const uint8_t mDevice;
         Request& mRequest;
         uint8_t mTarget;
 
-        CommandBase(CommandBase const& other) = delete;
+        CommandBase(const CommandBase& other) = delete;
         CommandBase(CommandBase&& other) = delete;
-        CommandBase& operator=(CommandBase const& other) = delete;
+        CommandBase& operator=(const CommandBase& other) = delete;
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline CommandBase::CommandBase(Devices const device, Request& request, uint8_t const target) :
+    inline CommandBase::CommandBase(const Devices device, Request& request, const uint8_t target) :
         mDevice { device }, mRequest { request }, mTarget { target } {
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline uint8_t CommandBase::buildFlags(bool const get_response) const {
+    inline uint8_t CommandBase::buildFlags(const bool get_response) const {
         uint8_t flags { static_cast<uint8_t>((get_response ? Request::request_response : 0) | Request::has_target) };
+        flags |= Request::activity;
         return flags;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::do_request(uint8_t const cmd, bool const get_response) {
+    inline void CommandBase::cmd_basic(const uint8_t cmd, const bool get_response) {
         MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence() };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::do_request_alt(uint8_t const cmd, bool const get_response) {
+    inline void CommandBase::cmd_basic_alt(const uint8_t cmd, const bool get_response) {
         uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
         MsgArray msg { buildFlags(get_response), alt_target, mDevice, cmd, mRequest.sequence() };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::enable_request(uint8_t const cmd, bool const state, bool const get_response) {
+    inline void CommandBase::cmd_enable(const uint8_t cmd, const bool state, const bool get_response) {
         MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence(), state };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::disable_request(uint8_t const cmd, bool const state, bool const get_response) {
+    inline void CommandBase::cmd_disable(const uint8_t cmd, const bool state, const bool get_response) {
         MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, state, mRequest.sequence() };
         mRequest.send(msg);
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_byte(const uint8_t cmd, const uint8_t data, const bool get_response) {
+        MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence(), data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_byte_alt(const uint8_t cmd, const uint8_t data, const bool get_response) {
+        uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
+        MsgArray msg { buildFlags(get_response), alt_target, mDevice, cmd, mRequest.sequence(), data };
+        mRequest.send(msg);
+    }
 } /* namespace rvr */
 
 #endif

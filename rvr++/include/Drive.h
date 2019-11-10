@@ -79,27 +79,27 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::getMotorFault() {
-        do_request(get_motor_fault_state, true);
+        cmd_basic(get_motor_fault_state, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::enableMotorFaultNotify() {
-        enable_request(enable_motor_fault_notify, true, true);
+        cmd_enable(enable_motor_fault_notify, true, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::disableMotorFaultNotify() {
-        enable_request(enable_motor_fault_notify, false, true);
+        cmd_enable(enable_motor_fault_notify, false, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::enableMotorStallNotify() {
-        enable_request(enable_motor_stall_notify, true, true);
+        cmd_enable(enable_motor_stall_notify, true, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::disableMotorStallNotify() {
-        enable_request(enable_motor_stall_notify, false, true);
+        cmd_enable(enable_motor_stall_notify, false, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::fixHeading(const bool get_response) {
-        do_request(reset_yaw, true);
+        cmd_basic(reset_yaw, true);
     }
 }
 /* namespace rvr */

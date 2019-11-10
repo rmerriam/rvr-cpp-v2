@@ -30,22 +30,29 @@ namespace rvr {
     class Power : protected CommandBase {
 
     public:
+        enum VoltageType : uint8_t {
+            CalibratedFiltered = 0, CalibratedUnfiltered = 1, UncalibratedUnfiltered = 2,
+        };
+        enum MotorSide : uint8_t {
+            left = 0, right = 1
+        };
         Power(Request& req) :
             CommandBase { Devices::power, req, bluetoothSOC } {
         }
 
-        Power(Power const& other) = delete;
+        Power(const Power& other) = delete;
         Power(Power&& other) = delete;
-        Power& operator=(Power const& other) = delete;
+        Power& operator=(const Power& other) = delete;
 
         void awake();
         void sleep();
 
         void battery_precentage();
         void battery_voltage_state();
-        void battery_voltage();
         void battery_volt_thresholds();
-        void battery_current();
+        void battery_current(const MotorSide ms);
+
+        void battery_voltage(const VoltageType vt);
 
     private:
         enum BatteryVoltageStates : uint8_t {
@@ -55,6 +62,7 @@ namespace rvr {
             snooze = 0x01, //
             wake = 0x0D, //
             get_battery_percentage = 0x10, //
+            activity_ack = 0x11, //
             get_battery_voltage_state = 0x17, //
             will_sleep_notify = 0x19, //
             did_sleep_notify = 0x1A, //
@@ -67,31 +75,31 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::awake() {
-        do_request(wake, true);
+        cmd_basic(wake, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::sleep() {
-        do_request(snooze, true);
+        cmd_basic(snooze, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_precentage() {
-        do_request(get_battery_percentage, true);
+        cmd_basic(get_battery_percentage, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_voltage_state() {
-        do_request(get_battery_voltage_state, true);
+        cmd_basic(get_battery_voltage_state, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_voltage() {
-        do_request(get_battery_voltage_in_volts, true);
+    inline void Power::battery_voltage(const VoltageType vt) {
+        cmd_byte(get_battery_voltage_in_volts, vt, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::battery_volt_thresholds() {
-        do_request(get_battery_voltage_state_thresholds, true);
+        cmd_basic(get_battery_voltage_state_thresholds, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_current() {
-        do_request(get_current_sense_amplifier_current, true);
+    inline void Power::battery_current(const MotorSide ms) {
+        cmd_byte_alt(get_current_sense_amplifier_current, ms, true);
     }
 
 } /* namespace rvr */

@@ -154,15 +154,15 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getActiveColorPalette() {
-        do_request(get_active_color_palette, true);
+        cmd_basic(get_active_color_palette, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getColorId() {
-        do_request(get_color_identification_report, true);
+        cmd_basic(get_color_identification_report, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::idleLeds() {
-        do_request(release_led_requests, true);
+        cmd_basic(release_led_requests, true);
     }
 
 } /* namespace rvr */

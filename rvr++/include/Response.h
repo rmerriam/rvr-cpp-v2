@@ -53,7 +53,7 @@ namespace rvr {
         Response& operator=(const Response& other) = delete;
 
         bool operator ()();
-        void read();
+        void read(rvr::MsgArray& in);
         void readx();    // experimental, comment out of it isn't available
 
         using FuncPtr = void (*)(MsgArray::const_iterator , MsgArray::const_iterator );
@@ -69,6 +69,8 @@ namespace rvr {
         void decode(MsgArray packet);
         void decode_flags(const uint8_t f);
         void decode_error(auto err_byte);
+        void checkForData(rvr::MsgArray& in);
+        void processData(rvr::MsgArray& in);
 
         std::shared_future<void> mEnd;
 
