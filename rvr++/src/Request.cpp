@@ -43,7 +43,7 @@ namespace rvr {
 
         mSerialPort.write(mMsg.data(), mMsg.size());
 
-//        mys::terr << mMsg << mys::nl;
+        terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
     }
 
 }

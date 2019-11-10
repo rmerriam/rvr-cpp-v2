@@ -23,13 +23,13 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
-#include <thread>
+#include <future>
 #include <version>
-using namespace std;
 
 #include "Trace.h"
 
 #include "IoLed.h"
+#include "Response.h"
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
 //---------------------------------------------------------------------------------------------------------------------
@@ -40,6 +40,8 @@ int main(int argc, char* argv[]) {
     SerialPort serial { argv[1], 115200 };
     rvr::Request req { serial };
 
+    //---------------------------------------------------------------------------------------------------------------------
+    //  Setup the LED handling
     rvr::IoLed led(req);
 
     uint32_t led32 { Led::headlight_left | Led::headlight_right };
@@ -50,13 +52,24 @@ int main(int argc, char* argv[]) {
       0x00, 0x00, 0xFF, }, //
     };
 
+    //  Setup the thread to read responses
+    std::promise<void> end_tasks;
+    std::shared_future<void> end_future(end_tasks.get_future());
+    rvr::Response resp { serial, end_future };
+
+    auto resp_future = std::async(std::launch::async, std::ref(resp));
+
     for (auto i { 0 }; i < 10; ++i) {
         led.allLed(led32, colors[i % 2], true);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         terr << "blink";
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
-    terr << __TIME__ << mys::tab << __func__ << mys::tab << code_loc;
+    led.idleLeds();
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    end_tasks.set_value();
+    terr << std::boolalpha << resp_future.get();
 
     return 0;
 }

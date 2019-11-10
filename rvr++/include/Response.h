@@ -22,6 +22,9 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
+#include <future>
+#include <unordered_map>
+
 #include "Packet.h"
 
 namespace rvr {
@@ -42,17 +45,32 @@ namespace rvr {
             target_unavailable = 0x0A,
         };
 
-        Response(SerialPort& s) :
-            Packet { s } {
+        Response(SerialPort& s, std::shared_future<void> end) :
+            Packet { s }, mEnd { end } {
         }
         Response(const Response& other) = delete;
-        Response(Response&& other) = delete;
+        Response(Response&& other) = default;
         Response& operator=(const Response& other) = delete;
 
-        int read();
+        bool operator ()();
+        void read();
         void readx();    // experimental, comment out of it isn't available
 
+        using FuncPtr = void (*)(MsgArray::const_iterator , MsgArray::const_iterator );
+
+        struct RespDecoder {
+            std::string name;
+            FuncPtr func;
+        };
+        using DecoderMap = std::unordered_map <uint16_t, RespDecoder>;
+
     private:
+
+        void decode(MsgArray packet);
+        void decode_flags(const uint8_t f);
+        void decode_error(auto err_byte);
+
+        std::shared_future<void> mEnd;
 
     };
 

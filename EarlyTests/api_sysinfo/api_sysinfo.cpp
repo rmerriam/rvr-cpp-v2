@@ -10,7 +10,6 @@
 #include <iomanip>
 #include <iostream>
 #include <thread>
-using namespace std;
 
 #include "Response.h"
 

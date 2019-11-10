@@ -41,7 +41,20 @@ namespace rvr {
 
         static void unescape_msg(MsgArray& payload);
         static void escape_msg(MsgArray& payload);
-        protected:
+
+        enum flags : uint8_t {
+            no_response = 0x00,
+            response = 0x01,
+            request_response = 0x02,
+            request_error_response = 0x04,
+            activity = 0x08,
+            has_target = 0x10,
+            has_source = 0x20,
+            has_more_flags = 0x80,
+        };
+        using RFlags = Packet::flags;
+
+    protected:
 
         enum SpecialChars : uint8_t {
             SOP = 0x8D, EOP = 0xD8, ESC = 0xAB, escaped_SOP = 0x05, escaped_EOP = 0x50, escaped_ESC = 0x23,
@@ -60,37 +73,6 @@ namespace rvr {
 
         static uint8_t mSeq;
     };
-
 }
-#if 0
-
-struct Header {
-    enum Flags : uint8_t {
-        resp = 1,   // expect error byte
-        tid = 0x10, // has target id
-        sid = 0x20, // has source id
-    };
-    uint8_t Tid;    // target id
-    uint8_t Sid;    // source id
-    uint8_t Did;    // device id
-    uint8_t Cid;    // command id
-    uint8_t Seq;    // sequence
-    uint8_t Err;    // error
-};
-
-In the meantime, I can tell you that the header bytes, in order are:
-TID - Target ID (if there is one) - the address of the target, expressed as a port ID and a node ID
-SID - Source ID (if there is one) - the address of the sorce, expressed as a port ID and a node ID
-DID - Device ID - The command group (eg Power or LEDs or Driving )
-CID - Command ID - The command to execute
-Seq - A token (random number) that the sender sends to the receiver and the receiver sends back
-Err - Error (if there is one)
-
-There are also flags, as you noted, that modify the behavior of the packet:
-Bit 0 indicates whether the packet is a response(1) or a command (0); if the packet is a response, you can expect there to be an error code byte in the header.
-Bit 4 indicates whether the packet has a Target ID in the header (1) or not (0).
-Bit 5 indicates whether the packet has a Source ID in the header (1) or not (0).
-
-#endif
 
 #endif /* Packet_H_ */

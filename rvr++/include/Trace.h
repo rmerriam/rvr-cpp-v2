@@ -27,10 +27,21 @@
 #include <iomanip>
 #include <iostream>
 #include <iterator>
+#include <mutex>
 #include <ostream>
+#include <type_traits>
 #include <vector>
 //---------------------------------------------------------------------------------------------------------------------
 namespace mys {
+
+    template <typename T, typename = std::void_t<>>
+    struct has_value_type : std::false_type {
+    };
+
+    template <typename T>
+    struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {
+    };
+
     constexpr char tab { '\t' };
     constexpr char nl { '\n' };
     constexpr char sp { ' ' };
@@ -42,17 +53,15 @@ namespace mys {
         Trace(Trace&& other) = delete;
         Trace& operator=(const Trace& other) = delete;
 
-        template <typename T>
-        Trace& operator<<(T&& value);
-
-        template <typename T>
-        Trace& operator<<(const std::vector<T>& data);
+        template <typename C>
+        Trace& operator<<(const C& data);
 
         void off();
         void on();
 
     protected:
         std::ostream &mOs;
+        std::mutex mOutputMutex;
     };
     //=====================================================================================================================
     class TraceStart : public Trace {
@@ -63,13 +72,11 @@ namespace mys {
         TraceStart& operator=(const Trace& other) = delete;
 
         template <typename T>
-        mys::Trace& operator<<(T& value);
-
-        template <typename T>
-        Trace& operator<<(const std::vector<T>& data);
+        mys::Trace& operator<<(const T& value);
 
     private:
         Trace &mTrace;
+        int16_t mCnt { };
 
         void time_stamp();
     };
@@ -90,24 +97,27 @@ namespace mys {
         Trace &mTrace;
     };
 //=====================================================================================================================
+
 #define code_loc __func__ << ':' << __LINE__ << mys::sp << __FILE__
-    extern mys::TraceStart terr;
 //=====================================================================================================================
     inline Trace::Trace(std::ostream& os) :
         mOs { os } {
     }
     //----------------------------------------------------------------------------------------------------------------------
-    template <typename T>
-    inline mys::Trace& Trace::operator <<(const std::vector<T>& data) {
-        std::copy(data.begin(), data.end(), std::ostream_iterator<int>(std::cerr, " "));
-        std::cerr << nl;
+    template <typename C>
+    inline mys::Trace& Trace::operator <<(const C& data) {
+        if constexpr (has_value_type<C>()) {
+            std::copy(data.begin(), data.end(), std::ostream_iterator<int>(mOs, " "));
+        }
+        else {
+            mOs << data;
+        }
         return *this;
     }
-
-    //---------------------------------------------------------------------------------------------------------------------
-    template <typename T>
-    inline mys::Trace& Trace::operator <<(T&& value) {
-        mOs << value;
+    //----------------------------------------------------------------------------------------------------------------------
+    template <>
+    inline mys::Trace& Trace::operator <<(const std::string& data) {
+        mOs << data;
         return *this;
     }
     //---------------------------------------------------------------------------------------------------------------------
@@ -124,16 +134,10 @@ namespace mys {
     }
     //---------------------------------------------------------------------------------------------------------------------
     template <typename T>
-    inline mys::Trace& TraceStart::operator <<(T& value) {
+    inline mys::Trace& TraceStart::operator <<(const T& value) {
         time_stamp();
         mOs << value;
-        return mTrace;
-    }
-    //---------------------------------------------------------------------------------------------------------------------
-    template <typename T>
-    inline Trace& TraceStart::operator <<(const std::vector<T>& data) {
-        time_stamp();
-        Trace::operator<<(data);
+        mOs << std::dec;
         return mTrace;
     }
     //---------------------------------------------------------------------------------------------------------------------
@@ -165,4 +169,7 @@ namespace mys {
         mTrace.on();
     }
 }
+//---------------------------------------------------------------------------------------------------------------------
+extern mys::TraceStart terr;
+
 #endif

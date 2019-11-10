@@ -31,23 +31,12 @@ namespace rvr {
     class Request : public Packet {
     public:
 
-        enum flags : uint8_t {
-            no_response = 0x00,
-            response = 0x01,
-            request_response = 0x02,
-            request_error_response = 0x04,
-            activity = 0x08,
-            has_target = 0x10,
-            has_source = 0x20,
-            has_more_flags = 0x80,
-        };
-
         Request(SerialPort& s) :
             Packet { s } {
         }
 
         void send(const MsgArray& p);
-        private:
+    private:
 
     };
 }
