@@ -59,6 +59,8 @@ namespace rvr {
         void cmd_byte(const uint8_t cmd, const uint8_t data, const bool get_response = false);
         void cmd_byte_alt(const uint8_t cmd, const uint8_t data, const bool get_response = false);
 
+        void cmd_int(const uint8_t cmd, const uint16_t data, const bool get_response);
+
         void cmd_enable(const uint8_t cmd, const bool state, const bool get_response = false);
         void cmd_disable(const uint8_t cmd, const bool state, const bool get_response = false);
 
@@ -110,6 +112,12 @@ namespace rvr {
     inline void CommandBase::cmd_byte_alt(const uint8_t cmd, const uint8_t data, const bool get_response) {
         uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
         MsgArray msg { buildFlags(get_response), alt_target, mDevice, cmd, mRequest.sequence(), data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_int(const uint8_t cmd, const uint16_t data, const bool get_response) {
+        MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence(), //
+                       static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
         mRequest.send(msg);
     }
 } /* namespace rvr */

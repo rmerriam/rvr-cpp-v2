@@ -56,14 +56,6 @@ namespace rvr {
         void read(rvr::MsgArray& in);
         void readx();    // experimental, comment out of it isn't available
 
-        using FuncPtr = void (*)(MsgArray::const_iterator , MsgArray::const_iterator );
-
-        struct RespDecoder {
-            std::string name;
-            FuncPtr func;
-        };
-        using DecoderMap = std::unordered_map <uint16_t, RespDecoder>;
-
     private:
 
         void decode(MsgArray packet);

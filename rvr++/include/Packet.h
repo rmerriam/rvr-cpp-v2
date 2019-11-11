@@ -26,6 +26,8 @@
 #include <vector>
 #include "SerialPort.h"
 
+using char_ptr = const char *;
+
 namespace rvr {
     using MsgArray = std::vector<uint8_t>;
 
@@ -52,7 +54,16 @@ namespace rvr {
             has_source = 0x20,
             has_more_flags = 0x80,
         };
-        using RFlags = Packet::flags;
+
+        enum Devices : uint8_t {
+            api_and_shell = 0x10,    //
+            system = 0x11,   //
+            power = 0x13,   //
+            drive = 0x16,   //
+            sensors = 0x18,   //
+            connection = 0x19,   //
+            io_led = 0x1A,   //
+        };
 
     protected:
 
@@ -73,6 +84,10 @@ namespace rvr {
 
         static uint8_t mSeq;
     };
+
+    using RFlags = Packet::flags;
+    using Systems = Packet::Devices;
+
 }
 
 #endif /* Packet_H_ */

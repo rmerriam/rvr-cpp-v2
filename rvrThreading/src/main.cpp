@@ -26,14 +26,18 @@
 #include <future>
 #include <version>
 
+using namespace std::literals;
+
 #include "Trace.h"
 #include "Response.h"
+#include "ResponseDecoder.h"
 
 #include "ApiShell.h"
 #include "Connection.h"
 #include "Drive.h"
 #include "IoLed.h"
 #include "Power.h"
+#include "Sensors.h"
 #include "SystemInfo.h"
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
@@ -58,9 +62,35 @@ int main(int argc, char* argv[]) {
     rvr::Drive drive(req);
     rvr::IoLed led(req);
     rvr::Power pow(req);
+    rvr::Sensors sen(req);
     rvr::SystemInfo sys(req);
 
 #if 0
+    /// change size back to 15 in sensors!!!!
+    rvr::MsgArray accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
+    sen.configureStreaming(1, accel, 2);
+
+//    rvr::MsgArray ambient { 0x02, 0x00, 0x0A, 0x02 };
+//    sen.configureStreaming(2, ambient, 1);
+//
+//    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
+//    sen.configureStreaming(2, speed, 2);
+//
+//    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
+//    sen.configureStreaming(2, velocity, 2);
+//
+//    rvr::MsgArray locator { 0x02, 0x00, 0x06, 0x02 };
+//    sen.configureStreaming(2, locator, 0);
+
+    std::this_thread::sleep_for(500ms);
+
+    sen.enableStreaming(500);
+
+    std::this_thread::sleep_for(2000ms);
+    sen.disableStreaming();
+    sen.clearStreaming();
+
+#elif 0
     //---------------------------------------------------------------------------------------------------------------------
     //  Setup the LED handling
 
@@ -80,11 +110,10 @@ int main(int argc, char* argv[]) {
 
     led.idleLeds();
 
-#elif 0
+#elif 1
 
     pow.awake();
-//    pow.battery_precentage();
-    pow.battery_voltage_state();
+//    pow.battery_voltage_state();
 //
 //    pow.battery_voltage(rvr::Power::VoltageType::CalibratedFiltered);
 //    pow.battery_voltage(rvr::Power::VoltageType::CalibratedUnfiltered);
@@ -93,9 +122,9 @@ int main(int argc, char* argv[]) {
 //    pow.battery_current(rvr::Power::MotorSide::left);
 //    pow.battery_current(rvr::Power::MotorSide::right);
 
-
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    pow.battery_precentage();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     pow.sleep();
 
 #elif 0
@@ -122,7 +151,7 @@ int main(int argc, char* argv[]) {
 
     drive.getMotorFault();
 
-#elif 1
+#elif 0
     rvr::MsgArray dead { 0xDE, 0xAD };
     api.echo(dead, true);
 
@@ -139,7 +168,7 @@ int main(int argc, char* argv[]) {
     sys.getMainAppVersion();
 #endif
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(2s);
 
     end_tasks.set_value();
     terr << std::boolalpha << resp_future.get();
