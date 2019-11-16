@@ -1,5 +1,5 @@
-#ifndef RESPONSE_H_
-#define RESPONSE_H_
+#ifndef BLACKBOARD_H_
+#define BLACKBOARD_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -19,50 +19,49 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 25, 2019
+//     Created: Nov 10, 2019
 //
 //======================================================================================================================
 #include <ReadPacket.h>
-#include <future>
+#include <string>
 #include <unordered_map>
 
 namespace rvr {
 
-    class Response : public ReadPacket {
+    class Blackboard {
     public:
-        enum ErrorCode : uint8_t {
-            success = 0x00,
-            bad_did = 0x01,
-            bad_cid = 0x02,
-            not_yes_implemented = 0x03,
-            restricted = 0x04,
-            bad_data_length = 0x05,
-            failed = 0x06,
-            bad_data_value = 0x07,
-            busy = 0x08,
-            bad_tid = 0x09,
-            target_unavailable = 0x0A,
-        };
+        Blackboard();
+        Blackboard(const Blackboard& other) = delete;
+        Blackboard(Blackboard&& other) = delete;
+        Blackboard& operator=(const Blackboard& other) = delete;
 
-        Response(SerialPort& s, std::shared_future<void> end) :
-            ReadPacket { s }, mEnd { end } {
+        static std::string getName(const uint16_t key) {
+            return decoder_map[key].name;
         }
-        Response(const Response& other) = delete;
-        Response(Response&& other) = default;
-        Response& operator=(const Response& other) = delete;
 
-        bool operator ()();
-//        void read(rvr::MsgArray& in, rvr::MsgArray& out);
+        using FuncPtr = void (*)(MsgArray::const_iterator , MsgArray::const_iterator );
 
-        static void decode(MsgArray packet);
+        static FuncPtr getFunc(const uint16_t key) {
+            return decoder_map[key].func;
+        }
+
+        static float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static long long int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
 
     private:
-        static void decode_flags(const uint8_t f);
-        static void decode_error(auto err_byte);
 
-        std::shared_future<void> mEnd;
+        struct RespDecoder {
+            std::string name;
+            FuncPtr func;
+        };
+        using DecoderMap = std::unordered_map <uint16_t, RespDecoder>;
+
+        static DecoderMap decoder_map;
     };
 
 } /* namespace rvr */
 
-#endif /* RESPONSE_H_ */
+using RespDecode = rvr::Blackboard;
+//using RespMap = rvr::ResponseDecoder::DecoderMap;
+
+#endif /* BLACKBOARD_H_ */

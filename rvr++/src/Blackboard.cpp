@@ -20,63 +20,76 @@
 //     Created: Nov 10, 2019
 //
 //======================================================================================================================
-
+#include <Blackboard.h>
 #include "Trace.h"
-#include "ResponseDecoder.h"
-
+#include "Power.h"
 namespace rvr {
+    /*
+     * Send to a processor a stream: <token><high id><low id><size>...<high id><low id><size> where the id and size are r
+     * epeated for the desired sensors. Sensors are grouped by the processor and token.
 
-    ResponseDecoder::ResponseDecoder() {
-
+     * The responses are all 0x3D streaming service notify. The data is in the order and size specified in the streaming
+     * ;request from (1) determined by processor and token.
+     */
+    Blackboard::Blackboard() {
     }
+
+    //======================================================================================================================
     //----------------------------------------------------------------------------------------------------------------------
     void raw_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         std::cerr << std::hex;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void string_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        std::copy(begin, end, std::ostream_iterator<uint8_t>(std::cerr));
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void int_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    long long Blackboard::int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         long long value { };
         for (auto it { begin }; it != end; ++it) {
             const uint8_t& v { *it };
-
             value <<= 8;
             value += v;
         }
-        terr << __func__ << mys::sp << value;
+        return value;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    float Blackboard::float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         union {
             uint8_t buf[4];
             float result;
         };
-
         buf[0] = *(begin + 2);
         buf[1] = *(begin + 3);
         buf[2] = *(begin + 1);
         buf[3] = *(begin + 0);
-
         return result;
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------
+    void string_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        std::copy(begin, end, std::ostream_iterator<uint8_t>(std::cerr));
     }
     //----------------------------------------------------------------------------------------------------------------------
     void float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        terr << __func__ << mys::sp << float_convert(begin, end);
+        terr << __func__ << mys::sp << Blackboard::float_convert(begin, end);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
+    void int_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        long long value { Blackboard::int_convert(begin, end) };
+        terr << __func__ << mys::sp << value;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     void tri_float_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        terr << __func__ << mys::sp << float_convert(begin, begin + 4);
-        terr << __func__ << mys::sp << float_convert(begin + 4, begin + 8);
-        terr << __func__ << mys::sp << float_convert(begin + 8, end);
+        terr << __func__ << mys::sp << Blackboard::float_convert(begin, begin + 4);
+        terr << __func__ << mys::sp << Blackboard::float_convert(begin + 4, begin + 8);
+        terr << __func__ << mys::sp << Blackboard::float_convert(begin + 8, end);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     void status_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         char_ptr status[] { "okay", "fail" };
         terr << __func__ << mys::sp << status[begin[ -1]];
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void notification_status(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        terr << __func__ << mys::sp << "okay";
     }
 //----------------------------------------------------------------------------------------------------------------------
     void motor_fault_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
@@ -87,7 +100,6 @@ namespace rvr {
     void motor_stall_data(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         char_ptr motor[] { "left", "right" };
-
         terr << __func__ << mys::sp << motor[begin[0]] << std::boolalpha << (begin[1] == 0);
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -114,9 +126,8 @@ namespace rvr {
         terr << __func__ << mys::sp << state[ *begin];
     }
     //----------------------------------------------------------------------------------------------------------------------
-    using dev = Packet::Devices;
-
-    ResponseDecoder::DecoderMap ResponseDecoder::decoder_map { //
+    using dev = Devices;
+    Blackboard::DecoderMap Blackboard::decoder_map { //
     //
     { dev::api_and_shell << 8 | 0x00, RespDecoder { "echo", raw_data } }, //
     //
@@ -137,56 +148,45 @@ namespace rvr {
     { dev::power << 8 | 0x01, RespDecoder { "snooze", raw_data } }, //
     { dev::power << 8 | 0x0D, RespDecoder { "wake", status_data } }, //
     { dev::power << 8 | 0x10, RespDecoder { "get_battery_percentage", percentage_data } }, //
-    { dev::power << 8 | 0x11, RespDecoder { "activity_ack", raw_data } }, //
+    { dev::power << 8 | 0x11, RespDecoder { "system_awake_notification", notification_status } }, //
     { dev::power << 8 | 0x17, RespDecoder { "get_battery_voltage_state", battery_state_data } }, //
     { dev::power << 8 | 0x19, RespDecoder { "will_sleep_notify", raw_data } }, //
     { dev::power << 8 | 0x1A, RespDecoder { "did_sleep_notify", raw_data } }, //
     { dev::power << 8 | 0x1B, RespDecoder { "enable_battery_voltage_state_change_notify", raw_data } }, //
     { dev::power << 8 | 0x1C, RespDecoder { "battery_voltage_state_change_notify", raw_data } }, //
-    { dev::power << 8 | 0x25, RespDecoder { "get_battery_voltage_in_volts", float_data } }, //
+    { dev::power << 8 | 0x25, RespDecoder { "get_battery_voltage_in_volts", Power::rxBatVoltageInVolts } }, //
     { dev::power << 8 | 0x26, RespDecoder { "get_battery_voltage_state_thresholds", tri_float_data } }, //
     { dev::power << 8 | 0x27, RespDecoder { "get_current_sense_amplifier_current", float_data } }, //
     //
     { dev::sensors << 8 | 0x0F, RespDecoder { "enable_gyro_max_notify", raw_data } }, //
     { dev::sensors << 8 | 0x10, RespDecoder { "gyro_max_notify", raw_data } }, //
+    { dev::sensors << 8 | 0x13, RespDecoder { "reset_locator_x_and_y", raw_data } }, //
+    { dev::sensors << 8 | 0x17, RespDecoder { "set_locator_flags ", raw_data } }, //
+    { dev::sensors << 8 | 0x22, RespDecoder { "get_bot_to_bot_infrared_readings ", raw_data } }, //
+    { dev::sensors << 8 | 0x23, RespDecoder { "get_rgbc_senso", raw_data } }, //
+    { dev::sensors << 8 | 0x27, RespDecoder { "start_robot_to_robot_infrared_broadcasting", raw_data } }, //
+    { dev::sensors << 8 | 0x28, RespDecoder { "start_robot_to_robot_infrared_following", raw_data } }, //
+    { dev::sensors << 8 | 0x29, RespDecoder { "stop_robot_to_robot_infrared_broadcasting", raw_data } }, //
+    { dev::sensors << 8 | 0x2C, RespDecoder { "robot_to_robot_infrared_message_received_notify", raw_data } }, //
+    { dev::sensors << 8 | 0x30, RespDecoder { "get_ambient_light_sensor_value", raw_data } }, //
+    { dev::sensors << 8 | 0x32, RespDecoder { "stop_robot_to_robot_infrared_following", raw_data } }, //
+    { dev::sensors << 8 | 0x33, RespDecoder { "start_robot_to_robot_infrared_evading", raw_data } }, //
+    { dev::sensors << 8 | 0x34, RespDecoder { "stop_robot_to_robot_infrared_evading", raw_data } }, //
+    { dev::sensors << 8 | 0x35, RespDecoder { "enable_color_detection_notify", raw_data } }, //
+    { dev::sensors << 8 | 0x36, RespDecoder { "color_detection_notify", raw_data } }, //
+    { dev::sensors << 8 | 0x37, RespDecoder { "get_current_detected_color_reading", raw_data } }, //
+    { dev::sensors << 8 | 0x38, RespDecoder { "enable_color_detection", raw_data } }, //
     { dev::sensors << 8 | 0x39, RespDecoder { "configure_streaming_service", raw_data } }, //
     { dev::sensors << 8 | 0x3A, RespDecoder { "start_streaming_service", raw_data } }, //
-    { dev::sensors << 8 | 0x3B, RespDecoder { "stop_streaming_service", status_data } }, //
-    { dev::sensors << 8 | 0x3C, RespDecoder { "clear_streaming_service", status_data } }, //
-
-#if 0
-    enable_gyro_max_notify = 0x0F,
-    gyro_max_notify = 0x10,
-    reset_locator_x_and_y = 0x13,
-    set_locator_flags = 0x17,
-    get_bot_to_bot_infrared_readings = 0x22,
-    get_rgbc_sensor_values = 0x23,
-    start_robot_to_robot_infrared_broadcasting = 0x27,
-    start_robot_to_robot_infrared_following = 0x28,
-    stop_robot_to_robot_infrared_broadcasting = 0x29,
-    robot_to_robot_infrared_message_received_notify = 0x2C,
-    get_ambient_light_sensor_value = 0x30,
-    stop_robot_to_robot_infrared_following = 0x32,
-    start_robot_to_robot_infrared_evading = 0x33,
-    stop_robot_to_robot_infrared_evading = 0x34,
-    enable_color_detection_notify = 0x35,
-    color_detection_notify = 0x36,
-    get_current_detected_color_reading = 0x37,
-    enable_color_detection = 0x38,
-    configure_streaming_service = 0x39,
-    start_streaming_service = 0x3A,
-    stop_streaming_service = 0x3B,
-    clear_streaming_service = 0x3C,
-    streaming_service_data_notify = 0x3D,
-    enable_robot_infrared_message_notify = 0x3E,
-    send_infrared_message = 0x3F,
-    get_motor_temperature = 0x42,
-    get_motor_thermal_protection_status = 0x4B,
-    enable_motor_thermal_protection_status_notify = 0x4C,
-    motor_thermal_protection_status_notify = 0x4D,
-
-#endif
-
+    { dev::sensors << 8 | 0x3B, RespDecoder { "stop_streaming_service", raw_data } }, //
+    { dev::sensors << 8 | 0x3C, RespDecoder { "clear_streaming_service", raw_data } }, //
+    { dev::sensors << 8 | 0x3D, RespDecoder { "streaming_service_data_notify", notification_status } }, //
+    { dev::sensors << 8 | 0x3E, RespDecoder { "enable_robot_infrared_message_notify", raw_data } }, //
+    { dev::sensors << 8 | 0x3F, RespDecoder { "send_infrared_message", raw_data } }, //
+    { dev::sensors << 8 | 0x42, RespDecoder { "get_motor_temperature", raw_data } }, //
+    { dev::sensors << 8 | 0x4B, RespDecoder { "get_motor_thermal_protection_status", raw_data } }, //
+    { dev::sensors << 8 | 0x4C, RespDecoder { "enable_motor_thermal_protection_status_notify", raw_data } }, //
+    { dev::sensors << 8 | 0x4D, RespDecoder { "motor_thermal_protection_status_notify", raw_data } }, //
     //
     { dev::system << 8 | 0x00, RespDecoder { "get_main_application_version", version_data } }, //
     { dev::system << 8 | 0x01, RespDecoder { "get_bootloader_version", version_data } }, //
@@ -196,7 +196,5 @@ namespace rvr {
     { dev::system << 8 | 0x1F, RespDecoder { "get_processor_name", string_data } }, //
     { dev::system << 8 | 0x38, RespDecoder { "get_sku", string_data } }, //
     { dev::system << 8 | 0x39, RespDecoder { "get_core_up_time_in_milliseconds", int_data } }, //
-
     };
-
 } /* namespace rvr */

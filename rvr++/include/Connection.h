@@ -36,7 +36,7 @@ namespace rvr {
         Connection(Connection&& other) = delete;
         Connection& operator=(const Connection& other) = delete;
 
-        void bluetoothName();
+        void bluetoothName(const CommandResponse want_resp = resp_on_error);
 
     private:
         enum Cmd : uint8_t {
@@ -45,8 +45,8 @@ namespace rvr {
 
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Connection::bluetoothName() {
-        cmd_basic(get_bluetooth_advertising_name, true);
+    inline void Connection::bluetoothName(const CommandResponse want_resp) {
+        cmd_basic(get_bluetooth_advertising_name, want_resp);
     }
 
 } /* namespace rvr */

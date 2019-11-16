@@ -20,14 +20,17 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
+#include <algorithm>
+#include <numeric>
+
 #include "Trace.h"
 #include "Request.h"
 
 namespace rvr {
-
+    //----------------------------------------------------------------------------------------------------------------------
     void Request::send(const MsgArray& p) {
         MsgArray payload { p };
-
+        MsgArray mMsg;
         mMsg.clear();
         mMsg.push_back(SOP);
 
@@ -44,6 +47,46 @@ namespace rvr {
         mSerialPort.write(mMsg.data(), mMsg.size());
 
         terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    auto Request::escape_char(MsgArray::iterator& p, MsgArray& payload) {
+
+        switch ( *p) {
+            case SOP: {
+                *p = ESC;
+                payload.insert(p + 1, escaped_SOP);
+                break;
+            }
+            case EOP: {
+                *p = ESC;
+                payload.insert(p + 1, escaped_EOP);
+                break;
+            }
+            case ESC: {
+                *p = ESC;
+                payload.insert(p + 1, escaped_ESC);
+                break;
+            }
+        }
+        ++p;
+        return p;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint8_t Request::checksum(const MsgArray& payload) const {
+        unsigned int sum { };
+        sum = ~std::accumulate(payload.begin(), payload.end(), 0);
+        return sum;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    bool Request::isPacketChar(const uint8_t c) {
+        return (c == SOP) || (c == EOP) || (c == ESC);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::escape_msg(MsgArray& payload) {
+        for (auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end();
+            p = find_if(p, payload.end(), isPacketChar)) {
+            p = escape_char(p, payload);
+        }
     }
 
 }

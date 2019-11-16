@@ -39,9 +39,9 @@ namespace rvr {
         Drive(const Drive& other) = delete;
         Drive& operator=(const Drive& other) = delete;
 
-        void drive(const double& left, const double& right, const bool get_response = false);
-        void stop(const int& heading, const bool get_response = false);
-        void spin_drive(const double& speed, const int& heading, const bool get_response = false);
+        void drive(const double& left, const double& right, const CmdResp want_resp = false);
+        void stop(const int& heading, const CmdResp want_resp = false);
+        void spin_drive(const double& speed, const int& heading, const CmdResp want_resp = false);
 
         void getMotorFault();
 
@@ -50,7 +50,7 @@ namespace rvr {
         void enableMotorStallNotify();
         void disableMotorStallNotify();
 
-        void fixHeading(const bool get_response = false);
+        void fixHeading(const CmdResp want_resp = false);
 
     private:
 
@@ -74,8 +74,8 @@ namespace rvr {
         const std::tuple<uint8_t, uint8_t> speed_mode(const double& speed) const;
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::stop(const int& heading, const bool get_response) {
-        spin_drive(0, heading, get_response);
+    inline void Drive::stop(const int& heading, const CmdResp want_resp) {
+        spin_drive(0, heading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Drive::getMotorFault() {
@@ -98,7 +98,7 @@ namespace rvr {
         enable_request(enable_motor_stall_notify, false, true);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::fixHeading(const bool get_response) {
+    inline void Drive::fixHeading(const CmdResp want_resp) {
         do_request(reset_yaw, true);
     }
 }

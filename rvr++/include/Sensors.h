@@ -67,35 +67,28 @@ namespace rvr {
         Sensors& operator=(const Sensors& other) = delete;
 
         //----------------------------------------------------------------------------------------------------------------------
-        void enableGyroMaxNotify() {
-            cmd_enable(enable_gyro_max_notify, true, true);
+        void enableGyroMaxNotify(const CommandResponse want_resp = resp_on_error) {
+            cmd_enable(enable_gyro_max_notify, true, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        void disableGyroMaxNotify() {
-            cmd_enable(enable_gyro_max_notify, false, true);
-        }
-        //
-        //----------------------------------------------------------------------------------------------------------------------
-        void configureStreaming(const uint8_t token, const MsgArray& cfg, const uint8_t proc, const bool get_response = true) {
-            MsgArray msg { buildFlags(get_response), proc, mDevice, configure_streaming_service, mRequest.sequence(), };
-            msg.insert(msg.end(), cfg.begin(), cfg.end());
-
-            mRequest.send(msg);
-
-//            cmd_byte(configure_streaming_service, token, true);
-        }
-
-        //----------------------------------------------------------------------------------------------------------------------
-        void enableStreaming(const uint16_t millis) {
-            cmd_int(start_streaming_service, millis, true);
+        void disableGyroMaxNotify(const CommandResponse want_resp = resp_on_error) {
+            cmd_enable(enable_gyro_max_notify, false, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        void disableStreaming() {
-            cmd_basic(stop_streaming_service, true);
+        void configureStreaming(const uint8_t token, const MsgArray& cfg, const uint8_t proc, const CommandResponse want_resp = resp_on_error) {
+            cmd_data(configure_streaming_service, cfg, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        void clearStreaming() {
-            cmd_basic(clear_streaming_service, true);
+        void enableStreaming(const uint16_t millis, const CommandResponse want_resp = resp_on_error) {
+            cmd_int(start_streaming_service, millis, want_resp);
+        }
+        //----------------------------------------------------------------------------------------------------------------------
+        void disableStreaming(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic(stop_streaming_service, want_resp);
+        }
+        //----------------------------------------------------------------------------------------------------------------------
+        void clearStreaming(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic(clear_streaming_service, want_resp);
         }
     private:
         enum MotorIndexes : uint8_t {

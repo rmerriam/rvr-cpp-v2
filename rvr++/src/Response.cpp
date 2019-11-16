@@ -20,13 +20,14 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
+#include <Blackboard.h>
+#include <ReadPacket.h>
 #include <chrono>
 #include <string>
+#include <unordered_map>
 
-#include "Trace.h"
 #include "Packet.h"
 #include "Response.h"
-#include "ResponseDecoder.h"
 
 namespace rvr {
 
@@ -40,90 +41,55 @@ namespace rvr {
     { 0x19, "connection" }, //
     { 0x1A, "io_led" }, //
     };
-
-//----------------------------------------------------------------------------------------------------------------------
-    void Response::readx() {
-        uint8_t resp[120];
-        int cnt = mSerialPort.read(resp, 120);
-        mMsg.assign(resp, &resp[cnt]);
-
-        unescape_msg(mMsg);
-
-        terr << __func__ << mys::sp << __func__ << mys::sp << std::hex << mMsg;
-//        return cnt;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Response::checkForData(rvr::MsgArray& in) {
-        if (mSerialPort.count() != 0) {
-            uint8_t r[in.capacity()];
-            int cnt = mSerialPort.read(r, in.capacity());
-            in.insert(in.end(), r, &r[cnt]);
-            terr << __func__ << mys::sp << " in: " << std::hex << in;
-        }
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Response::processData(rvr::MsgArray& in) {
-        constexpr uint8_t EopSop[] { EOP, SOP };
-        while (in.size() >= 8) {
-            auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
-
-            if (pos != in.end()) {
-                rvr::MsgArray packet { in.begin(), pos + 1 };
-                terr << __func__ << mys::sp << "pkt: " << std::hex << packet;
-                decode(packet);
-                in.erase(in.begin(), pos + 1);
-            }
-            else {
-                break;
-            }
-        }
-    }
     //----------------------------------------------------------------------------------------------------------------------
     bool Response::operator ()() {
         rvr::MsgArray in;
+        rvr::MsgArray packet;
         in.reserve(80);
 
         while (mEnd.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
-            read(in);
+            read(in, packet);
+
+            if ( !packet.empty()) {
+                terr << __func__ << mys::sp << "pkt: " << std::hex << packet;
+                decode(packet);
+                packet.clear();
+            }
         }
         terr << __func__ << mys::sp << " exit";
         return true;
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Response::read(rvr::MsgArray& in) {
-        processData(in);
-        checkForData(in);
-    }
+
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_flags(const uint8_t f) {
         std::string flags { };
 
         for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
             switch (mask & f) {
-                case RFlags::response:
+                case response:
                     flags += "response | ";
                     break;
-                case RFlags::request_response:
+                case request_response:
                     flags += "request_response | ";
                     break;
-                case RFlags::request_error_response:
+                case request_error_response:
                     flags += "request_error_response | ";
                     break;
-                case RFlags::activity:
+                case activity:
                     flags += "activity | ";
                     break;
-                case RFlags::has_target:
+                case has_target:
                     flags += "has_target | ";
                     break;
-                case RFlags::has_source:
+                case has_source:
                     flags += "has_source | ";
                     break;
-                case RFlags::has_more_flags:
+                case has_more_flags:
                     flags += "has_more_flags | ";
                     break;
             }
         }
-        if ((f & RFlags::response) == 0) {
+        if ((f & response) == 0) {
             flags += "no_response";
         }
         terr << __func__ << mys::sp << flags;
@@ -186,12 +152,10 @@ namespace rvr {
             data = 0x07,            //
         };
 
-        Packet::unescape_msg(packet);
-
-        const bool is_resp { (packet[flags] & RFlags::response) == RFlags::response };   // versus notification
+        const bool is_resp { (packet[flags] & response) == response };   // versus notification
 
         // if there is a target byte then increment byte position by 1
-        int8_t offset = (packet[flags] & RFlags::has_target) ? 1 : 0;
+        int8_t offset = (packet[flags] & has_target) ? 1 : 0;
         decode_flags(packet[flags]);
 
         std::string device = device_names[packet[dev + offset]];
@@ -218,6 +182,8 @@ namespace rvr {
             }
             else {  // notification - no sequence number
                 terr << __func__ << " notification " << std::hex << (int)packet[seq];
+                RespDecode::FuncPtr decode_func { RespDecode::getFunc(key) };
+                decode_func(packet.begin() + seq, packet.end() - 2);
             }
         }
         terr << __func__ << " **************";

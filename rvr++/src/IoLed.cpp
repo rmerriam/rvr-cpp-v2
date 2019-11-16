@@ -23,18 +23,21 @@
 #include "IoLed.h"
 namespace rvr {
 
-    void IoLed::allLed(const uint32_t led_bits, const MsgArray& colors, const bool get_response) {
-
-        MsgArray msg { buildFlags(get_response), mTarget, mDevice, set_all_leds, mRequest.sequence() };
+    void IoLed::allLed(const uint32_t led_bits, const MsgArray& colors, const CommandResponse want_resp) {
 
         MsgArray leds { //
         static_cast<uint8_t>(led_bits >> 24), //
         static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
         static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
-        static_cast<uint8_t>(led_bits & 0xFF) };
+        static_cast<uint8_t>(led_bits & 0xFF) //
+        };
+        leds.insert(leds.end(), colors.begin(), colors.end());
 
-        msg.insert(msg.end(), leds.begin(), leds.end());
-        msg.insert(msg.end(), colors.begin(), colors.end());
-        mRequest.send(msg);
+        cmd_data(set_all_leds, leds, want_resp);
+
+//        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, set_all_leds, sequence() };
+//        msg.insert(msg.end(), leds.begin(), leds.end());
+//        msg.insert(msg.end(), colors.begin(), colors.end());
+//        mRequest.send(msg);
     }
 }

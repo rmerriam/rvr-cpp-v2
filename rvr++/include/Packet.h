@@ -1,5 +1,5 @@
-#ifndef Packet_H_
-#define Packet_H_
+#ifndef PACKET_H_
+#define PACKET_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -19,75 +19,51 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 21, 2019
+//     Created: Nov 15, 2019
 //
 //======================================================================================================================
-//  Base class for building packets which are either Requests or Response
-#include <vector>
-#include "SerialPort.h"
 
+#include <vector>
+
+#include "Trace.h"
+
+#include "SerialPort.h"
+//----------------------------------------------------------------------------------------------------------------------
 using char_ptr = const char *;
+//----------------------------------------------------------------------------------------------------------------------
 
 namespace rvr {
     using MsgArray = std::vector<uint8_t>;
 
-    class Packet {
-    public:
-        Packet(SerialPort& s) :
-            mSerialPort { s } {
-        }
-
-        uint8_t sequence() {
-            return ++mSeq;
-        }
-
-        static void unescape_msg(MsgArray& payload);
-        static void escape_msg(MsgArray& payload);
-
-        enum flags : uint8_t {
-            no_response = 0x00,
-            response = 0x01,
-            request_response = 0x02,
-            request_error_response = 0x04,
-            activity = 0x08,
-            has_target = 0x10,
-            has_source = 0x20,
-            has_more_flags = 0x80,
-        };
-
-        enum Devices : uint8_t {
-            api_and_shell = 0x10,    //
-            system = 0x11,   //
-            power = 0x13,   //
-            drive = 0x16,   //
-            sensors = 0x18,   //
-            connection = 0x19,   //
-            io_led = 0x1A,   //
-        };
-
-    protected:
-
-        enum SpecialChars : uint8_t {
-            SOP = 0x8D, EOP = 0xD8, ESC = 0xAB, escaped_SOP = 0x05, escaped_EOP = 0x50, escaped_ESC = 0x23,
-        };
-
-        uint8_t checksum(const MsgArray& payload) const;
-
-        static bool isPacketChar(const uint8_t c);
-
-        SerialPort& mSerialPort;
-        MsgArray mMsg { 40 };
-
-    private:
-        static auto escape_char(MsgArray::iterator& p, MsgArray& payload);
-        static void unescape_char(auto& p, MsgArray& payload);
-
-        static uint8_t mSeq;
+    enum flags : uint8_t {
+        no_response = 0x00, //
+        response = 0x01,  //
+        request_response = 0x02,  //
+        request_error_response = 0x06, // must request response to get error response
+        activity = 0x08, //
+        has_target = 0x10, //
+        has_source = 0x20, //
+        has_more_flags = 0x80,
     };
 
-    using RFlags = Packet::flags;
-    using Systems = Packet::Devices;
+    enum SpecialChars : uint8_t {
+        SOP = 0x8D, //
+        EOP = 0xD8,  //
+        ESC = 0xAB,  //
+        escaped_SOP = 0x05,   //
+        escaped_EOP = 0x50,   //
+        escaped_ESC = 0x23,
+    };
 
+    enum Devices : uint8_t {
+        api_and_shell = 0x10,    //
+        system = 0x11,   //
+        power = 0x13,   //
+        drive = 0x16,   //
+        sensors = 0x18,   //
+        connection = 0x19,   //
+        io_led = 0x1A,   //
+    };
 }
 
-#endif /* Packet_H_ */
+#endif /* PACKET_H_ */

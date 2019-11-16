@@ -1,5 +1,5 @@
-#ifndef RESPONSEDECODER_H_
-#define RESPONSEDECODER_H_
+#ifndef Packet_H_
+#define Packet_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -19,47 +19,30 @@
 //
 //     Author: rmerriam
 //
-//     Created: Nov 10, 2019
+//     Created: Oct 21, 2019
 //
 //======================================================================================================================
-#include <string>
-#include <unordered_map>
-
 #include "Packet.h"
 
 namespace rvr {
 
-    class ResponseDecoder {
+    class ReadPacket {
     public:
-        ResponseDecoder();
-        ResponseDecoder(const ResponseDecoder& other) = delete;
-        ResponseDecoder(ResponseDecoder&& other) = delete;
-        ResponseDecoder& operator=(const ResponseDecoder& other) = delete;
-
-        static std::string getName(const uint16_t key) {
-            return decoder_map[key].name;
+        ReadPacket(SerialPort& s) :
+            mSerialPort { s } {
         }
 
-        using FuncPtr = void (*)(MsgArray::const_iterator , MsgArray::const_iterator );
-
-        static FuncPtr getFunc(const uint16_t key) {
-            return decoder_map[key].func;
-        }
+        void read(rvr::MsgArray& in, rvr::MsgArray& out);
 
     private:
 
-        struct RespDecoder {
-            std::string name;
-            FuncPtr func;
-        };
-        using DecoderMap = std::unordered_map <uint16_t, RespDecoder>;
+        void unescape_char(auto& p, MsgArray& payload);
+        void unescape_msg(MsgArray& payload);
 
-        static DecoderMap decoder_map;
+        void checkForData(rvr::MsgArray& in);
+        void processData(rvr::MsgArray& in, rvr::MsgArray& out);
+
+        SerialPort& mSerialPort;
     };
-
-} /* namespace rvr */
-
-using RespDecode = rvr::ResponseDecoder;
-//using RespMap = rvr::ResponseDecoder::DecoderMap;
-
-#endif /* RESPONSEDECODER_H_ */
+}
+#endif /* Packet_H_ */

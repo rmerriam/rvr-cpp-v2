@@ -130,17 +130,15 @@ namespace rvr {
             CommandBase { Devices::io_led, req, bluetoothSOC } {
         }
 
-        IoLed(IoLed const& other) = delete;
+        IoLed(const IoLed& other) = delete;
         IoLed(IoLed&& other) = delete;
-        IoLed& operator=(IoLed const& other) = delete;
+        IoLed& operator=(const IoLed& other) = delete;
 
-        void allLed(uint32_t const led_bits, MsgArray const& colors, bool const get_response = false);
+        void allLed(const uint32_t led_bits, const MsgArray& colors, const CommandResponse want_resp = resp_on_error);
 
-        void getActiveColorPalette();
-        void getColorId();
-        void idleLeds();
-
-    private:
+        void getActiveColorPalette(const CommandResponse want_resp = resp_on_error);
+        void getColorId(const CommandResponse want_resp = resp_on_error);
+        void idleLeds(const CommandResponse want_resp = resp_on_error);
 
         enum Cmd : uint8_t {
             set_all_leds = 0x1A, //
@@ -152,17 +150,17 @@ namespace rvr {
             release_led_requests = 0x4E, //
         };
     };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void IoLed::getActiveColorPalette() {
-        cmd_basic(get_active_color_palette, true);
+    //---------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::idleLeds(const CommandResponse want_resp) {
+        cmd_basic(release_led_requests, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void IoLed::getColorId() {
-        cmd_basic(get_color_identification_report, true);
+//----------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::getActiveColorPalette(const CommandResponse want_resp) {
+        cmd_basic(get_active_color_palette, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void IoLed::idleLeds() {
-        cmd_basic(release_led_requests, true);
+//----------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::getColorId(const CommandResponse want_resp) {
+        cmd_basic(get_color_identification_report, want_resp);
     }
 
 } /* namespace rvr */

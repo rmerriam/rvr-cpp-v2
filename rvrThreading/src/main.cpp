@@ -30,7 +30,7 @@ using namespace std::literals;
 
 #include "Trace.h"
 #include "Response.h"
-#include "ResponseDecoder.h"
+#include <Blackboard.h>
 
 #include "ApiShell.h"
 #include "Connection.h"
@@ -41,10 +41,11 @@ using namespace std::literals;
 #include "SystemInfo.h"
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
+rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
-    terr << "Opening serial " << argv[1] << std::setprecision(4) << std::fixed;
+    terr << __func__ << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed;
 
     SerialPort serial { argv[1], 115200 };
     rvr::Request req { serial };
@@ -64,6 +65,9 @@ int main(int argc, char* argv[]) {
     rvr::Power pow(req);
     rvr::Sensors sen(req);
     rvr::SystemInfo sys(req);
+
+    pow.awake();
+    std::this_thread::sleep_for(100ms);
 
 #if 0
     /// change size back to 15 in sensors!!!!
@@ -103,75 +107,73 @@ int main(int argc, char* argv[]) {
     };
 
     for (auto i { 0 }; i < 10; ++i) {
-        led.allLed(led32, colors[i % 2], true);
+        led.allLed(led32, colors[i % 2], RespYes);
         terr << "blink";
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
-    led.idleLeds();
+    led.idleLeds(RespYes);
 
 #elif 1
 
-    pow.awake();
-//    pow.battery_voltage_state();
-//
-//    pow.battery_voltage(rvr::Power::VoltageType::CalibratedFiltered);
-//    pow.battery_voltage(rvr::Power::VoltageType::CalibratedUnfiltered);
-//    pow.battery_voltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
-//    pow.battery_volt_thresholds();
-//    pow.battery_current(rvr::Power::MotorSide::left);
-//    pow.battery_current(rvr::Power::MotorSide::right);
+    pow.battery_voltage_state(RespYes);
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    pow.battery_precentage();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    pow.sleep();
+    pow.battery_voltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
+    pow.battery_voltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
+    pow.battery_voltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
+
+    pow.battery_volt_thresholds(RespYes);
+    pow.battery_current(rvr::Power::MotorSide::left, RespYes);
+    pow.battery_current(rvr::Power::MotorSide::right, RespYes);
+
+    pow.battery_precentage(RespYes);
 
 #elif 0
-    drive.fixHeading(true);
+//    drive.fixHeading(RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//
+//    drive.stop(90, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//
+//    drive.drive(25, 25, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//
+//    drive.spin_drive(0, 20, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.fixHeading(RespYes);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    drive.stop(90, true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    drive.enableMotorStallNotify(RespYes);
+    drive.enableMotorFaultNotify(RespYes);
 
-    drive.drive(25, 25, true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    drive.disableMotorStallNotify(RespYes);
+    drive.disableMotorFaultNotify(RespYes);
 
-    drive.spin_drive(0, 20, true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    drive.fixHeading(true);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    drive.enableMotorStallNotify();
-    drive.enableMotorFaultNotify();
-
-    drive.disableMotorStallNotify();
-    drive.disableMotorFaultNotify();
-
-    drive.getMotorFault();
+    drive.getMotorFault(RespYes);
 
 #elif 0
     rvr::MsgArray dead { 0xDE, 0xAD };
-    api.echo(dead, true);
+    api.echo(dead, RespYes);
 
-    cmd.bluetoothName();
+    cmd.bluetoothName(RespYes);
 
-    sys.getMainAppVersion();
-    sys.getBootloaderVersion();
-    sys.getBoardRevision();
-    sys.getMacId();
-    sys.getStatsId();
-    sys.getUpTime();
-    sys.getProcessorName();
-    sys.getSku();
-    sys.getMainAppVersion();
+    sys.getMainAppVersion(RespYes);
+    sys.getBootloaderVersion(RespYes);
+    sys.getBoardRevision(RespYes);
+    sys.getMacId(RespYes);
+    sys.getStatsId(RespYes);
+    sys.getUpTime(RespYes);
+    sys.getProcessorName(RespYes);
+    sys.getSku(RespYes);
+    sys.getMainAppVersion(RespYes);
 #endif
 
-    std::this_thread::sleep_for(2s);
+    std::this_thread::sleep_for(4s);
 
     end_tasks.set_value();
     terr << std::boolalpha << resp_future.get();
+    pow.sleep();
 
     return 0;
 }

@@ -52,12 +52,12 @@ namespace rvr {
 
         };
         explicit CommandBase(Devices const device, Request& request, uint8_t const target);
-        uint8_t buildFlags(bool const get_response) const;
-        void do_request(uint8_t const cmd, bool const get_response = false);
-        void do_request_alt(uint8_t const cmd, bool const get_response = false);
+        uint8_t buildFlags(bool const want_resp) const;
+        void do_request(uint8_t const cmd, bool const want_resp = false);
+        void do_request_alt(uint8_t const cmd, bool const want_resp = false);
 
-        void enable_request(uint8_t const cmd, bool const state, bool const get_response = false);
-        void disable_request(uint8_t const cmd, bool const state, bool const get_response = false);
+        void enable_request(uint8_t const cmd, bool const state, bool const want_resp = false);
+        void disable_request(uint8_t const cmd, bool const state, bool const want_resp = false);
 
         uint8_t const mDevice;
         Request& mRequest;
@@ -72,29 +72,29 @@ namespace rvr {
         mDevice { device }, mRequest { request }, mTarget { target } {
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline uint8_t CommandBase::buildFlags(bool const get_response) const {
-        uint8_t flags { static_cast<uint8_t>((get_response ? Request::request_response : 0) | Request::has_target) };
+    inline uint8_t CommandBase::buildFlags(bool const want_resp) const {
+        uint8_t flags { static_cast<uint8_t>((want_resp ? Request::request_response : 0) | Request::has_target) };
         return flags;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::do_request(uint8_t const cmd, bool const get_response) {
-        MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence() };
+    inline void CommandBase::do_request(uint8_t const cmd, bool const want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, mRequest.sequence() };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::do_request_alt(uint8_t const cmd, bool const get_response) {
+    inline void CommandBase::do_request_alt(uint8_t const cmd, bool const want_resp) {
         uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
-        MsgArray msg { buildFlags(get_response), alt_target, mDevice, cmd, mRequest.sequence() };
+        MsgArray msg { buildFlags(want_resp), alt_target, mDevice, cmd, mRequest.sequence() };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::enable_request(uint8_t const cmd, bool const state, bool const get_response) {
-        MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, mRequest.sequence(), state };
+    inline void CommandBase::enable_request(uint8_t const cmd, bool const state, bool const want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, mRequest.sequence(), state };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::disable_request(uint8_t const cmd, bool const state, bool const get_response) {
-        MsgArray msg { buildFlags(get_response), mTarget, mDevice, cmd, state, mRequest.sequence() };
+    inline void CommandBase::disable_request(uint8_t const cmd, bool const state, bool const want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, state, mRequest.sequence() };
         mRequest.send(msg);
     }
 

@@ -25,21 +25,27 @@
 //  Build a message to send to the RVR
 
 #include "Packet.h"
-
 namespace rvr {
 
-    class Request : public Packet {
+    class Request {
     public:
 
         Request(SerialPort& s) :
-            Packet { s } {
+            mSerialPort { s } {
+            terr << __func__ << " starting";
         }
 
         void send(const MsgArray& p);
-    private:
 
+    private:
+        uint8_t checksum(const MsgArray& payload) const;
+        static bool isPacketChar(const uint8_t c);
+
+        auto escape_char(MsgArray::iterator& p, MsgArray& payload);
+        void escape_msg(MsgArray& payload);
+
+        SerialPort mSerialPort;
     };
 }
-using RFlags = rvr::Request::flags;
 
 #endif /* REQUEST_H_ */

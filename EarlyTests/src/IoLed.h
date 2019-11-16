@@ -134,7 +134,7 @@ namespace rvr {
         IoLed(IoLed&& other) = delete;
         IoLed& operator=(IoLed const& other) = delete;
 
-        void allLed(uint32_t const led_bits, MsgArray const& colors, bool const get_response = false);
+        void allLed(uint32_t const led_bits, MsgArray const& colors, bool const want_resp = false);
 
         void getActiveColorPalette();
         void getColorId();

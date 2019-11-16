@@ -37,42 +37,40 @@ namespace rvr {
         SystemInfo& operator=(const SystemInfo& other) = delete;
 
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getMainAppVersion() {
-            cmd_basic(get_main_application_version, true);
-            cmd_basic_alt(get_main_application_version, true);
+        inline void getMainAppVersion(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic(get_main_application_version, want_resp);
+            cmd_basic_alt(get_main_application_version, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getBootloaderVersion() {
-            cmd_basic(get_bootloader_version, true);
-            cmd_basic_alt(get_bootloader_version, true);
+        inline void getBootloaderVersion(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic(get_bootloader_version, want_resp);
+            cmd_basic_alt(get_bootloader_version, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getBoardRevision() {
-            cmd_basic_alt(get_board_revision, true);
+        inline void getBoardRevision(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic_alt(get_board_revision, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getMacId() {
-            cmd_basic_alt(get_mac_address, true);
+        inline void getMacId(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic_alt(get_mac_address, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getStatsId() {
-            cmd_basic_alt(get_stats_id, true);
+        inline void getStatsId(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic_alt(get_stats_id, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getProcessorName() {
-            cmd_basic(get_processor_name, true);
-            cmd_basic_alt(get_processor_name, true);
+        inline void getProcessorName(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic(get_processor_name, want_resp);
+            cmd_basic_alt(get_processor_name, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getUpTime() {
-            cmd_basic(get_core_up_time_in_milliseconds, true);
+        inline void getUpTime(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic(get_core_up_time_in_milliseconds, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        inline void getSku() {
-            cmd_basic_alt(get_sku, true);
+        inline void getSku(const CommandResponse want_resp = resp_on_error) {
+            cmd_basic_alt(get_sku, want_resp);
         }
-
-        static void decode_cmd(const uint8_t cmd, const rvr::MsgArray packet);
 
     private:
         enum Cmd : uint8_t {

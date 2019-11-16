@@ -22,6 +22,7 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
+#include <Blackboard.h>
 #include "Request.h"
 #include "CommandBase.h"
 
@@ -44,15 +45,19 @@ namespace rvr {
         Power(Power&& other) = delete;
         Power& operator=(const Power& other) = delete;
 
-        void awake();
-        void sleep();
+        void awake(const CommandResponse want_resp = resp_yes);
+        void sleep(const CommandResponse want_resp = resp_yes);
 
-        void battery_precentage();
-        void battery_voltage_state();
-        void battery_volt_thresholds();
-        void battery_current(const MotorSide ms);
+        void battery_precentage(const CommandResponse want_resp = resp_yes);
+        void battery_voltage_state(const CommandResponse want_resp = resp_yes);
+        void battery_volt_thresholds(const CommandResponse want_resp = resp_yes);
+        void battery_current(const MotorSide ms, const CommandResponse want_resp = resp_yes);
 
-        void battery_voltage(const VoltageType vt);
+        void battery_voltage(const VoltageType vt, const CommandResponse want_resp = resp_yes);
+
+        static void rxBatVoltageInVolts(MsgArray::const_iterator begin, MsgArray::const_iterator end);
+
+        static inline float mVoltage;
 
     private:
         enum BatteryVoltageStates : uint8_t {
@@ -72,34 +77,39 @@ namespace rvr {
             get_battery_voltage_state_thresholds = 0x26, //
             get_current_sense_amplifier_current = 0x27, //
         };
+
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::awake() {
-        cmd_basic(wake, true);
+    inline void Power::awake(const CommandResponse want_resp) {
+        cmd_basic(wake, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::sleep() {
-        cmd_basic(snooze, true);
+    inline void Power::sleep(const CommandResponse want_resp) {
+        cmd_basic(snooze, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_precentage() {
-        cmd_basic(get_battery_percentage, true);
+    inline void Power::battery_precentage(const CommandResponse want_resp) {
+        cmd_basic(get_battery_percentage, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_voltage_state() {
-        cmd_basic(get_battery_voltage_state, true);
+    inline void Power::battery_voltage_state(const CommandResponse want_resp) {
+        cmd_basic(get_battery_voltage_state, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_voltage(const VoltageType vt) {
-        cmd_byte(get_battery_voltage_in_volts, vt, true);
+    inline void Power::battery_voltage(const VoltageType vt, const CommandResponse want_resp) {
+        cmd_byte(get_battery_voltage_in_volts, vt, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_volt_thresholds() {
-        cmd_basic(get_battery_voltage_state_thresholds, true);
+    inline void Power::battery_volt_thresholds(const CommandResponse want_resp) {
+        cmd_basic(get_battery_voltage_state_thresholds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::battery_current(const MotorSide ms) {
-        cmd_byte_alt(get_current_sense_amplifier_current, ms, true);
+    inline void Power::battery_current(const MotorSide ms, const CommandResponse want_resp) {
+        cmd_byte_alt(get_current_sense_amplifier_current, ms, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Power::rxBatVoltageInVolts(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        mVoltage = Blackboard::float_convert(begin, end);
     }
 
 } /* namespace rvr */

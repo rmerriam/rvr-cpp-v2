@@ -39,18 +39,18 @@ namespace rvr {
         Drive(const Drive& other) = delete;
         Drive& operator=(const Drive& other) = delete;
 
-        void drive(const double& left, const double& right, const bool get_response = false);
-        void stop(const int& heading, const bool get_response = false);
-        void spin_drive(const double& speed, const int& heading, const bool get_response = false);
+        void drive(const double& left, const double& right, const CommandResponse want_resp = resp_on_error);
+        void stop(const int& heading, const CommandResponse want_resp = resp_on_error);
+        void spin_drive(const double& speed, const int& heading, const CommandResponse want_resp = resp_on_error);
 
-        void getMotorFault();
+        void getMotorFault(const CommandResponse want_resp = resp_on_error);
 
-        void enableMotorFaultNotify();
-        void disableMotorFaultNotify();
-        void enableMotorStallNotify();
-        void disableMotorStallNotify();
+        void enableMotorFaultNotify(const CommandResponse want_resp = resp_on_error);
+        void disableMotorFaultNotify(const CommandResponse want_resp = resp_on_error);
+        void enableMotorStallNotify(const CommandResponse want_resp = resp_on_error);
+        void disableMotorStallNotify(const CommandResponse want_resp = resp_on_error);
 
-        void fixHeading(const bool get_response = false);
+        void fixHeading(const CommandResponse want_resp = resp_on_error);
 
     private:
 
@@ -74,32 +74,32 @@ namespace rvr {
         const std::tuple<uint8_t, uint8_t> speed_mode(const double& speed) const;
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::stop(const int& heading, const bool get_response) {
-        spin_drive(0, heading, get_response);
+    inline void Drive::stop(const int& heading, const CommandResponse want_resp) {
+        spin_drive(0, heading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::getMotorFault() {
-        cmd_basic(get_motor_fault_state, true);
+    inline void Drive::getMotorFault(const CommandResponse want_resp) {
+        cmd_basic(get_motor_fault_state, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::enableMotorFaultNotify() {
-        cmd_enable(enable_motor_fault_notify, true, true);
+    inline void Drive::enableMotorFaultNotify(const CommandResponse want_resp) {
+        cmd_enable(enable_motor_fault_notify, true, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::disableMotorFaultNotify() {
-        cmd_enable(enable_motor_fault_notify, false, true);
+    inline void Drive::disableMotorFaultNotify(const CommandResponse want_resp) {
+        cmd_enable(enable_motor_fault_notify, false, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::enableMotorStallNotify() {
-        cmd_enable(enable_motor_stall_notify, true, true);
+    inline void Drive::enableMotorStallNotify(const CommandResponse want_resp) {
+        cmd_enable(enable_motor_stall_notify, true, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::disableMotorStallNotify() {
-        cmd_enable(enable_motor_stall_notify, false, true);
+    inline void Drive::disableMotorStallNotify(const CommandResponse want_resp) {
+        cmd_enable(enable_motor_stall_notify, false, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::fixHeading(const bool get_response) {
-        cmd_basic(reset_yaw, true);
+    inline void Drive::fixHeading(const CommandResponse want_resp) {
+        cmd_basic(reset_yaw, resp_on_error);
     }
 }
 /* namespace rvr */

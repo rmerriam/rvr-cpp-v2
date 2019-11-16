@@ -20,59 +20,37 @@
 //     Created: Oct 21, 2019
 //
 //======================================================================================================================
-#include <algorithm>
-#include <iomanip>
-#include <iostream>
-#include <numeric>
-#include <vector>
+#include <ReadPacket.h>
 
-#include "trace.h"
-#include "Packet.h"
 namespace rvr {
 
-    uint8_t Packet::mSeq { 0x80 };
     //----------------------------------------------------------------------------------------------------------------------
-    auto Packet::escape_char(MsgArray::iterator& p, MsgArray& payload) {
+    void ReadPacket::read(rvr::MsgArray& in, rvr::MsgArray& out) {
+        checkForData(in);
+        processData(in, out);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void ReadPacket::checkForData(rvr::MsgArray& in) {
+        if (mSerialPort.count() != 0) {
+            uint8_t r[in.capacity()];
+            int cnt = mSerialPort.read(r, in.capacity());
+            in.insert(in.end(), r, &r[cnt]);
+        }
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void ReadPacket::processData(rvr::MsgArray& in, rvr::MsgArray& packet) {
+        constexpr uint8_t EopSop[] { EOP, SOP };
 
-        switch ( *p) {
-            case SOP: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_SOP);
-                break;
-            }
-            case EOP: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_EOP);
-                break;
-            }
-            case ESC: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_ESC);
-                break;
-            }
-        }
-        ++p;
-        return p;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Packet::checksum(const MsgArray& payload) const {
-        unsigned int sum { };
-        sum = ~std::accumulate(payload.begin(), payload.end(), 0);
-        return sum;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    bool Packet::isPacketChar(const uint8_t c) {
-        return (c == SOP) || (c == EOP) || (c == ESC);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Packet::escape_msg(MsgArray& payload) {
-        for (auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end();
-            p = find_if(p, payload.end(), isPacketChar)) {
-            p = escape_char(p, payload);
+        auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
+
+        if (pos != in.end()) {
+            packet.insert(packet.begin(), in.begin(), pos + 1);
+            in.erase(in.begin(), pos + 1);
+            unescape_msg(packet);
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Packet::unescape_char(auto& p, MsgArray& payload) {
+    void ReadPacket::unescape_char(auto& p, MsgArray& payload) {
         auto n { p + 1 };
         switch ( *n) {
             case escaped_SOP: {
@@ -91,7 +69,7 @@ namespace rvr {
         payload.erase(p);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Packet::unescape_msg(MsgArray& payload) {
+    void ReadPacket::unescape_msg(MsgArray& payload) {
         for (auto p { find(payload.begin(), payload.end(), ESC) }; p != payload.end(); p = find(p + 1, payload.end(), ESC)) {
             unescape_char(p, payload);
         }

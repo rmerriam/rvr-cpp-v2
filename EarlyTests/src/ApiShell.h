@@ -36,7 +36,7 @@ namespace rvr {
         ApiShell(ApiShell&& other) = delete;
         ApiShell& operator=(const ApiShell& other) = delete;
 
-        void echo(const MsgArray& data, const bool get_response = false);
+        void echo(const MsgArray& data, const CmdResp want_resp = false);
 
     private:
         enum Cmd : uint8_t {
@@ -44,8 +44,8 @@ namespace rvr {
         };
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void ApiShell::echo(const MsgArray& data, const bool get_response) {
-        MsgArray msg { buildFlags(get_response), mTarget, mDevice, echo_cmd, mRequest.sequence() };
+    inline void ApiShell::echo(const MsgArray& data, const CmdResp want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, echo_cmd, mRequest.sequence() };
         msg.insert(msg.end(), data.begin(), data.end());
         mRequest.send(msg);
     }
