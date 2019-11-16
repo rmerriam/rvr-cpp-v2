@@ -55,6 +55,8 @@ namespace rvr {
         void cmd_byte(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
         void cmd_byte_alt(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
 
+        void cmd_byte_id(const uint8_t cmd, const uint8_t data, const uint8_t id, const CommandResponse want_resp = resp_on_error);
+
         void cmd_int(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_enable(const uint8_t cmd, const bool state, const CommandResponse want_resp = resp_on_error);
@@ -116,9 +118,14 @@ namespace rvr {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, state, sequence() };
         mRequest.send(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_byte(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_byte_id(const uint8_t cmd, const uint8_t data, const uint8_t id, const CommandResponse want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, id, data };
         mRequest.send(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------

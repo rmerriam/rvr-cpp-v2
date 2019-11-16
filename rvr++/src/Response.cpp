@@ -141,15 +141,17 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(MsgArray packet) {
+        using bb = rvr::Blackboard;
+
         enum BytePositions : uint8_t {
-            flags = 0x01,   //
-            //            targ = 0x02,   //
-            src = 0x02,            //
-            dev = 0x03,            //
-            cmd = 0x04,            //
-            seq = 0x05,            //
-            status = 0x06,            //
-            data = 0x07,            //
+            flags = 0x00,   //
+            // targ = 0x01,   //
+            src = 0x01,     //
+            dev = 0x02,     //
+            cmd = 0x03,     //
+            seq = 0x04,     //
+            status = 0x05,  //
+            data = 0x06,    //
         };
 
         const bool is_resp { (packet[flags] & response) == response };   // versus notification
@@ -160,8 +162,8 @@ namespace rvr {
 
         std::string device = device_names[packet[dev + offset]];
 
-        const uint16_t key = packet[dev + offset] << 8 | packet[cmd + offset];
-        std::string command { RespDecode::getName(key) };
+        const bb::key_t key = bb::entryKey(packet[dev + offset], packet[cmd + offset]);
+        std::string command { bb::entryName(key) };
 
         if (command.empty()) {
             terr << __func__ << " Command not in decode table " << device << mys::sp << std::hex << key;
@@ -176,14 +178,14 @@ namespace rvr {
                     decode_error(err_byte);
                 }
                 else {
-                    RespDecode::FuncPtr decode_func { RespDecode::getFunc(key) };
-                    decode_func(packet.begin() + data + offset, packet.end() - 2);
+                    bb::FuncPtr decode_func { bb::entryFunc(key) };
+                    decode_func(key, packet.begin() + data + offset, packet.end() - 1);
                 }
             }
             else {  // notification - no sequence number
                 terr << __func__ << " notification " << std::hex << (int)packet[seq];
-                RespDecode::FuncPtr decode_func { RespDecode::getFunc(key) };
-                decode_func(packet.begin() + seq, packet.end() - 2);
+                bb::FuncPtr decode_func { bb::entryFunc(key) };
+                decode_func(key, packet.begin() + seq, packet.end() - 1);
             }
         }
         terr << __func__ << " **************";

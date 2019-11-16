@@ -22,9 +22,11 @@
 //     Created: Nov 10, 2019
 //
 //======================================================================================================================
-#include <ReadPacket.h>
+#include <any>
 #include <string>
 #include <unordered_map>
+
+#include "ReadPacket.h"
 
 namespace rvr {
 
@@ -35,33 +37,69 @@ namespace rvr {
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(const Blackboard& other) = delete;
 
-        static std::string getName(const uint16_t key) {
-            return decoder_map[key].name;
-        }
+        enum key_t : uint16_t {
+        };
 
-        using FuncPtr = void (*)(MsgArray::const_iterator , MsgArray::const_iterator );
+        using FuncPtr = void (*)(const key_t key, MsgArray::const_iterator , MsgArray::const_iterator );
 
-        static FuncPtr getFunc(const uint16_t key) {
-            return decoder_map[key].func;
-        }
+        struct BlackboardEntry {
+            std::string name;
+            FuncPtr func;
+            std::any value { };
+        };
+
+        static FuncPtr entryFunc(const key_t key);
+        static std::string entryName(const key_t key);
+        static std::any& entryValue(const key_t key);
+        static std::any entryValue(const uint8_t dev, const uint8_t cmd);
 
         static float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
         static long long int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
 
+        static key_t entryKey(const uint8_t dev, const uint8_t cmd);
+
+        using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
+
+        static void dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b);
+        static void dump();
+        static BBDictionary mDictionary;
+
     private:
 
-        struct RespDecoder {
-            std::string name;
-            FuncPtr func;
-        };
-        using DecoderMap = std::unordered_map <uint16_t, RespDecoder>;
-
-        static DecoderMap decoder_map;
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline rvr::Blackboard::FuncPtr Blackboard::entryFunc(const key_t key) {
+        return mDictionary[key].func;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::string Blackboard::entryName(const key_t key) {
+        return mDictionary[key].name;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::any Blackboard::entryValue(const uint8_t dev, const uint8_t cmd) {
+        return entryValue(entryKey(dev, cmd));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::any& Blackboard::entryValue(const key_t key) {
+        return mDictionary[key].value;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline Blackboard::key_t Blackboard::entryKey(const uint8_t dev, const uint8_t cmd) {
+        return static_cast<key_t>(dev << 8 | cmd);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Blackboard::dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b) {
+        auto be { b.second };
+        terr << std::hex << std::uppercase << (b.first) << mys::sp << be.name << //
+             mys::tab << ((be.value.has_value()) ? "has value" : "no value");
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Blackboard::dump() {
+        for (auto b : rvr::Blackboard::mDictionary) {
+            dumpEntry(b);
+        }
+    }
 
 } /* namespace rvr */
-
-using RespDecode = rvr::Blackboard;
-//using RespMap = rvr::ResponseDecoder::DecoderMap;
 
 #endif /* BLACKBOARD_H_ */

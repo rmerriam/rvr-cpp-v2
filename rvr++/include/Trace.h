@@ -34,6 +34,12 @@
 //---------------------------------------------------------------------------------------------------------------------
 namespace mys {
 
+#if 1
+    constexpr bool trace_active { true };
+#else
+    constexpr bool trace_active {false};
+#endif
+
     template <typename T, typename = std::void_t<>>
     struct has_value_type : std::false_type {
     };
@@ -98,7 +104,7 @@ namespace mys {
     };
 //=====================================================================================================================
 
-#define code_loc __func__ << ':' << __LINE__ << mys::sp << __FILE__
+#define code_loc __func__ << ' '
 //=====================================================================================================================
     inline Trace::Trace(std::ostream& os) :
         mOs { os } {
@@ -106,18 +112,22 @@ namespace mys {
     //----------------------------------------------------------------------------------------------------------------------
     template <typename C>
     inline mys::Trace& Trace::operator <<(const C& data) {
-        if constexpr (has_value_type<C>()) {
-            std::copy(data.begin(), data.end(), std::ostream_iterator<int>(mOs, " "));
-        }
-        else {
-            mOs << data;
+        if constexpr (trace_active) {
+            if constexpr (has_value_type<C>()) {
+                std::copy(data.begin(), data.end(), std::ostream_iterator<int>(mOs, " "));
+            }
+            else {
+                mOs << data;
+            }
         }
         return *this;
     }
     //----------------------------------------------------------------------------------------------------------------------
     template <>
     inline mys::Trace& Trace::operator <<(const std::string& data) {
-        mOs << data;
+        if constexpr (trace_active) {
+            mOs << data;
+        }
         return *this;
     }
     //---------------------------------------------------------------------------------------------------------------------
@@ -135,20 +145,24 @@ namespace mys {
     //---------------------------------------------------------------------------------------------------------------------
     template <typename T>
     inline mys::Trace& TraceStart::operator <<(const T& value) {
-        time_stamp();
-        mOs << value;
-        mOs << std::dec;
+        if constexpr (trace_active) {
+            mOs << std::dec;
+            time_stamp();
+            mOs << value;
+        }
         return mTrace;
     }
     //---------------------------------------------------------------------------------------------------------------------
     inline void TraceStart::time_stamp() {
-        using namespace std::chrono;
-        auto now = system_clock::now();
-        auto timer = system_clock::to_time_t(now);
+        if constexpr (trace_active) {
+            using namespace std::chrono;
+            auto now = system_clock::now();
+            auto timer = system_clock::to_time_t(now);
 
-        mTrace << std::put_time(std::localtime( &timer), "%n%y%m%d.%H%M%S."); //
-        mTrace << std::dec << std::setfill('0') << std::setw(3);
-        mTrace << (duration_cast<milliseconds>(now.time_since_epoch()) % 1000).count() << ": ";
+            mTrace << std::put_time(std::localtime( &timer), "%n%y%m%d.%H%M%S."); //
+            mTrace << std::dec << std::setfill('0') << std::setw(3);
+            mTrace << (duration_cast<milliseconds>(now.time_since_epoch()) % 1000).count() << ": ";
+        }
     }
     //---------------------------------------------------------------------------------------------------------------------
     inline TraceOff::TraceOff(Trace& t) :

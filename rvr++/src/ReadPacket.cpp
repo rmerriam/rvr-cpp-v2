@@ -47,6 +47,7 @@ namespace rvr {
             packet.insert(packet.begin(), in.begin(), pos + 1);
             in.erase(in.begin(), pos + 1);
             unescape_msg(packet);
+            removeDelimiters(packet);
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -74,4 +75,6 @@ namespace rvr {
             unescape_char(p, payload);
         }
     }
+
 }
+

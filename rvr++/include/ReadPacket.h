@@ -38,11 +38,17 @@ namespace rvr {
 
         void unescape_char(auto& p, MsgArray& payload);
         void unescape_msg(MsgArray& payload);
+        void removeDelimiters(MsgArray& payload);
 
         void checkForData(rvr::MsgArray& in);
         void processData(rvr::MsgArray& in, rvr::MsgArray& out);
 
         SerialPort& mSerialPort;
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void ReadPacket::removeDelimiters(MsgArray& payload) {
+        payload.erase(payload.begin());
+        payload.erase(payload.end() - 1);
+    }
 }
 #endif /* Packet_H_ */

@@ -66,6 +66,7 @@ int main(int argc, char* argv[]) {
     rvr::Sensors sen(req);
     rvr::SystemInfo sys(req);
 
+//    rvr::Blackboard::dump();
     pow.awake();
     std::this_thread::sleep_for(100ms);
 
@@ -116,17 +117,24 @@ int main(int argc, char* argv[]) {
 
 #elif 1
 
-    pow.battery_voltage_state(RespYes);
+    pow.batteryVoltageState(RespYes);
 
-    pow.battery_voltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
-    pow.battery_voltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
-    pow.battery_voltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
+    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
+    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
+    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
 
-    pow.battery_volt_thresholds(RespYes);
-    pow.battery_current(rvr::Power::MotorSide::left, RespYes);
-    pow.battery_current(rvr::Power::MotorSide::right, RespYes);
+    pow.batteryVoltThresholds(RespYes);
+    pow.batteryMotorCurrent(rvr::Power::MotorSide::left, RespYes);
+    pow.batteryMotorCurrent(rvr::Power::MotorSide::right, RespYes);
 
-    pow.battery_precentage(RespYes);
+    pow.batteryPercentage(RespYes);
+
+    std::this_thread::sleep_for(1s);
+
+    terr << __func__ << mys::sp << "VoltageCF: " << pow.batteryVoltsCalibratedFiltered();
+    terr << __func__ << mys::sp << "VoltageCUf: " << pow.batteryVoltsCalibratedUnfiltered();
+    terr << __func__ << mys::sp << "VoltageUcUf: " << pow.batteryVoltsUncalibratedUnfiltered();
+    terr << __func__ << mys::sp << "VPercent: " << pow.batteryPercent();
 
 #elif 0
 //    drive.fixHeading(RespYes);
