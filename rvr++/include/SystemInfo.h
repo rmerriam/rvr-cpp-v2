@@ -25,7 +25,10 @@
 #include "Request.h"
 #include "CommandBase.h"
 
+using namespace std::literals;
+
 namespace rvr {
+    using bb= Blackboard;
 
     class SystemInfo : protected CommandBase {
     public:
@@ -36,41 +39,22 @@ namespace rvr {
         SystemInfo(SystemInfo&& other) = delete;
         SystemInfo& operator=(const SystemInfo& other) = delete;
 
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getMainAppVersion(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic(get_main_application_version, want_resp);
-            cmd_basic_alt(get_main_application_version, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getBootloaderVersion(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic(get_bootloader_version, want_resp);
-            cmd_basic_alt(get_bootloader_version, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getBoardRevision(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic_alt(get_board_revision, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getMacId(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic_alt(get_mac_address, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getStatsId(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic_alt(get_stats_id, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getProcessorName(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic(get_processor_name, want_resp);
-            cmd_basic_alt(get_processor_name, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getUpTime(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic(get_core_up_time_in_milliseconds, want_resp);
-        }
-        //----------------------------------------------------------------------------------------------------------------------
-        inline void getSku(const CommandResponse want_resp = resp_on_error) {
-            cmd_basic_alt(get_sku, want_resp);
-        }
+        void getBoardRevision(const CommandResponse want_resp = resp_on_error);
+        void getBootloaderVersion(const CommandResponse want_resp = resp_on_error);
+        void getMacId(const CommandResponse want_resp = resp_on_error);
+        void getMainAppVersion(const CommandResponse want_resp = resp_on_error);
+        void getProcessorName(const CommandResponse want_resp = resp_on_error);
+        void getSku(const CommandResponse want_resp = resp_on_error);
+        void getStatsId(const CommandResponse want_resp = resp_on_error);
+        void getUpTime(const CommandResponse want_resp = resp_on_error);
+
+        int64_t boardVersion();
+        std::string bootVersion();
+        std::string macAddress();
+        std::string mainAppVersion();
+        std::string processorName();
+        int64_t statsId();
+        std::string sku();
 
     private:
         enum Cmd : uint8_t {
@@ -85,6 +69,42 @@ namespace rvr {
         };
 
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getMainAppVersion(const CommandResponse want_resp) {
+        cmd_basic(get_main_application_version, want_resp);
+        cmd_basic_alt(get_main_application_version, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getBootloaderVersion(const CommandResponse want_resp) {
+        cmd_basic(get_bootloader_version, want_resp);
+        cmd_basic_alt(get_bootloader_version, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getBoardRevision(const CommandResponse want_resp) {
+        cmd_basic_alt(get_board_revision, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getMacId(const CommandResponse want_resp) {
+        cmd_basic_alt(get_mac_address, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getStatsId(const CommandResponse want_resp) {
+        cmd_basic_alt(get_stats_id, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getProcessorName(const CommandResponse want_resp) {
+        cmd_basic(get_processor_name, want_resp);
+        cmd_basic_alt(get_processor_name, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getUpTime(const CommandResponse want_resp) {
+        cmd_basic(get_core_up_time_in_milliseconds, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SystemInfo::getSku(const CommandResponse want_resp) {
+        cmd_basic_alt(get_sku, want_resp);
+    }
+
 } /* namespace rvr */
 
 #endif /* SYSTEMINFO_H_ */

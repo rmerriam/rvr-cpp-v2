@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
 
     led.idleLeds(RespYes);
 
-#elif 1
+#elif 0
 
     pow.batteryVoltageState(RespYes);
 
@@ -126,14 +126,21 @@ int main(int argc, char* argv[]) {
     pow.batteryVoltThresholds(RespYes);
     pow.batteryMotorCurrent(rvr::Power::MotorSide::left, RespYes);
     pow.batteryMotorCurrent(rvr::Power::MotorSide::right, RespYes);
+    pow.batteryVoltageState(RespYes);
 
     pow.batteryPercentage(RespYes);
 
     std::this_thread::sleep_for(1s);
+//    rvr::Blackboard::dump();
 
-    terr << __func__ << mys::sp << "VoltageCF: " << pow.batteryVoltsCalibratedFiltered();
-    terr << __func__ << mys::sp << "VoltageCUf: " << pow.batteryVoltsCalibratedUnfiltered();
-    terr << __func__ << mys::sp << "VoltageUcUf: " << pow.batteryVoltsUncalibratedUnfiltered();
+    terr << __func__ << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
+    terr << __func__ << mys::sp << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
+    terr << __func__ << mys::sp << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
+    terr << __func__ << mys::sp << "State: " << pow.voltState();
+    terr << __func__ << mys::sp << "Motor Current: " << pow.motorCurrent();
+    terr << __func__ << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
+    terr << __func__ << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
+    terr << __func__ << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
     terr << __func__ << mys::sp << "VPercent: " << pow.batteryPercent();
 
 #elif 0
@@ -160,28 +167,45 @@ int main(int argc, char* argv[]) {
 
     drive.getMotorFault(RespYes);
 
-#elif 0
-    rvr::MsgArray dead { 0xDE, 0xAD };
+#elif 1
+    rvr::MsgArray dead { 0xDE, 0xAD, 0xFE, 0xED };
     api.echo(dead, RespYes);
 
     cmd.bluetoothName(RespYes);
 
-    sys.getMainAppVersion(RespYes);
-    sys.getBootloaderVersion(RespYes);
     sys.getBoardRevision(RespYes);
+    sys.getBootloaderVersion(RespYes);
     sys.getMacId(RespYes);
-    sys.getStatsId(RespYes);
-    sys.getUpTime(RespYes);
+    sys.getMainAppVersion(RespYes);
     sys.getProcessorName(RespYes);
     sys.getSku(RespYes);
-    sys.getMainAppVersion(RespYes);
+    sys.getStatsId(RespYes);
+    sys.getUpTime(RespYes);
+
+    std::this_thread::sleep_for(1s);
+    terr << code_loc << mys::nl;
+
+    terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
+    terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
+    terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
+    terr << code_loc << "BT Name: " << cmd.name();
+    terr << code_loc << "Echo: " << std::hex << api.echo();
+    terr << code_loc << "MAC Addr: " << sys.macAddress();
+    terr << code_loc << "Processor: " << sys.processorName();
+    terr << code_loc << "SKU: " << sys.sku();
+    terr << code_loc << "StatsId: " << sys.statsId();
+
+    terr << code_loc << mys::nl;
+
 #endif
 
-    std::this_thread::sleep_for(4s);
+    std::this_thread::sleep_for(1s);
+
+    pow.sleep();
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
 
     end_tasks.set_value();
     terr << std::boolalpha << resp_future.get();
-    pow.sleep();
 
     return 0;
 }

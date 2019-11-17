@@ -36,8 +36,8 @@ namespace rvr {
     using bb = Blackboard;
 
     //======================================================================================================================
-    long long Blackboard::int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        long long value { };
+    int64_t Blackboard::int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+        int64_t value { };
         for (auto it { begin }; it != end; ++it) {
             const uint8_t v { *it };
             value <<= 8;
@@ -60,80 +60,63 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void raw_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         std::cerr << std::hex;
+        Blackboard::entryValue(key) = MsgArray(begin, end);
+        terr << code_loc << key;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
+
     }
     //----------------------------------------------------------------------------------------------------------------------
     void string_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        std::copy(begin, end, std::ostream_iterator<uint8_t>(std::cerr));
+        Blackboard::entryValue(key) = std::string(begin, end);
+        terr << code_loc << key << mys::sp << std::any_cast<std::string>(Blackboard::entryValue(key));
     }
     //----------------------------------------------------------------------------------------------------------------------
     void float_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        terr << __func__ << mys::sp << Blackboard::float_convert(begin, end);
+        Blackboard::entryValue(key) = bb::float_convert(begin, end);
+        terr << code_loc << key << mys::sp << std::any_cast<float>(Blackboard::entryValue(key));
     }
     //----------------------------------------------------------------------------------------------------------------------
     void int_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        long long value { Blackboard::int_convert(begin, end) };
-        terr << __func__ << mys::sp << value;
+        Blackboard::entryValue(key) = bb::int_convert(begin, end);
+        terr << code_loc << key << mys::sp << std::any_cast<int64_t>(Blackboard::entryValue(key));
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    void tri_float_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        terr << __func__ << mys::sp << Blackboard::float_convert(begin, begin + 4);
-        terr << __func__ << mys::sp << Blackboard::float_convert(begin + 4, begin + 8);
-        terr << __func__ << mys::sp << Blackboard::float_convert(begin + 8, end);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void status_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        char_ptr status[] { "okay", "fail" };
-        terr << __func__ << mys::sp << status[begin[ -1]];
+        Blackboard::entryValue(key) = *(begin - 1);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void notification_status(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        terr << __func__ << mys::sp << "okay";
+        terr << code_loc << "okay";
     }
 //----------------------------------------------------------------------------------------------------------------------
     void motor_fault_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
-        terr << __func__ << mys::sp << std::boolalpha << (begin[ -1] == 0);
+        terr << code_loc << std::boolalpha << (begin[ -1] == 0);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void motor_stall_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         char_ptr motor[] { "left", "right" };
-        terr << __func__ << mys::sp << motor[begin[0]] << std::boolalpha << (begin[1] == 0);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    void percentage_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        double value { float( *begin) / 100.0 };
-        terr << __func__ << mys::sp << value;
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    void version_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        terr << __func__ << mys::sp << mys::sp << ((begin[0] << 8) | begin[1]) << "." << ((begin[2] << 8) | begin[3]) << "."
-             << ((begin[4] << 8) | begin[5]);
+        terr << code_loc << motor[begin[0]] << std::boolalpha << (begin[1] == 0);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void mac_addr(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         for (auto it = begin; it < end - 2; ++it) {
-            terr << __func__ << mys::sp << *it++ << *it << ":";
+            terr << code_loc << *it++ << *it << ":";
         }
-        terr << __func__ << mys::sp << *(end - 2) << *(end - 1);
+        terr << code_loc << *(end - 2) << *(end - 1);
     }
+
 //----------------------------------------------------------------------------------------------------------------------
-    void battery_state_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        using char_ptr = const char *;
-        char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        terr << __func__ << mys::sp << state[ *begin];
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     using dev = Devices;
     bb::BBDictionary bb::mDictionary { //
-    //
+//
 //        { entryKey(dev::api_and_shell, 0x00)), BlackboardEntry { "echo", raw_data } }, //
     { key_t(dev::api_and_shell << 8 | 0x00), BlackboardEntry { "echo", raw_data } }, //
-    //
+//
 #if 1
     { key_t(dev::connection << 8 | 0x05), BlackboardEntry { "get_bluetooth_advertising_name", string_data } }, //
-    //
+//
     { key_t(dev::drive << 8 | 0x01), BlackboardEntry { "raw_motors", status_data } }, //
     { key_t(dev::drive << 8 | 0x06), BlackboardEntry { "reset_yaw", status_data } }, //
     { key_t(dev::drive << 8 | 0x07), BlackboardEntry { "drive_with_heading", status_data } }, //
@@ -142,23 +125,33 @@ namespace rvr {
     { key_t(dev::drive << 8 | 0x27), BlackboardEntry { "enable_motor_fault_notify", status_data } }, //
     { key_t(dev::drive << 8 | 0x28), BlackboardEntry { "motor_fault_notify", motor_fault_data } }, //
     { key_t(dev::drive << 8 | 0x29), BlackboardEntry { "get_motor_fault_state", motor_fault_data } },
-    //
+//
     { key_t(dev::io_led << 8 | 0x1A), BlackboardEntry { "set_all_leds", status_data } }, //
     { key_t(dev::io_led << 8 | 0x4E), BlackboardEntry { "release_led_requests", status_data } }, //
-    //
+//
     { key_t(dev::power << 8 | 0x01), BlackboardEntry { "snooze", raw_data } }, //
     { key_t(dev::power << 8 | 0x0D), BlackboardEntry { "wake", status_data } }, //
-    { key_t(dev::power << 8 | 0x10), BlackboardEntry { "get_battery_percentage", Power::rxBatteryPercentage } }, //
+    { key_t(dev::power << 8 | 0x10), BlackboardEntry { "get_battery_percentage", int_data } }, //
     { key_t(dev::power << 8 | 0x11), BlackboardEntry { "system_awake_notification", notification_status } }, //
-    { key_t(dev::power << 8 | 0x17), BlackboardEntry { "get_battery_voltage_state", battery_state_data } }, //
+    { key_t(dev::power << 8 | 0x17), BlackboardEntry { "get_battery_voltage_state", int_data } }, //
     { key_t(dev::power << 8 | 0x19), BlackboardEntry { "will_sleep_notify", raw_data } }, //
     { key_t(dev::power << 8 | 0x1A), BlackboardEntry { "did_sleep_notify", raw_data } }, //
     { key_t(dev::power << 8 | 0x1B), BlackboardEntry { "enable_battery_voltage_state_change_notify", raw_data } }, //
     { key_t(dev::power << 8 | 0x1C), BlackboardEntry { "battery_voltage_state_change_notify", raw_data } }, //
-    { key_t(dev::power << 8 | 0x25), BlackboardEntry { "get_battery_voltage_in_volts", Power::rxBatVoltageInVolts } }, //
-    { key_t(dev::power << 8 | 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds", tri_float_data } }, //
+
+    { key_t(Power::CalibratedFiltered << 16 | dev::power << 8 | 0x25), BlackboardEntry { "get_battery_voltage_in_volts",
+                                                                                         Power::rxBatVoltageInVolts } }, //
+    { key_t(Power::CalibratedUnfiltered << 16 | dev::power << 8 | 0x25), BlackboardEntry { "get_battery_voltage_in_volts",
+                                                                                           Power::rxBatVoltageInVolts } }, //
+    { key_t(Power::UncalibratedUnfiltered << 16 | dev::power << 8 | 0x25), BlackboardEntry { "get_battery_voltage_in_volts",
+                                                                                             Power::rxBatVoltageInVolts } }, //
+
+    { key_t(dev::power << 8 | 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds", Power::rxBatteryThresholds } }, //
+    { key_t(1 << 16 | dev::power << 8 | 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds", Power::rxBatteryThresholds } }, //
+    { key_t(2 << 16 | dev::power << 8 | 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds", Power::rxBatteryThresholds } }, //
+
     { key_t(dev::power << 8 | 0x27), BlackboardEntry { "get_current_sense_amplifier_current", float_data } }, //
-    //
+//
     { key_t(dev::sensors << 8 | 0x0F), BlackboardEntry { "enable_gyro_max_notify", raw_data } }, //
     { key_t(dev::sensors << 8 | 0x10), BlackboardEntry { "gyro_max_notify", raw_data } }, //
     { key_t(dev::sensors << 8 | 0x13), BlackboardEntry { "reset_locator_x_and_y", raw_data } }, //
@@ -188,11 +181,13 @@ namespace rvr {
     { key_t(dev::sensors << 8 | 0x4B), BlackboardEntry { "get_motor_thermal_protection_status", raw_data } }, //
     { key_t(dev::sensors << 8 | 0x4C), BlackboardEntry { "enable_motor_thermal_protection_status_notify", raw_data } }, //
     { key_t(dev::sensors << 8 | 0x4D), BlackboardEntry { "motor_thermal_protection_status_notify", raw_data } }, //
-    //
-    { key_t(dev::system << 8 | 0x00), BlackboardEntry { "get_main_application_version", version_data } }, //
-    { key_t(dev::system << 8 | 0x01), BlackboardEntry { "get_bootloader_version", version_data } }, //
+//
+
+    { key_t(dev::system << 8 | 0x00), BlackboardEntry { "get_main_application_version", raw_data } }, //
+    { key_t(dev::system << 8 | 0x01), BlackboardEntry { "get_bootloader_version", raw_data } }, //
+
     { key_t(dev::system << 8 | 0x03), BlackboardEntry { "get_board_revision", int_data } }, //
-    { key_t(dev::system << 8 | 0x06), BlackboardEntry { "get_mac_address", mac_addr } }, //
+    { key_t(dev::system << 8 | 0x06), BlackboardEntry { "get_mac_address", string_data } }, //
     { key_t(dev::system << 8 | 0x13), BlackboardEntry { "get_stats_id", int_data } }, //
     { key_t(dev::system << 8 | 0x1F), BlackboardEntry { "get_processor_name", string_data } }, //
     { key_t(dev::system << 8 | 0x38), BlackboardEntry { "get_sku", string_data } }, //

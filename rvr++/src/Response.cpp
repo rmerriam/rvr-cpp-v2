@@ -59,7 +59,6 @@ namespace rvr {
         terr << __func__ << mys::sp << " exit";
         return true;
     }
-
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_flags(const uint8_t f) {
         std::string flags { };
@@ -162,7 +161,14 @@ namespace rvr {
 
         std::string device = device_names[packet[dev + offset]];
 
-        const bb::key_t key = bb::entryKey(packet[dev + offset], packet[cmd + offset]);
+        bb::key_t key;
+        if (packet[seq + offset] >= 0x80) {
+            key = bb::entryKey(packet[dev + offset], packet[cmd + offset]);
+        }
+        else {
+            key = bb::entryKey(packet[dev + offset], packet[cmd + offset], packet[seq + offset]);
+        }
+
         std::string command { bb::entryName(key) };
 
         if (command.empty()) {

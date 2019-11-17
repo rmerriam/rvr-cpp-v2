@@ -26,6 +26,7 @@
 #include "CommandBase.h"
 
 namespace rvr {
+    using bb= Blackboard;
 
     class ApiShell : protected CommandBase {
     public:
@@ -38,16 +39,16 @@ namespace rvr {
 
         void echo(const MsgArray& data, const CommandResponse want_resp = resp_on_error);
 
+        //----------------------------------------------------------------------------------------------------------------------
+        MsgArray echo() {
+            std::any value { bb::entryValue(Devices::api_and_shell, echo_cmd) };
+            return (value.has_value()) ? std::any_cast<MsgArray>(value) : MsgArray();
+        }
     private:
         enum Cmd : uint8_t {
             echo_cmd = 0x00, //
         };
     };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void ApiShell::echo(const MsgArray& data, const CommandResponse want_resp) {
-        cmd_data(echo_cmd, data, want_resp);
-        cmd_data_alt(echo_cmd, data, want_resp);
-    }
 
 } /* namespace rvr */
 

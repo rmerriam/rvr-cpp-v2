@@ -52,7 +52,6 @@ namespace rvr {
         Response& operator=(const Response& other) = delete;
 
         bool operator ()();
-//        void read(rvr::MsgArray& in, rvr::MsgArray& out);
 
         static void decode(MsgArray packet);
 

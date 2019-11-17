@@ -30,6 +30,7 @@
 namespace rvr {
 
     class Power : protected CommandBase {
+        using bb= Blackboard;
 
     public:
         enum VoltageType : uint8_t {
@@ -54,27 +55,30 @@ namespace rvr {
         void awake(const CommandResponse want_resp = resp_yes);
         void sleep(const CommandResponse want_resp = resp_yes);
 
+        void batteryMotorCurrent(const MotorSide ms, const CommandResponse want_resp = resp_yes);
         void batteryPercentage(const CommandResponse want_resp = resp_yes);
+        void batteryVoltage(const VoltageType vt, const CommandResponse want_resp = resp_yes);
         void batteryVoltageState(const CommandResponse want_resp = resp_yes);
         void batteryVoltThresholds(const CommandResponse want_resp = resp_yes);
-        void batteryMotorCurrent(const MotorSide ms, const CommandResponse want_resp = resp_yes);
-        void batteryVoltage(const VoltageType vt, const CommandResponse want_resp = resp_yes);
 
-        using bb= Blackboard;
+        // Data access methods`
+        float voltsCalibratedFiltered();
+        float voltsCalibratedUnfiltered();
+        float voltsUncalibratedUnfiltered();
 
-        // Data access methods
-        float batteryVoltsCalibratedFiltered();
-        float batteryVoltsCalibratedUnfiltered();
-        float batteryVoltsUncalibratedUnfiltered();
+        float voltThresholdCritical();
+        float voltThresholdLow();
+        float voltThresholdHysteresis();
 
+        float motorCurrent();
         int batteryPercent();
-        std::string batteryVoltageState();
-        float batteryVoltThresholds();
-        float batteryMotorCurrent();
+        std::string voltState();
 
         // De-serialization handlers
-        static void rxBatVoltageInVolts(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end);
         static void rxBatteryPercentage(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static void rxBatteryStateChange(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static void rxBatVoltageInVolts(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static void rxBatteryThresholds(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end);
 
     private:
         enum BatteryVoltageStates : uint8_t {
@@ -115,7 +119,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltage(const VoltageType vt, const CommandResponse want_resp) {
-        cmd_byte(get_battery_voltage_in_volts, vt, want_resp);
+        cmd_byte_id(get_battery_voltage_in_volts, vt, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltThresholds(const CommandResponse want_resp) {
@@ -125,50 +129,7 @@ namespace rvr {
     inline void Power::batteryMotorCurrent(const MotorSide ms, const CommandResponse want_resp) {
         cmd_byte_alt(get_current_sense_amplifier_current, ms, want_resp);
     }
-    //======================================================================================================================
-    // data access methods
-    inline float Power::batteryVoltsCalibratedFiltered() {
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_in_volts) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
-    }
-    inline float Power::batteryVoltsCalibratedUnfiltered() {
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_in_volts) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
-    }
-    inline float Power::batteryVoltsUncalibratedUnfiltered() {
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_in_volts) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline int Power::batteryPercent() {
-        std::any value { bb::entryValue(Devices::power, get_battery_percentage) };
-        return (value.has_value()) ? std::any_cast<float>(value) : -1;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline std::string Power::batteryVoltageState() {
-        using namespace std::literals;
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_state) };
-        return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline float Power::batteryVoltThresholds() {
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_state_thresholds) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline float Power::batteryMotorCurrent() {
-        std::any value { bb::entryValue(Devices::power, get_current_sense_amplifier_current) };
-        return (value.has_value()) ? std::any_cast<float>(value) : -1;
-    }
-    //======================================================================================================================
-    // Deserialization methods
-    inline void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        Blackboard::entryValue(key) = Blackboard::float_convert(begin, end);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::rxBatteryPercentage(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        Blackboard::entryValue(key) = (Blackboard::int_convert(begin, end) * 100.0f) / 100.0f;
-    }
+
 } /* namespace rvr */
 
 #endif

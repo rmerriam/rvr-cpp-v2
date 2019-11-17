@@ -37,7 +37,7 @@ namespace rvr {
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(const Blackboard& other) = delete;
 
-        enum key_t : uint16_t {
+        enum key_t : uint32_t {
         };
 
         using FuncPtr = void (*)(const key_t key, MsgArray::const_iterator , MsgArray::const_iterator );
@@ -52,11 +52,12 @@ namespace rvr {
         static std::string entryName(const key_t key);
         static std::any& entryValue(const key_t key);
         static std::any entryValue(const uint8_t dev, const uint8_t cmd);
+        static std::any entryValueId(const uint8_t dev, const uint8_t cmd, const uint8_t id);
 
         static float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
-        static long long int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static int64_t int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
 
-        static key_t entryKey(const uint8_t dev, const uint8_t cmd);
+        static constexpr key_t entryKey(const uint8_t dev, const uint8_t cmd, const uint8_t id = 0);
 
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
 
@@ -80,12 +81,16 @@ namespace rvr {
         return entryValue(entryKey(dev, cmd));
     }
     //----------------------------------------------------------------------------------------------------------------------
+    inline std::any Blackboard::entryValueId(const uint8_t dev, const uint8_t cmd, const uint8_t id) {
+        return entryValue(entryKey(dev, cmd, id));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     inline std::any& Blackboard::entryValue(const key_t key) {
         return mDictionary[key].value;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline Blackboard::key_t Blackboard::entryKey(const uint8_t dev, const uint8_t cmd) {
-        return static_cast<key_t>(dev << 8 | cmd);
+    inline constexpr Blackboard::key_t Blackboard::entryKey(const uint8_t dev, const uint8_t cmd, const uint8_t id) {
+        return static_cast<key_t>(id << 16 | dev << 8 | cmd);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Blackboard::dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b) {

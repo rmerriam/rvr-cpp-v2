@@ -55,7 +55,7 @@ namespace rvr {
         void cmd_byte(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
         void cmd_byte_alt(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
 
-        void cmd_byte_id(const uint8_t cmd, const uint8_t data, const uint8_t id, const CommandResponse want_resp = resp_on_error);
+        void cmd_byte_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_int(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp = resp_on_error);
 
@@ -74,10 +74,15 @@ namespace rvr {
         CommandBase& operator=(const CommandBase& other) = delete;
 
     private:
-        static inline uint8_t mSeq { 0x80 };
+        static inline uint8_t mSeq { 0x0 };
 
+        // NOTE: HACK ALERT!!!
+        // The sequence field is used for debugging only. It isn't used for tracking messages.
+        // It is used as a special field for some message that pass an ID. The ID is put in the sequence field.
+        // During deserialization any sequence less than 0x80 is used as part of the dictionary key for updating
+        // values in the dictionary.
         uint8_t sequence() {
-            return ++mSeq;
+            return ++mSeq | 0x80;
         }
 
         uint8_t makeAltProc();
@@ -124,8 +129,8 @@ namespace rvr {
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_byte_id(const uint8_t cmd, const uint8_t data, const uint8_t id, const CommandResponse want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, id, data };
+    inline void CommandBase::cmd_byte_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
         mRequest.send(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------

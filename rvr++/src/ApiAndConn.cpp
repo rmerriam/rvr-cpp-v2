@@ -1,5 +1,3 @@
-#ifndef Connection_H_
-#define Connection_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -19,38 +17,28 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 29, 2019
+//     Created: Oct 26, 2019
 //
 //======================================================================================================================
-#include "Request.h"
-#include "CommandBase.h"
+
+#include "Blackboard.h"
+
+#include "ApiShell.h"
+#include "Connection.h"
+
+using namespace std::literals;
 
 namespace rvr {
 
-    class Connection : protected CommandBase {
-    public:
-        Connection(Request& req) :
-            CommandBase { Devices::connection, req, bluetoothSOC } {
-        }
-        Connection(const Connection& other) = delete;
-        Connection(Connection&& other) = delete;
-        Connection& operator=(const Connection& other) = delete;
-
-        void bluetoothName(const CommandResponse want_resp = resp_on_error);
-
-        std::string name();
-
-    private:
-        enum Cmd : uint8_t {
-            get_bluetooth_advertising_name = 0x05, //
-        };
-
-    };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Connection::bluetoothName(const CommandResponse want_resp) {
-        cmd_basic(get_bluetooth_advertising_name, want_resp);
+    std::string Connection::name() {
+        std::any value { bb::entryValue(Devices::connection, get_bluetooth_advertising_name) };
+        return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
     }
 
-} /* namespace rvr */
+    //----------------------------------------------------------------------------------------------------------------------
+    void ApiShell::echo(const MsgArray& data, const CommandResponse want_resp) {
+        cmd_data(echo_cmd, data, want_resp);
+        cmd_data_alt(echo_cmd, data, want_resp);
+    }
 
-#endif /* Connection_H_ */
+}
