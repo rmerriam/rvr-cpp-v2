@@ -75,7 +75,8 @@ namespace rvr {
             cmd_enable(enable_gyro_max_notify, false, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        void configureStreaming(const uint8_t token, const MsgArray& cfg, const uint8_t proc, const CommandResponse want_resp = resp_on_error) {
+        void configureStreaming(const uint8_t token, const MsgArray& cfg, const uint8_t proc,
+            const CommandResponse want_resp = resp_on_error) {
             cmd_data(configure_streaming_service, cfg, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
@@ -155,35 +156,6 @@ namespace rvr {
         };
 
     };
-
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::awake() {
-//        cmd_basic(wake, true);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::sleep() {
-//        cmd_basic(snooze, true);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::battery_precentage() {
-//        cmd_basic(get_battery_percentage, true);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::battery_voltage_state() {
-//        cmd_basic(get_battery_voltage_state, true);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::battery_voltage(const VoltageType vt) {
-//        cmd_byte(get_battery_voltage_in_volts, vt, true);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::battery_volt_thresholds() {
-//        cmd_basic(get_battery_voltage_state_thresholds, true);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    inline void Sensors::battery_current(const MotorSide ms) {
-//        cmd_byte_alt(get_current_sense_amplifier_current, ms, true);
-//    }
 
 } /* namespace rvr */
 

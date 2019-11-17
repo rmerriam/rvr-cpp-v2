@@ -23,6 +23,7 @@
 //
 //======================================================================================================================
 
+#include "Request.h"
 namespace rvr {
 
     class CommandBase {
@@ -33,8 +34,6 @@ namespace rvr {
             resp_yes = request_response, //
             resp_on_error = request_error_response,
         };
-
-    protected:
 
         enum SourcePort : uint8_t {
             serial = 0x01, //
@@ -68,6 +67,7 @@ namespace rvr {
         const uint8_t mDevice;
         Request& mRequest;
         uint8_t mTarget;
+        uint8_t mAltTarget;
 
         CommandBase(const CommandBase& other) = delete;
         CommandBase(CommandBase&& other) = delete;
@@ -90,7 +90,7 @@ namespace rvr {
 
 //----------------------------------------------------------------------------------------------------------------------
     inline CommandBase::CommandBase(const Devices device, Request& request, const uint8_t target) :
-        mDevice { device }, mRequest { request }, mTarget { target } {
+        mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline uint8_t CommandBase::buildFlags(const CommandResponse want_resp) const {
@@ -109,8 +109,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_basic_alt(const uint8_t cmd, const CommandResponse want_resp) {
-        uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
-        MsgArray msg { buildFlags(want_resp), alt_target, mDevice, cmd, sequence() };
+        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
         mRequest.send(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -135,7 +134,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_byte_alt(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
-        MsgArray msg { buildFlags(want_resp), makeAltProc(), mDevice, cmd, sequence(), data };
+        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
         mRequest.send(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -152,7 +151,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_data_alt(const uint8_t cmd, const MsgArray& data, const CommandResponse want_resp) {
-        MsgArray msg { buildFlags(want_resp), makeAltProc(), mDevice, cmd, sequence() };
+        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
         msg.insert(msg.end(), data.begin(), data.end());
         mRequest.send(msg);
     }

@@ -33,7 +33,6 @@ namespace rvr {
     public:
         Drive(Request& req) :
             CommandBase { Devices::drive, req, microcontroller } {
-
         }
         Drive(Drive&& other) = delete;
         Drive(const Drive& other) = delete;

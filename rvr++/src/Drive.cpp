@@ -15,17 +15,11 @@ namespace rvr {
 
         MsgArray msg { l_mode, l_speed, r_mode, r_speed };
         cmd_data(raw_motors, msg, want_resp);
-//        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, raw_motors, mRequest.sequence(), l_mode, l_speed, r_mode, r_speed };
-//        mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::spin_drive(const double& speed, const int& heading, const CommandResponse want_resp) {
         auto [spd, mode] = speed_mode(speed);
         MsgArray msg { spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), mode };
         cmd_data(drive_with_heading, msg, want_resp);
-
-//        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, drive_with_heading, mRequest.sequence(), //
-//            spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), mode };
-//        mRequest.send(msg);
     }
 }

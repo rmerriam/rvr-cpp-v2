@@ -26,17 +26,34 @@
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::processorName() {
-        std::any value { bb::entryValue(Devices::system, get_processor_name) };
+        std::any value { bb::entryValue(mTarget, Devices::system, get_processor_name) };
+        return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    std::string SystemInfo::processorName2() {
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_processor_name) };
         return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::sku() {
-        std::any value { bb::entryValue(Devices::system, get_sku) };
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_sku) };
         return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::mainAppVersion() {
-        std::any value { bb::entryValue(Devices::system, get_main_application_version) };
+        std::any value { bb::entryValue(mTarget, Devices::system, get_main_application_version) };
+        std::string ver;
+        if (value.has_value()) {
+            MsgArray msg { std::any_cast<MsgArray>(value) };
+            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
+                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
+                std::to_string(((msg[4] << 8) | msg[5]));
+        }
+        return ver;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    std::string SystemInfo::mainAppVersion2() {
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_main_application_version) };
         std::string ver;
         if (value.has_value()) {
             MsgArray msg { std::any_cast<MsgArray>(value) };
@@ -48,7 +65,19 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::bootVersion() {
-        std::any value { bb::entryValue(Devices::system, get_bootloader_version) };
+        std::any value { bb::entryValue(mTarget, Devices::system, get_bootloader_version) };
+        std::string ver;
+        if (value.has_value()) {
+            MsgArray msg { std::any_cast<MsgArray>(value) };
+            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
+                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
+                std::to_string(((msg[4] << 8) | msg[5]));
+        }
+        return ver;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    std::string SystemInfo::bootVersion2() {
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_bootloader_version) };
         std::string ver;
         if (value.has_value()) {
             MsgArray msg { std::any_cast<MsgArray>(value) };
@@ -60,12 +89,12 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::boardVersion() {
-        std::any value { bb::entryValue(Devices::system, get_board_revision) };
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_board_revision) };
         return (value.has_value()) ? std::any_cast<int64_t>(value) : 0;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::macAddress() {
-        std::any value { bb::entryValue(Devices::system, get_mac_address) };
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_mac_address) };
         if (value.has_value()) {
             const char* colon { ":" };
             std::string mac { std::any_cast<std::string>(value) };
@@ -80,7 +109,12 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::statsId() {
-        std::any value { bb::entryValue(Devices::system, get_stats_id) };
+        std::any value { bb::entryValue(mAltTarget, Devices::system, get_stats_id) };
+        return (value.has_value()) ? std::any_cast<int64_t>(value) : 0;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    int64_t SystemInfo::upTime() {
+        std::any value { bb::entryValue(mTarget, Devices::system, get_core_up_time_in_milliseconds) };
         return (value.has_value()) ? std::any_cast<int64_t>(value) : 0;
     }
 

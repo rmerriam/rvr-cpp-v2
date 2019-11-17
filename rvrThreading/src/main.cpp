@@ -169,31 +169,33 @@ int main(int argc, char* argv[]) {
 
 #elif 1
     rvr::MsgArray dead { 0xDE, 0xAD, 0xFE, 0xED };
-    api.echo(dead, RespYes);
-
-    cmd.bluetoothName(RespYes);
-
-    sys.getBoardRevision(RespYes);
-    sys.getBootloaderVersion(RespYes);
-    sys.getMacId(RespYes);
-    sys.getMainAppVersion(RespYes);
-    sys.getProcessorName(RespYes);
-    sys.getSku(RespYes);
+    api.echo(dead, RespYes);    // alt
+    cmd.bluetoothName(RespYes);    //
+    sys.getBoardRevision(RespYes);  // ??
+    sys.getBootloaderVersion(RespYes);    //
+    sys.getMacId(RespYes);  // ??
+    sys.getMainAppVersion(RespYes);    // alt
+    sys.getProcessorName(RespYes);  // alt
+    sys.getSku(RespYes);    // ??
     sys.getStatsId(RespYes);
-    sys.getUpTime(RespYes);
+    sys.getUpTime(RespYes); //
 
     std::this_thread::sleep_for(1s);
     terr << code_loc << mys::nl;
 
     terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
+    terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion2();
     terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
     terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
+    terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion2();
     terr << code_loc << "BT Name: " << cmd.name();
     terr << code_loc << "Echo: " << std::hex << api.echo();
     terr << code_loc << "MAC Addr: " << sys.macAddress();
     terr << code_loc << "Processor: " << sys.processorName();
+    terr << code_loc << "Processor: " << sys.processorName2();
     terr << code_loc << "SKU: " << sys.sku();
-    terr << code_loc << "StatsId: " << sys.statsId();
+    terr << code_loc << "Stats Id: " << sys.statsId();
+    terr << code_loc << "Up Time: " << sys.upTime();
 
     terr << code_loc << mys::nl;
 

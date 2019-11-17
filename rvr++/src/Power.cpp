@@ -27,47 +27,47 @@ namespace rvr {
     // data access methods
     //----------------------------------------------------------------------------------------------------------------------
     int Power::batteryPercent() {
-        std::any value { bb::entryValue(Devices::power, get_battery_percentage) };
+        std::any value { bb::entryValue(mTarget, Devices::power, get_battery_percentage) };
         return (value.has_value()) ? std::any_cast<int64_t>(value) : -1;
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::motorCurrent() {
-        std::any value { bb::entryValue(Devices::power, get_current_sense_amplifier_current) };
+        std::any value { bb::entryValue(mTarget, Devices::power, get_current_sense_amplifier_current) };
         return (value.has_value()) ? std::any_cast<float>(value) : -1;
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedFiltered() {
-        std::any value { bb::entryValueId(Devices::power, get_battery_voltage_in_volts, CalibratedFiltered) };
+        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, CalibratedFiltered) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedUnfiltered() {
-        std::any value { bb::entryValueId(Devices::power, get_battery_voltage_in_volts, CalibratedUnfiltered) };
+        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, CalibratedUnfiltered) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string Power::voltState() {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_state) };
+        std::any value { bb::entryValue(mTarget, Devices::power, get_battery_voltage_state) };
         const int64_t st { (value.has_value()) ? std::any_cast<int64_t>(value) : unknown };
         return state[st];
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltThresholdCritical() {
-        std::any value { bb::entryValue(Devices::power, get_battery_voltage_state_thresholds) };
+        std::any value { bb::entryValue(mTarget, Devices::power, get_battery_voltage_state_thresholds) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
     float Power::voltThresholdLow() {
-        std::any value { bb::entryValueId(Devices::power, get_battery_voltage_state_thresholds, 1) };
+        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_state_thresholds, 1) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
     float Power::voltThresholdHysteresis() {
-        std::any value { bb::entryValueId(Devices::power, get_battery_voltage_state_thresholds, 2) };
+        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_state_thresholds, 2) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsUncalibratedUnfiltered() {
-        std::any value { bb::entryValueId(Devices::power, get_battery_voltage_in_volts, UncalibratedUnfiltered) };
+        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, UncalibratedUnfiltered) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
     //======================================================================================================================
@@ -82,8 +82,11 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         Blackboard::entryValue(key) = bb::float_convert(begin, begin + 4);
-        Blackboard::entryValue(static_cast<bb::key_t>((1 << 16) | key)) = bb::float_convert(begin + 4, begin + 8);
-        Blackboard::entryValue(static_cast<bb::key_t>((2 << 16) | key)) = bb::float_convert(begin + 8, end);
+        bb::key_s id_key { key };
+        id_key.id = 1;
+        Blackboard::entryValue(id_key) = bb::float_convert(begin + 4, begin + 8);
+        id_key.id = 2;
+        Blackboard::entryValue(id_key) = bb::float_convert(begin + 8, end);
     }
 }
 

@@ -31,7 +31,7 @@ using namespace std::literals;
 namespace rvr {
 
     std::string Connection::name() {
-        std::any value { bb::entryValue(Devices::connection, get_bluetooth_advertising_name) };
+        std::any value { bb::entryValue(mTarget, Devices::connection, get_bluetooth_advertising_name) };
         return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
     }
 

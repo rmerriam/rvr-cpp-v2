@@ -22,13 +22,14 @@
 //     Created: Oct 29, 2019
 //
 //======================================================================================================================
+#include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
 
 using namespace std::literals;
 
 namespace rvr {
-    using bb= Blackboard;
+    using bb = Blackboard;
 
     class SystemInfo : protected CommandBase {
     public:
@@ -50,11 +51,15 @@ namespace rvr {
 
         int64_t boardVersion();
         std::string bootVersion();
+        std::string bootVersion2();
         std::string macAddress();
         std::string mainAppVersion();
+        std::string mainAppVersion2();
         std::string processorName();
+        std::string processorName2();
         int64_t statsId();
         std::string sku();
+        int64_t upTime();
 
     private:
         enum Cmd : uint8_t {

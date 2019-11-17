@@ -30,9 +30,12 @@
 namespace rvr {
 
     class Power : protected CommandBase {
-        using bb= Blackboard;
+        using bb = Blackboard;
 
     public:
+        Power(Request& req) :
+            CommandBase { Devices::power, req, bluetoothSOC } {
+        }
         enum VoltageType : uint8_t {
             CalibratedFiltered = 0, //
             CalibratedUnfiltered = 1, //
@@ -42,10 +45,6 @@ namespace rvr {
             left = 0, //
             right = 1
         };
-
-        Power(Request& req) :
-            CommandBase { Devices::power, req, bluetoothSOC } {
-        }
 
         Power(const Power& other) = delete;
         Power(Power&& other) = delete;

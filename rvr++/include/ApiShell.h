@@ -41,13 +41,15 @@ namespace rvr {
 
         //----------------------------------------------------------------------------------------------------------------------
         MsgArray echo() {
-            std::any value { bb::entryValue(Devices::api_and_shell, echo_cmd) };
+            std::any value { bb::entryValue(mTarget, Devices::api_and_shell, echo_cmd) };
             return (value.has_value()) ? std::any_cast<MsgArray>(value) : MsgArray();
         }
-    private:
+
         enum Cmd : uint8_t {
             echo_cmd = 0x00, //
         };
+    private:
+
     };
 
 } /* namespace rvr */

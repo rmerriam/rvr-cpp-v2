@@ -20,13 +20,14 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
-#include <Blackboard.h>
-#include <ReadPacket.h>
-#include <chrono>
-#include <string>
-#include <unordered_map>
+//#include <chrono>
+//#include <string>
+//#include <unordered_map>
+//#include <ostream>
 
 #include "Packet.h"
+#include "Blackboard.h"
+#include "ReadPacket.h"
 #include "Response.h"
 
 namespace rvr {
@@ -51,12 +52,12 @@ namespace rvr {
             read(in, packet);
 
             if ( !packet.empty()) {
-                terr << __func__ << mys::sp << "pkt: " << std::hex << packet;
+                terr << code_loc << "pkt: " << std::hex << packet;
                 decode(packet);
                 packet.clear();
             }
         }
-        terr << __func__ << mys::sp << " exit";
+        terr << code_loc << " exit";
         return true;
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -91,101 +92,109 @@ namespace rvr {
         if ((f & response) == 0) {
             flags += "no_response";
         }
-        terr << __func__ << mys::sp << flags;
+        terr << code_loc << flags;
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_error(auto err_byte) {
         switch (err_byte) {
             case 1: {
-                terr << __func__ << mys::sp << "bad_did";
+                terr << code_loc << "bad_did";
                 break;
             }
             case 2: {
-                terr << __func__ << mys::sp << "bad_cid";
+                terr << code_loc << "bad_cid";
                 break;
             }
             case 3: {
-                terr << __func__ << mys::sp << "not_yes_implemented";
+                terr << code_loc << "not_yes_implemented";
                 break;
             }
             case 4: {
-                terr << __func__ << mys::sp << "restricted";
+                terr << code_loc << "restricted";
                 break;
             }
             case 5: {
-                terr << __func__ << mys::sp << "bad_data_length";
+                terr << code_loc << "bad_data_length";
                 break;
             }
             case 6: {
-                terr << __func__ << mys::sp << "failed";
+                terr << code_loc << "failed";
                 break;
             }
             case 7: {
-                terr << __func__ << mys::sp << "bad bad_data_value";
+                terr << code_loc << "bad bad_data_value";
                 break;
             }
             case 8: {
-                terr << __func__ << mys::sp << "busy";
+                terr << code_loc << "busy";
                 break;
             }
             case 9: {
-                terr << __func__ << mys::sp << "bad_tid";
+                terr << code_loc << "bad_tid";
                 break;
             }
             case 0xA: {
-                terr << __func__ << mys::sp << "target_unavailable";
+                terr << code_loc << "target_unavailable";
                 break;
             }
         }
     }
+
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(MsgArray packet) {
         using bb = rvr::Blackboard;
 
-        enum BytePositions : uint8_t {
-            flags = 0x00,   //
-            // targ = 0x01,   //
-            src = 0x01,     //
-            dev = 0x02,     //
-            cmd = 0x03,     //
-            seq = 0x04,     //
-            status = 0x05,  //
-            data = 0x06,    //
-        };
+        // typeical positions of header bytes when target not present, the usual case
+        uint8_t flags { 0x00 };   //
+        uint8_t targ { 0x01 };   // usually not present
+        uint8_t src { 0x01 };     //
+        uint8_t dev { 0x02 };     //
+        uint8_t cmd { 0x03 };     //
+        uint8_t seq { 0x04 };     //
+        uint8_t status { 0x05 };  //
+        uint8_t data { 0x06 };    //
 
         const bool is_resp { (packet[flags] & response) == response };   // versus notification
 
-        // if there is a target byte then increment byte position by 1
-        int8_t offset = (packet[flags] & has_target) ? 1 : 0;
+        if (packet[flags] & has_target) {  //
+            ++src;
+            ++dev;
+            ++cmd;
+            ++seq;
+            ++status;
+            ++data;
+        }
+
         decode_flags(packet[flags]);
 
-        std::string device = device_names[packet[dev + offset]];
+        std::string device = device_names[packet[dev]];
 
         bb::key_t key;
-        if (packet[seq + offset] >= 0x80) {
-            key = bb::entryKey(packet[dev + offset], packet[cmd + offset]);
+        if (packet[seq] >= 0x80) {
+            key = bb::entryKey(packet[src], packet[dev], packet[cmd]);
         }
         else {
-            key = bb::entryKey(packet[dev + offset], packet[cmd + offset], packet[seq + offset]);
+            key = bb::entryKey(packet[src], packet[dev], packet[cmd], packet[seq]);
         }
 
         std::string command { bb::entryName(key) };
 
         if (command.empty()) {
-            terr << __func__ << " Command not in decode table " << device << mys::sp << std::hex << key;
+            terr << code_loc << "Command not in decode table " << device //
+                 << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key;
         }
         else {
-            terr << __func__ << mys::sp << device << mys::sp << command;
+            terr << code_loc << device << mys::sp << command;
 
             if (is_resp) {
-                if (packet[status + offset]) {
-                    auto err_byte { packet[status + offset] };
-                    terr << __func__ << mys::sp << "ERROR: " << (uint16_t)err_byte;
+                if (packet[status]) {
+                    auto err_byte { packet[status] };
+                    terr << code_loc << "ERROR: " << (uint16_t)err_byte;
                     decode_error(err_byte);
                 }
                 else {
                     bb::FuncPtr decode_func { bb::entryFunc(key) };
-                    decode_func(key, packet.begin() + data + offset, packet.end() - 1);
+                    decode_func(key, packet.begin() + data, packet.end() - 1);
                 }
             }
             else {  // notification - no sequence number
