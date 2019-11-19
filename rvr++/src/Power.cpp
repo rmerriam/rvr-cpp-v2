@@ -31,8 +31,8 @@ namespace rvr {
         return (value.has_value()) ? std::any_cast<int64_t>(value) : -1;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::motorCurrent() {
-        std::any value { bb::entryValue(mTarget, Devices::power, get_current_sense_amplifier_current) };
+    float Power::motorCurrent(const MotorSide ms) {
+        std::any value { bb::entryValueId(mAltTarget, Devices::power, get_current_sense_amplifier_current, ms) };
         return (value.has_value()) ? std::any_cast<float>(value) : -1;
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -70,16 +70,38 @@ namespace rvr {
         std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, UncalibratedUnfiltered) };
         return (value.has_value()) ? std::any_cast<float>(value) : NaN;
     }
-    //======================================================================================================================
+//    //----------------------------------------------------------------------------------------------------------------------
+    bool Power::checkBatteryStateChange() {
+        std::any value { bb::entryValue(mTarget, Devices::power, enable_battery_voltage_state_change_notify) };
+        return value.has_value();
+//        return (value.has_value()) ? (std::any_cast<int64_t>(value)) == 0 : false;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    bool Power::isSleepNotify() {
+        std::any value { bb::entryValue(mTarget, Devices::power, did_sleep_notify) };
+        return value.has_value();
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    bool Power::isWakeNotify() {
+        std::any value { bb::entryValue(mTarget, Devices::power, system_awake_notify) };
+        return value.has_value();
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Power::resetWakeNotify() {
+//        std::any& value { bb::entryValue(mTarget, Devices::power, system_awake_notify) };
+//        value.reset();
+        resetNotify(system_awake_notify);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Power::resetNotify(const uint8_t cmd) const {
+        std::any& value { bb::entryValue(mTarget, Devices::power, cmd) };
+        value.reset();
+    }    //======================================================================================================================
     // Deserialization methods
-    void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        Blackboard::entryValue(key) = bb::float_convert(begin, end);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Power::rxBatteryPercentage(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        Blackboard::entryValue(key) = (bb::int_convert(begin, end) * 100.0f) / 100.0f;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
+//    void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+//        Blackboard::entryValue(key) = bb::float_convert(begin, end);
+//    }
+//    //----------------------------------------------------------------------------------------------------------------------
     void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
         Blackboard::entryValue(key) = bb::float_convert(begin, begin + 4);
         bb::key_s id_key { key };

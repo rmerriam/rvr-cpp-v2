@@ -22,9 +22,11 @@
 //     Created: Oct 25, 2019
 //
 //======================================================================================================================
-#include <ReadPacket.h>
 #include <future>
 #include <unordered_map>
+
+#include "Blackboard.h"
+#include "ReadPacket.h"
 
 namespace rvr {
 
@@ -58,6 +60,7 @@ namespace rvr {
     private:
         static void decode_flags(const uint8_t f);
         static void decode_error(auto err_byte);
+        static rvr::Blackboard::key_t msgKey(const uint8_t src, const uint8_t dev, const uint8_t cmd, const uint8_t seq);
 
         std::shared_future<void> mEnd;
     };

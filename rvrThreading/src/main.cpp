@@ -45,7 +45,7 @@ rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
-    terr << __func__ << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed;
+    terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed;
 
     SerialPort serial { argv[1], 115200 };
     rvr::Request req { serial };
@@ -58,38 +58,49 @@ int main(int argc, char* argv[]) {
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
 
-    rvr::ApiShell api(req);
-    rvr::Connection cmd(req);
-    rvr::Drive drive(req);
-    rvr::IoLed led(req);
     rvr::Power pow(req);
-    rvr::Sensors sen(req);
-    rvr::SystemInfo sys(req);
 
 //    rvr::Blackboard::dump();
     pow.awake();
     std::this_thread::sleep_for(100ms);
 
-#if 0
+#if 1
+    rvr::Sensors sen(req);
+
+//    sen.enableGyroMaxNotify(RespYes);
+//    sen.disableGyroMaxNotify(RespYes);
+//    sen.getAmbient(RespYes);
+//
+//    sen.enableThermal(RespYes);
+//    sen.getThermalData(RespYes);
+//    std::this_thread::sleep_for(500ms);
+//
+//    sen.getRightMotorTemp(RespYes);
+//    sen.getLeftMotorTemp(RespYes);
+//    sen.disableThermal(RespYes);
+
     /// change size back to 15 in sensors!!!!
     rvr::MsgArray accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
-    sen.configureStreaming(1, accel, 2);
+    sen.configureStreaming(1, accel, 2, RespYes);
 
-//    rvr::MsgArray ambient { 0x02, 0x00, 0x0A, 0x02 };
-//    sen.configureStreaming(2, ambient, 1);
-//
-//    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
-//    sen.configureStreaming(2, speed, 2);
-//
-//    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
-//    sen.configureStreaming(2, velocity, 2);
-//
-//    rvr::MsgArray locator { 0x02, 0x00, 0x06, 0x02 };
-//    sen.configureStreaming(2, locator, 0);
+    rvr::MsgArray core { 0x02, 0x00, 0x09, 0x01 };
+    sen.configureStreaming(3, core, 1, RespYes);
+
+    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
+    sen.configureStreaming(2, speed, 2, RespYes);
+
+    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
+    sen.configureStreaming(2, velocity, 2, RespYes);
+
+    rvr::MsgArray ambient { 0x02, 0x00, 0x0A, 0x01 };
+    sen.configureStreaming(2, ambient, 1, RespYes);
+
+    rvr::MsgArray locator { 0x01, 0x00, 0x06, 0x02 };
+    sen.configureStreaming(2, locator, 0, RespYes);
 
     std::this_thread::sleep_for(500ms);
 
-    sen.enableStreaming(500);
+    sen.enableStreaming(1000);
 
     std::this_thread::sleep_for(2000ms);
     sen.disableStreaming();
@@ -98,6 +109,7 @@ int main(int argc, char* argv[]) {
 #elif 0
     //---------------------------------------------------------------------------------------------------------------------
     //  Setup the LED handling
+    rvr::IoLed led(req);
 
     uint32_t led32 { Led::headlight_left | Led::headlight_right };
 
@@ -115,10 +127,22 @@ int main(int argc, char* argv[]) {
 
     led.idleLeds(RespYes);
 
-#elif 0
+#elif 1
+    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
+
+    pow.enableBatteryStateChange(RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    terr << code_loc << mys::sp << "Set State Change on?: " << pow.checkBatteryStateChange();
+
+    pow.disableBatteryStateChange(RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
+    terr << code_loc << mys::sp << "Set State Change off?: " << pow.checkBatteryStateChange();
 
     pow.batteryVoltageState(RespYes);
-
     pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
     pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
     pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
@@ -132,29 +156,39 @@ int main(int argc, char* argv[]) {
 
     std::this_thread::sleep_for(1s);
 //    rvr::Blackboard::dump();
+    terr << code_loc << mys::nl;
+    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify() << " =========";
+    pow.resetWakeNotify();
+    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify() << " =========";
 
-    terr << __func__ << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
-    terr << __func__ << mys::sp << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
-    terr << __func__ << mys::sp << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
-    terr << __func__ << mys::sp << "State: " << pow.voltState();
-    terr << __func__ << mys::sp << "Motor Current: " << pow.motorCurrent();
-    terr << __func__ << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
-    terr << __func__ << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
-    terr << __func__ << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
-    terr << __func__ << mys::sp << "VPercent: " << pow.batteryPercent();
+    terr << code_loc << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
+    terr << code_loc << mys::sp << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
+    terr << code_loc << mys::sp << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
+    terr << code_loc << mys::sp << "State: " << pow.voltState();
+    terr << code_loc << mys::sp << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
+    terr << code_loc << mys::sp << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
+    terr << code_loc << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
+    terr << code_loc << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
+    terr << code_loc << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
+    terr << code_loc << mys::sp << "VPercent: " << pow.batteryPercent();
+
+    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
+    terr << code_loc << mys::nl;
 
 #elif 0
-//    drive.fixHeading(RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-//
-//    drive.stop(90, RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-//
-//    drive.drive(25, 25, RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-//
-//    drive.spin_drive(0, 20, RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    rvr::Drive drive(req);
+
+    drive.fixHeading(RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.stop(90, RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.drive(25, 25, RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.spin_drive(0, 20, RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     drive.fixHeading(RespYes);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -167,7 +201,11 @@ int main(int argc, char* argv[]) {
 
     drive.getMotorFault(RespYes);
 
-#elif 1
+#elif 0
+    rvr::ApiShell api(req);
+    rvr::Connection cmd(req);
+    rvr::SystemInfo sys(req);
+
     rvr::MsgArray dead { 0xDE, 0xAD, 0xFE, 0xED };
     api.echo(dead, RespYes);    // alt
     cmd.bluetoothName(RespYes);    //
@@ -202,12 +240,15 @@ int main(int argc, char* argv[]) {
 #endif
 
     std::this_thread::sleep_for(1s);
+    terr << code_loc << mys::nl;
 
     pow.sleep();
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(15000));
+    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
 
     end_tasks.set_value();
-    terr << std::boolalpha << resp_future.get();
+    resp_future.get();
+//    pow.powerOff();
 
     return 0;
 }

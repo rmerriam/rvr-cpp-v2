@@ -38,6 +38,18 @@ namespace rvr {
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(const Blackboard& other) = delete;
 
+        /*  =============================================================================================================
+         * Key stuff is gnarly because of using unorderedmap which uses a hash table but has limited hashing capability
+         *  The key is "key_t" but is a combination of processor, device, command, and id. That's not easy to deal with
+         *  so key_s is a struct with those fields with a conversion operator. That allows constructing the key by fields
+         *  and then converting it to the key_t.
+         *
+         *  Id is another hack. There are some messages that use a parameter to ask for different information. But the
+         *  response doesn't contain that parameter. In those cases the parameter is plugged in as sequence number. The
+         *  actual sequence numbers are limited to > 0x80h so anything less is an Id.
+         *
+         */
+
         enum key_t : uint32_t {
         };
 
@@ -74,8 +86,8 @@ namespace rvr {
         static FuncPtr entryFunc(const key_t key);
         static std::string entryName(const key_t key);
         static std::any& entryValue(const key_t key);
-        static std::any entryValue(const uint8_t proc, const uint8_t dev, const uint8_t cmd);
-        static std::any entryValueId(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id);
+        static std::any& entryValue(const uint8_t proc, const uint8_t dev, const uint8_t cmd);
+        static std::any& entryValueId(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id);
 
         static float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
         static int64_t int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
@@ -83,7 +95,6 @@ namespace rvr {
         static key_t entryKey(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id = 0);
 
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
-//        using BBDictionary = std::map <key_t, BlackboardEntry>;
 
         static void dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b);
         static void dump();
@@ -110,11 +121,11 @@ namespace rvr {
         return mDictionary[key].name;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::any Blackboard::entryValue(const uint8_t proc, const uint8_t dev, const uint8_t cmd) {
+    inline std::any& Blackboard::entryValue(const uint8_t proc, const uint8_t dev, const uint8_t cmd) {
         return entryValue(entryKey(proc, dev, cmd, 0));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::any Blackboard::entryValueId(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id) {
+    inline std::any& Blackboard::entryValueId(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id) {
         return entryValue(entryKey(proc, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------

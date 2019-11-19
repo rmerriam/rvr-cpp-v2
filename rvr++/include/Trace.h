@@ -37,7 +37,7 @@ namespace mys {
 #if 1
     constexpr bool trace_active { true };
 #else
-    constexpr bool trace_active {false};
+    constexpr bool trace_active { false };
 #endif
 
     template <typename T, typename = std::void_t<>>
@@ -184,5 +184,6 @@ namespace mys {
 }
 //---------------------------------------------------------------------------------------------------------------------
 extern mys::TraceStart terr;
+extern mys::TraceStart tout;
 
 #endif

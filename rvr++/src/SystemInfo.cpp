@@ -43,48 +43,37 @@ namespace rvr {
     std::string SystemInfo::mainAppVersion() {
         std::any value { bb::entryValue(mTarget, Devices::system, get_main_application_version) };
         std::string ver;
+        makeVer(value, ver);
+        return ver;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SystemInfo::makeVer(std::any value, std::string& ver) {
         if (value.has_value()) {
             MsgArray msg { std::any_cast<MsgArray>(value) };
             ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
                 std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
                 std::to_string(((msg[4] << 8) | msg[5]));
         }
-        return ver;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::mainAppVersion2() {
         std::any value { bb::entryValue(mAltTarget, Devices::system, get_main_application_version) };
         std::string ver;
-        if (value.has_value()) {
-            MsgArray msg { std::any_cast<MsgArray>(value) };
-            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
-                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
-        }
+        makeVer(value, ver);
         return ver;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::bootVersion() {
         std::any value { bb::entryValue(mTarget, Devices::system, get_bootloader_version) };
         std::string ver;
-        if (value.has_value()) {
-            MsgArray msg { std::any_cast<MsgArray>(value) };
-            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
-                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
-        }
+        makeVer(value, ver);
         return ver;
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::bootVersion2() {
         std::any value { bb::entryValue(mAltTarget, Devices::system, get_bootloader_version) };
         std::string ver;
-        if (value.has_value()) {
-            MsgArray msg { std::any_cast<MsgArray>(value) };
-            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
-                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
-        }
+        makeVer(value, ver);
         return ver;
     }
     //----------------------------------------------------------------------------------------------------------------------

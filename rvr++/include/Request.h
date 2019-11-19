@@ -32,7 +32,6 @@ namespace rvr {
 
         Request(SerialPort& s) :
             mSerialPort { s } {
-            terr << __func__ << " starting";
         }
 
         void send(const MsgArray& p);
@@ -44,7 +43,7 @@ namespace rvr {
         auto escape_char(MsgArray::iterator& p, MsgArray& payload);
         void escape_msg(MsgArray& payload);
 
-        SerialPort mSerialPort;
+        SerialPort& mSerialPort;
     };
 }
 

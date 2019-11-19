@@ -67,13 +67,20 @@ namespace rvr {
         Sensors& operator=(const Sensors& other) = delete;
 
         //----------------------------------------------------------------------------------------------------------------------
-        void enableGyroMaxNotify(const CommandResponse want_resp = resp_on_error) {
-            cmd_enable(enable_gyro_max_notify, true, want_resp);
+        void getRightMotorTemp(const CommandResponse want_resp = resp_on_error) {
+            cmd_byte_alt(get_motor_temperature, right, want_resp);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        void disableGyroMaxNotify(const CommandResponse want_resp = resp_on_error) {
-            cmd_enable(enable_gyro_max_notify, false, want_resp);
+        void getLeftMotorTemp(const CommandResponse want_resp = resp_on_error) {
+            cmd_byte_alt(get_motor_temperature, left, want_resp);
         }
+        //----------------------------------------------------------------------------------------------------------------------
+        void getAmbient(const CommandResponse want_resp = resp_on_error);
+        void enableGyroMaxNotify(const CommandResponse want_resp = resp_on_error);
+        void disableGyroMaxNotify(const CommandResponse want_resp = resp_on_error);
+        void getThermalData(const CommandResponse want_resp);
+        void enableThermal(const CommandResponse want_resp = resp_on_error);
+        void disableThermal(const CommandResponse want_resp = resp_on_error);
         //----------------------------------------------------------------------------------------------------------------------
         void configureStreaming(const uint8_t token, const MsgArray& cfg, const uint8_t proc,
             const CommandResponse want_resp = resp_on_error) {
@@ -117,7 +124,8 @@ namespace rvr {
         };
 
         enum Cmd : uint8_t {
-            enable_gyro_max_notify = 0x0F, gyro_max_notify = 0x10,
+            enable_gyro_max_notify = 0x0F, //
+            gyro_max_notify = 0x10,
             //
             reset_locator_x_and_y = 0x13,
             set_locator_flags = 0x17,
@@ -156,6 +164,31 @@ namespace rvr {
         };
 
     };
+
+    inline void Sensors::getThermalData(const CommandResponse want_resp) {
+        cmd_basic_alt(get_motor_thermal_protection_status, want_resp);
+    }
+
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Sensors::getAmbient(const CommandResponse want_resp) {
+        cmd_basic_alt(get_ambient_light_sensor_value, want_resp);
+    }
+
+    inline void Sensors::enableThermal(const CommandResponse want_resp) {
+        cmd_enable(enable_motor_thermal_protection_status_notify, true, want_resp);
+    }
+
+    inline void Sensors::disableThermal(const CommandResponse want_resp) {
+        cmd_enable(enable_motor_thermal_protection_status_notify, false, want_resp);
+    }
+
+    inline void Sensors::enableGyroMaxNotify(const CommandResponse want_resp) {
+        cmd_enable(enable_gyro_max_notify, true, want_resp);
+    }
+
+    inline void Sensors::disableGyroMaxNotify(const CommandResponse want_resp) {
+        cmd_enable(enable_gyro_max_notify, false, want_resp);
+    }
 
 } /* namespace rvr */
 

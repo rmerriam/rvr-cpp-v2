@@ -73,6 +73,7 @@ namespace rvr {
             get_core_up_time_in_milliseconds = 0x39, //
         };
 
+        void makeVer(std::any value, std::string& ver);
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMainAppVersion(const CommandResponse want_resp) {

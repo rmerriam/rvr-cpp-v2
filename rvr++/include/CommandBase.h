@@ -55,10 +55,12 @@ namespace rvr {
         void cmd_byte_alt(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_byte_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
+        void cmd_byte_alt_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_int(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_enable(const uint8_t cmd, const bool state, const CommandResponse want_resp = resp_on_error);
+        void cmd_enable_alt(const uint8_t cmd, const bool state, const CommandResponse want_resp = resp_on_error);
         void cmd_disable(const uint8_t cmd, const bool state, const CommandResponse want_resp = resp_on_error);
 
         void cmd_data(const uint8_t cmd, const MsgArray& data, const CommandResponse want_resp = resp_on_error);
@@ -112,9 +114,13 @@ namespace rvr {
         MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
         mRequest.send(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_enable(const uint8_t cmd, const bool state, const CommandResponse want_resp) {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), state };
+        mRequest.send(msg);
+    }        //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_enable_alt(const uint8_t cmd, const bool state, const CommandResponse want_resp) {
+        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), state };
         mRequest.send(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -128,16 +134,20 @@ namespace rvr {
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_byte_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
-        mRequest.send(msg);
-    }
-//----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_byte_alt(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
         MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
         mRequest.send(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_byte_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
+        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_byte_alt_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
+        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, data, data };
+        mRequest.send(msg);
+    }  //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_int(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp) {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), //
                        static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };

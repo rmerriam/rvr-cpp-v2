@@ -106,11 +106,11 @@ namespace rvr {
                 break;
             }
             case 3: {
-                terr << code_loc << "not_yes_implemented";
+                terr << code_loc << "not_ye1_implemented";
                 break;
             }
             case 4: {
-                terr << code_loc << "restricted";
+                terr << code_loc << "cannot be executed in current mode";
                 break;
             }
             case 5: {
@@ -118,11 +118,11 @@ namespace rvr {
                 break;
             }
             case 6: {
-                terr << code_loc << "failed";
+                terr << code_loc << "failed for command specific reason";
                 break;
             }
             case 7: {
-                terr << code_loc << "bad bad_data_value";
+                terr << code_loc << "Bad Parameter Value";
                 break;
             }
             case 8: {
@@ -140,7 +140,19 @@ namespace rvr {
         }
     }
 
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
+    rvr::Blackboard::key_t Response::msgKey(const uint8_t src, const uint8_t dev, const uint8_t cmd, const uint8_t seq) {
+        using bb = rvr::Blackboard;
+        bb::key_t key;
+        if (seq >= 0x80) {
+            key = bb::entryKey(src, dev, cmd);
+        }
+        else {
+            key = bb::entryKey(src, dev, cmd, seq);
+        }
+        return key;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(MsgArray packet) {
         using bb = rvr::Blackboard;
 
@@ -166,17 +178,9 @@ namespace rvr {
         }
 
         decode_flags(packet[flags]);
+        bb::key_t key { msgKey(packet[src], packet[dev], packet[cmd], packet[seq]) };
 
         std::string device = device_names[packet[dev]];
-
-        bb::key_t key;
-        if (packet[seq] >= 0x80) {
-            key = bb::entryKey(packet[src], packet[dev], packet[cmd]);
-        }
-        else {
-            key = bb::entryKey(packet[src], packet[dev], packet[cmd], packet[seq]);
-        }
-
         std::string command { bb::entryName(key) };
 
         if (command.empty()) {
