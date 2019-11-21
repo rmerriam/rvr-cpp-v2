@@ -34,7 +34,7 @@ namespace rvr {
     class SystemInfo : protected CommandBase {
     public:
         SystemInfo(Request& req) :
-            CommandBase { Devices::system, req, microcontroller } {
+            CommandBase { Devices::system, req, nordic } {
         }
         SystemInfo(const SystemInfo& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;

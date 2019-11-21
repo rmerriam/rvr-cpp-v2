@@ -57,22 +57,22 @@ namespace rvr {
             key_s() {
             }
             key_s(const key_t k) :
-                proc { static_cast<uint8_t>(k & 0xFF) }, //
-                    dev { static_cast<uint8_t>((k >> 8) & 0xFF) },  //
-                    cmd { static_cast<uint8_t>((k >> 16) & 0xFF) },  //
-                    id { static_cast<uint8_t>((k >> 24) & 0xFF) } {
+                id { static_cast<uint8_t>(k & 0xFF) }, //
+                    cmd { static_cast<uint8_t>((k >> 8) & 0xFF) },  //
+                    dev { static_cast<uint8_t>((k >> 16) & 0xFF) },  //
+                    proc { static_cast<uint8_t>((k >> 24) & 0xFF) } {
             }
 
             key_s(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id) :
-                proc(proc), dev(dev), cmd(cmd), id(id) {
+                id(id), cmd(cmd), dev(dev), proc(proc) {
             }
             operator key_t() {
-                return key_t(proc | (dev << 8) | (cmd << 16) | (id << 24));
+                return key_t(proc << 24 | (dev << 16) | (cmd << 8) | id);
             }
-            uint8_t proc { };
-            uint8_t dev { };
-            uint8_t cmd { };
             uint8_t id { };
+            uint8_t cmd { };
+            uint8_t dev { };
+            uint8_t proc { };
         };
 
         using FuncPtr = void (*)(const key_t key, MsgArray::const_iterator , MsgArray::const_iterator );
@@ -98,12 +98,12 @@ namespace rvr {
 
         static void dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b);
         static void dump();
+        static void m_to_v();
         static BBDictionary mDictionary;
 
     private:
 
-    }
-    ;
+    };
     //----------------------------------------------------------------------------------------------------------------------
     inline std::ostream& operator<<(std::ostream& os, const Blackboard::key_s& k) {
         os << k.proc << mys::sp  //
@@ -139,14 +139,39 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void Blackboard::dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b) {
         auto be { b.second };
-        terr << std::hex << std::uppercase << b.first << mys::sp << be.name << //
-             mys::tab << ((be.value.has_value()) ? "has value" : "no value");
+        terr << std::hex << std::uppercase << b.first //
+             << mys::tab << std::setw(45) << std::setfill(' ') << std::left << be.name << //
+             mys::tab << mys::tab << (( !be.value.has_value()) ? "" : be.value.type().name());
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Blackboard::dump() {
+
         for (auto b : rvr::Blackboard::mDictionary) {
             dumpEntry(b);
         }
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void Blackboard::m_to_v() {
+        struct v_map {
+            Blackboard::key_t key;
+            BlackboardEntry be;
+        };
+        std::vector<v_map> vec;
+        for (auto b : rvr::Blackboard::mDictionary) {
+            v_map v { b.first, b.second };
+            vec.push_back(v);
+        }
+        std::sort(vec.begin(), vec.end(), //
+                  [](const v_map& a, const v_map& b) {
+                      return a.key < b.key;
+                  }
+        );
+        for (auto& i : vec) {
+            terr << std::hex << std::uppercase << i.key //
+                 << mys::tab << std::setw(45) << std::setfill(' ') << std::left << i.be.name << //
+                 mys::tab << mys::tab << (( !i.be.value.has_value()) ? "" : i.be.value.type().name());
+        }
+
     }
 
 } /* namespace rvr */

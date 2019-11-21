@@ -64,6 +64,11 @@ namespace rvr {
         connection = 0x19,   //
         io_led = 0x1A,   //
     };
+
+    enum MotorIndexes : uint8_t {
+        left_motor_index = 0, //
+        right_motor_index = 1,
+    };
 }
 
 #endif /* PACKET_H_ */

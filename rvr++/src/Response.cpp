@@ -139,7 +139,6 @@ namespace rvr {
             }
         }
     }
-
     //----------------------------------------------------------------------------------------------------------------------
     rvr::Blackboard::key_t Response::msgKey(const uint8_t src, const uint8_t dev, const uint8_t cmd, const uint8_t seq) {
         using bb = rvr::Blackboard;
@@ -201,10 +200,9 @@ namespace rvr {
                     decode_func(key, packet.begin() + data, packet.end() - 1);
                 }
             }
-            else {  // notification - no sequence number
-                terr << __func__ << " notification " << std::hex << (int)packet[seq];
+            else {  // notification - sequence is 0xFF
                 bb::FuncPtr decode_func { bb::entryFunc(key) };
-                decode_func(key, packet.begin() + seq, packet.end() - 1);
+                decode_func(key, packet.begin() + status, packet.end());
             }
         }
         terr << __func__ << " **************";

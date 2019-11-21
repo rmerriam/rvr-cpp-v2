@@ -37,7 +37,8 @@ using namespace std::literals;
 #include "Drive.h"
 #include "IoLed.h"
 #include "Power.h"
-#include "Sensors.h"
+#include "SensorsBtSoc.h"
+#include "SensorsNordic.h"
 #include "SystemInfo.h"
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
@@ -62,83 +63,115 @@ int main(int argc, char* argv[]) {
 
 //    rvr::Blackboard::dump();
     pow.awake();
-    std::this_thread::sleep_for(100ms);
-
-#if 1
-    rvr::Sensors sen(req);
-
-//    sen.enableGyroMaxNotify(RespYes);
-//    sen.disableGyroMaxNotify(RespYes);
-//    sen.getAmbient(RespYes);
-//
-//    sen.enableThermal(RespYes);
-//    sen.getThermalData(RespYes);
-//    std::this_thread::sleep_for(500ms);
-//
-//    sen.getRightMotorTemp(RespYes);
-//    sen.getLeftMotorTemp(RespYes);
-//    sen.disableThermal(RespYes);
-
-    /// change size back to 15 in sensors!!!!
-    rvr::MsgArray accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
-    sen.configureStreaming(1, accel, 2, RespYes);
-
-    rvr::MsgArray core { 0x02, 0x00, 0x09, 0x01 };
-    sen.configureStreaming(3, core, 1, RespYes);
-
-    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
-    sen.configureStreaming(2, speed, 2, RespYes);
-
-    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
-    sen.configureStreaming(2, velocity, 2, RespYes);
-
-    rvr::MsgArray ambient { 0x02, 0x00, 0x0A, 0x01 };
-    sen.configureStreaming(2, ambient, 1, RespYes);
-
-    rvr::MsgArray locator { 0x01, 0x00, 0x06, 0x02 };
-    sen.configureStreaming(2, locator, 0, RespYes);
-
     std::this_thread::sleep_for(500ms);
 
-    sen.enableStreaming(1000);
-
-    std::this_thread::sleep_for(2000ms);
-    sen.disableStreaming();
-    sen.clearStreaming();
-
-#elif 0
+#if 1
     //---------------------------------------------------------------------------------------------------------------------
     //  Setup the LED handling
     rvr::IoLed led(req);
+    led.idleLeds(RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
-    uint32_t led32 { Led::headlight_left | Led::headlight_right };
+    uint32_t led32 {    //
+    Led::status_indication_left | Led::status_indication_right |    //
+        Led::headlight_left | Led::headlight_right };
 
-    rvr::MsgArray colors[2] { { 0x00, 0x00, 0xFF, //
-                                0xFF, 0x00, 0x00, }, //
+    rvr::MsgArray colors[] { //
+    { 0x00, 0x00, 0xFF, //
+      0xFF, 0x00, 0x00, //
+      0x00, 0x00, 0xFF, //
+      0xFF, 0x00, 0x00, }, //
     { 0xFF, 0x00, 0x00, //
+      0x00, 0x00, 0xFF, //
+      0xFF, 0x00, 0x00, //
       0x00, 0x00, 0xFF, }, //
     };
 
-    for (auto i { 0 }; i < 10; ++i) {
+    for (auto i { 0 }; i < 12; ++i) {
         led.allLed(led32, colors[i % 2], RespYes);
         terr << "blink";
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
-    led.idleLeds(RespYes);
+//    led.idleLeds(RespYes);
 
-#elif 1
+#endif
+#if 1
+    rvr::SensorsBtSoc sen_b(req);
+    rvr::SensorsNordic sen_n(req);
+    //---------------------------------------------------------------------------------------------------------------------
+    //  Not working
+//    sen_b.enableColorDetection(RespYes);
+//    sen_b.enabeColorDetectionNotify(true, 500, 0, RespYes);
+//    std::this_thread::sleep_for(1000ms);
+//
+//    sen_b.getCurrentColor(RespYes);
+//    std::this_thread::sleep_for(4000ms);
+//---------------------------------------------------------------------------------------------------------------------
+//  working Nordic
+//    sen_n.enableThermal(RespYes);
+//    sen_n.getRightMotorTemp(RespYes);
+//    sen_n.getLeftMotorTemp(RespYes);
+//    sen_n.getThermalProtectionStatus(RespYes);
+//    sen_n.enableGyroMaxNotify(RespYes);
+//    sen_n.disableGyroMaxNotify(RespYes);
+//
+//    sen_n.getThermalProtectionStatus(RespYes);
+//    sen_n.enableThermal(RespYes);
+//    std::this_thread::sleep_for(500ms);
+//    sen_n.disableThermal(RespYes);
+
+//---------------------------------------------------------------------------------------------------------------------
+// working BTC
+    sen_b.getAmbient(RespYes);
+/// change size back to 15 in sensors!!!!
+//    rvr::MsgArray accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
+//    sen_n.configureStreaming(1, accel, 2, RespYes);
+
+//    rvr::MsgArray core { 0x02, 0x00, 0x09, 0x01 };
+//    sen_n.configureStreaming(3, core, 1, RespYes);
+//
+//    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
+//    sen_n.configureStreaming(2, speed, 2, RespYes);
+//
+//    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
+//    sen_n.configureStreaming(2, velocity, 2, RespYes);
+//
+    rvr::MsgArray ambient { 3, 0x00, 0x0A, 0x02 };
+
+//    sen_n.configureStreaming(ambient, RespYes);
+    sen_b.configureStreaming(ambient, RespYes);
+//
+//    rvr::MsgArray locator { 0x07, 0x00, 0x08, 0x02 };
+//    sen_n.configureStreaming(1, locator, 0, RespYes);
+
+//    sen_n.enableStreaming(500, RespYes);
+    sen_b.enableStreaming(500, RespYes);
+    std::this_thread::sleep_for(2000ms);
+//
+    sen_n.disableStreaming(RespYes);
+    sen_n.clearStreaming(RespYes);
+
+    sen_b.disableStreaming(RespYes);
+    sen_b.clearStreaming(RespYes);
+//
+//    sen_b.disableColorDetection(RespYes);
+
+    std::this_thread::sleep_for(500ms);
+
+#endif
+#if 0
     terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
 
-    pow.enableBatteryStateChange(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    terr << code_loc << mys::sp << "Set State Change on?: " << pow.checkBatteryStateChange();
-
-    pow.disableBatteryStateChange(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//    pow.enableBatteryStateChange(RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//    terr << code_loc << mys::sp << "Set State Change on?: " << pow.checkBatteryStateChange();
+//
+//    pow.disableBatteryStateChange(RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     terr << code_loc << mys::sp << "Set State Change off?: " << pow.checkBatteryStateChange();
 
@@ -175,7 +208,8 @@ int main(int argc, char* argv[]) {
     terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
     terr << code_loc << mys::nl;
 
-#elif 0
+#endif
+#if 0
     rvr::Drive drive(req);
 
     drive.fixHeading(RespYes);
@@ -200,8 +234,8 @@ int main(int argc, char* argv[]) {
     drive.disableMotorFaultNotify(RespYes);
 
     drive.getMotorFault(RespYes);
-
-#elif 0
+#endif
+#if 0
     rvr::ApiShell api(req);
     rvr::Connection cmd(req);
     rvr::SystemInfo sys(req);
@@ -242,13 +276,15 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(1s);
     terr << code_loc << mys::nl;
 
-    pow.sleep();
-    std::this_thread::sleep_for(std::chrono::milliseconds(15000));
+//    pow.sleep();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
 
     end_tasks.set_value();
     resp_future.get();
 //    pow.powerOff();
+//    rvr::Blackboard::dump();
+//    rvr::Blackboard::m_to_v();
 
     return 0;
 }

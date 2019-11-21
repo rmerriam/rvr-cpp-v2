@@ -132,18 +132,8 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/rvr++"/>
-		</configuration>
-		<configuration configurationName="Release">
-			<resource resourceType="FOLDER" workspacePath="/rvr++/Release">
-				<exclusion class="org.eclipse.cdt.internal.core.resources.ResourceExclusion" contributorId="org.eclipse.cdt.ui.ResourceExclusionContributor" exclusionType="FOLDER">
-					<instance class="org.eclipse.cdt.core.resources.ExclusionInstance" displayString="include" exclusionType="FOLDER" workspacePath="/rvr++/Release/include"/>
-					<instance class="org.eclipse.cdt.core.resources.ExclusionInstance" displayString="src" exclusionType="FOLDER" workspacePath="/rvr++/Release/src"/>
-					<extensionData/>
-				</exclusion>
-			</resource>
-		</configuration>
+		<configuration configurationName="Debug"/>
+		<configuration configurationName="Release"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">

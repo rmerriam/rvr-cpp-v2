@@ -41,7 +41,7 @@ namespace rvr {
         };
         enum TargetPort : uint8_t {
             bluetoothSOC = 0x01, //
-            microcontroller = 0x02,
+            nordic = 0x02,
 
         };
         explicit CommandBase(const Devices device, Request& request, const uint8_t target);
@@ -58,6 +58,7 @@ namespace rvr {
         void cmd_byte_alt_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_int(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp = resp_on_error);
+        void cmd_int_alt(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp = resp_on_error);
 
         void cmd_enable(const uint8_t cmd, const bool state, const CommandResponse want_resp = resp_on_error);
         void cmd_enable_alt(const uint8_t cmd, const bool state, const CommandResponse want_resp = resp_on_error);
@@ -75,9 +76,7 @@ namespace rvr {
         CommandBase(CommandBase&& other) = delete;
         CommandBase& operator=(const CommandBase& other) = delete;
 
-    private:
-        static inline uint8_t mSeq { 0x0 };
-
+    protected:
         // NOTE: HACK ALERT!!!
         // The sequence field is used for debugging only. It isn't used for tracking messages.
         // It is used as a special field for some message that pass an ID. The ID is put in the sequence field.
@@ -86,6 +85,8 @@ namespace rvr {
         uint8_t sequence() {
             return ++mSeq | 0x80;
         }
+    private:
+        static inline uint8_t mSeq { 0x0 };
 
         uint8_t makeAltProc();
     };
@@ -101,7 +102,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline uint8_t CommandBase::makeAltProc() {
-        uint8_t alt_target = (bluetoothSOC + microcontroller) - mTarget;
+        uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
         return alt_target;
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -147,9 +148,16 @@ namespace rvr {
     inline void CommandBase::cmd_byte_alt_id(const uint8_t cmd, const uint8_t data, const CommandResponse want_resp) {
         MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, data, data };
         mRequest.send(msg);
-    }  //----------------------------------------------------------------------------------------------------------------------
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_int(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp) {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), //
+                       static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void CommandBase::cmd_int_alt(const uint8_t cmd, const uint16_t data, const CommandResponse want_resp) {
+        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), //
                        static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
         mRequest.send(msg);
     }

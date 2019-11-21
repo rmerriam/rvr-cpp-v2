@@ -32,7 +32,7 @@ namespace rvr {
     class Drive : protected CommandBase {
     public:
         Drive(Request& req) :
-            CommandBase { Devices::drive, req, microcontroller } {
+            CommandBase { Devices::drive, req, nordic } {
         }
         Drive(Drive&& other) = delete;
         Drive(const Drive& other) = delete;

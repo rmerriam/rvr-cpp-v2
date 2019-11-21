@@ -30,6 +30,12 @@ namespace rvr {
         processData(in, out);
     }
     //----------------------------------------------------------------------------------------------------------------------
+    void ReadPacket::removeDelimiters(MsgArray& payload) {
+        payload.erase(payload.begin()); // SOP
+        payload.erase(payload.end() - 1); // EOP
+        payload.erase(payload.end() - 1); // sum
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     void ReadPacket::checkForData(rvr::MsgArray& in) {
         if (mSerialPort.count() != 0) {
             uint8_t r[in.capacity()];
@@ -75,6 +81,5 @@ namespace rvr {
             unescape_char(p, payload);
         }
     }
-
 }
 

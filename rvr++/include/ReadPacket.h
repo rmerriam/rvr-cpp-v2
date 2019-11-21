@@ -45,10 +45,6 @@ namespace rvr {
 
         SerialPort& mSerialPort;
     };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void ReadPacket::removeDelimiters(MsgArray& payload) {
-        payload.erase(payload.begin());
-        payload.erase(payload.end() - 1);
-    }
+
 }
 #endif /* Packet_H_ */
