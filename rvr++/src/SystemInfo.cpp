@@ -66,7 +66,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::boardVersion() {
-        return bb::byte_value(get_board_revision, mAltTarget, mDevice);
+        return bb::byteValue(get_board_revision, mAltTarget, mDevice);
     }
 //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::macAddress() {
@@ -84,14 +84,16 @@ namespace rvr {
         return ""s;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    int64_t SystemInfo::statsId() {
-        std::any value { bb::entryValue(mAltTarget, mDevice, get_stats_id) };
-        return (value.has_value()) ? std::any_cast<int64_t>(value) : 0;
+    int16_t SystemInfo::statsId() {
+//        std::any value { bb::entryValue(mAltTarget, mDevice, get_stats_id) };
+        return bb::intValue(get_stats_id, mAltTarget, mDevice);
+
     }
 //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::upTime() {
-        std::any value { bb::entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
-        return (value.has_value()) ? std::any_cast<int64_t>(value) : 0;
+//        std::any value { bb::entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
+        return bb::uint64Value(get_core_up_time_in_milliseconds, mTarget, mDevice);
+
     }
 
 }

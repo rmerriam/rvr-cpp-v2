@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 
 #endif
 
-#if 1
+#if 0
     //  Streaming data from sensors
     rvr::SensorsStream sen_s(req);
 
@@ -236,7 +236,7 @@ int main(int argc, char* argv[]) {
 
     drive.getMotorFault(RespYes);
 #endif
-#if 0
+#if 1
     rvr::ApiShell api(req);
     rvr::Connection cmd(req);
     rvr::SystemInfo sys(req);
@@ -285,7 +285,7 @@ int main(int argc, char* argv[]) {
     resp_future.get();
 //    pow.powerOff();
 //    rvr::Blackboard::dump();
-    rvr::Blackboard::m_to_v();
+//    rvr::Blackboard::m_to_v();
 
     return 0;
 }

@@ -93,7 +93,10 @@ namespace rvr {
         static float float_convert(MsgArray::iterator begin, MsgArray::iterator end);
         static int32_t int_convert(MsgArray::iterator begin, MsgArray::iterator end);
 
-        static uint8_t byte_value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+        static uint8_t byteValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+        static int16_t intValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+        static uint16_t uintValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+        static uint64_t uint64Value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
 
         static std::string stringValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
 
@@ -107,7 +110,7 @@ namespace rvr {
         static BBDictionary mDictionary;
 
     private:
-
+        static uint64_t uintConvert(MsgArray::const_iterator begin, uint8_t n);
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline std::ostream& operator<<(std::ostream& os, const Blackboard::key_s& k) {
@@ -172,7 +175,7 @@ namespace rvr {
                       return a.key < b.key;
                   }
         );
-        for (auto& i : vec) {
+        for (auto &i : vec) {
             terr << std::hex << std::uppercase << i.key //
                  << mys::tab << std::setw(45) << std::setfill(' ') << std::left << i.be.name << //
                  mys::tab << mys::tab << (( !i.be.value.has_value()) ? "" : i.be.value.type().name());

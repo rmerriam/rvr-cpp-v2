@@ -57,7 +57,7 @@ namespace rvr {
         std::string mainAppVersion2();
         std::string processorName();
         std::string processorName2();
-        int64_t statsId();
+        int16_t statsId();
         std::string sku();
         int64_t upTime();
 

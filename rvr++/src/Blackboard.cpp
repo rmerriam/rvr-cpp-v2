@@ -237,7 +237,7 @@ namespace rvr {
     { entryKey(btc, dev::system, 0x01), BlackboardEntry { "bt_bootloader_version", msg_array } }, //
     { entryKey(btc, dev::system, 0x03), BlackboardEntry { "board_revision", msg_array } }, //
     { entryKey(btc, dev::system, 0x06), BlackboardEntry { "mac_address", msg_array } }, //
-    { entryKey(btc, dev::system, 0x13), BlackboardEntry { "stats_id", int_data } }, //
+    { entryKey(btc, dev::system, 0x13), BlackboardEntry { "stats_id", msg_array } }, //
     { entryKey(nordic, dev::system, 0x1F), BlackboardEntry { "nordic_processor_name", msg_array } }, //
     { entryKey(btc, dev::system, 0x1F), BlackboardEntry { "bt_processor_name", msg_array } }, //
     { entryKey(btc, dev::system, 0x38), BlackboardEntry { "get_sku", msg_array } }, //
@@ -247,11 +247,45 @@ namespace rvr {
     MsgArray empty;
 
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Blackboard::byte_value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
+    uint8_t Blackboard::byteValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
         std::any value { bb::entryValue(target, dev, cmd) };
         return (value.has_value()) ? std::any_cast<MsgArray>(value)[0] : 0;
     }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint16_t Blackboard::uintValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
+        std::any value { bb::entryValue(target, dev, cmd) };
+        MsgArray msg { (value.has_value()) ? std::any_cast<MsgArray>(value) : empty };
+        int16_t res { };
+        if (msg.size() >= sizeof(int16_t)) {
+            res = uintConvert(msg.begin(), sizeof(int16_t));
+        }
+        return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    int16_t Blackboard::intValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
+        return static_cast<int16_t>(uintValue(cmd, target, dev));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint64_t Blackboard::uintConvert(rvr::MsgArray::const_iterator begin, const uint8_t n) {
+        uint64_t res { };
+        for (auto it { begin }; it != begin + n; ++it) {
+            res <<= 8;
+            res |= *it;
+        }
+        return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint64_t Blackboard::uint64Value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
+        std::any value { bb::entryValue(target, dev, cmd) };
+        MsgArray msg { (value.has_value()) ? std::any_cast<MsgArray>(value) : empty };
+        uint64_t res { };
 
+        if (msg.size() >= sizeof(uint64_t)) {
+            res = uintConvert(msg.begin(), sizeof(uint64_t));
+        }
+        return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::stringValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
         std::any value { entryValue(target, dev, cmd) };
         MsgArray msg { (value.has_value()) ? std::any_cast<MsgArray>(value) : empty };
