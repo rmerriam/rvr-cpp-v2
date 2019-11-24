@@ -140,7 +140,7 @@ namespace rvr {
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-    rvr::Blackboard::key_t Response::msgKey(const uint8_t src, const uint8_t dev, const uint8_t cmd, const uint8_t seq) {
+    rvr::Blackboard::key_t Response::msgKey(const CommandBase::TargetPort src, const Devices dev, const uint8_t cmd, const uint8_t seq) {
         using bb = rvr::Blackboard;
         bb::key_t key;
         if (seq >= 0x80) {
@@ -157,7 +157,7 @@ namespace rvr {
 
         // typeical positions of header bytes when target not present, the usual case
         uint8_t flags { 0x00 };   //
-        uint8_t targ { 0x01 };   // usually not present
+//        uint8_t targ { 0x01 };   // usually not present
         uint8_t src { 0x01 };     //
         uint8_t dev { 0x02 };     //
         uint8_t cmd { 0x03 };     //
@@ -177,7 +177,7 @@ namespace rvr {
         }
 
         decode_flags(packet[flags]);
-        bb::key_t key { msgKey(packet[src], packet[dev], packet[cmd], packet[seq]) };
+        bb::key_t key { msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
 
         std::string device = device_names[packet[dev]];
         std::string command { bb::entryName(key) };
@@ -197,7 +197,7 @@ namespace rvr {
                 }
                 else {
                     bb::FuncPtr decode_func { bb::entryFunc(key) };
-                    decode_func(key, packet.begin() + data, packet.end() - 1);
+                    decode_func(key, packet.begin() + data, packet.end());
                 }
             }
             else {  // notification - sequence is 0xFF

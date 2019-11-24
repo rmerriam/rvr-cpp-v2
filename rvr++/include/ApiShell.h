@@ -37,18 +37,13 @@ namespace rvr {
         ApiShell(ApiShell&& other) = delete;
         ApiShell& operator=(const ApiShell& other) = delete;
 
+        MsgArray echo();
         void echo(const MsgArray& data, const CommandResponse want_resp = resp_on_error);
 
-        //----------------------------------------------------------------------------------------------------------------------
-        MsgArray echo() {
-            std::any value { bb::entryValue(mTarget, Devices::api_and_shell, echo_cmd) };
-            return (value.has_value()) ? std::any_cast<MsgArray>(value) : MsgArray();
-        }
-
+    private:
         enum Cmd : uint8_t {
             echo_cmd = 0x00, //
         };
-    private:
 
     };
 

@@ -27,6 +27,7 @@
 #include <map>
 #include <unordered_map>
 
+#include "CommandBase.h"
 #include "ReadPacket.h"
 
 namespace rvr {
@@ -63,7 +64,7 @@ namespace rvr {
                     proc { static_cast<uint8_t>((k >> 24) & 0xFF) } {
             }
 
-            key_s(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id) :
+            key_s(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id) :
                 id(id), cmd(cmd), dev(dev), proc(proc) {
             }
             operator key_t() {
@@ -71,11 +72,11 @@ namespace rvr {
             }
             uint8_t id { };
             uint8_t cmd { };
-            uint8_t dev { };
-            uint8_t proc { };
+            Devices dev { };
+            CommandBase::TargetPort proc { };
         };
 
-        using FuncPtr = void (*)(const key_t key, MsgArray::const_iterator , MsgArray::const_iterator );
+        using FuncPtr = void (*)(const key_t key, MsgArray::iterator , MsgArray::iterator );
 
         struct BlackboardEntry {
             std::string name;
@@ -86,13 +87,17 @@ namespace rvr {
         static FuncPtr entryFunc(const key_t key);
         static std::string entryName(const key_t key);
         static std::any& entryValue(const key_t key);
-        static std::any& entryValue(const uint8_t proc, const uint8_t dev, const uint8_t cmd);
-        static std::any& entryValueId(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id);
+        static std::any& entryValue(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd);
+        static std::any& entryValueId(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id);
 
-        static float float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
-        static int64_t int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static float float_convert(MsgArray::iterator begin, MsgArray::iterator end);
+        static int32_t int_convert(MsgArray::iterator begin, MsgArray::iterator end);
 
-        static key_t entryKey(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id = 0);
+        static uint8_t byte_value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+
+        static std::string stringValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+
+        static key_t entryKey(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id = 0);
 
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
 
@@ -121,11 +126,11 @@ namespace rvr {
         return mDictionary[key].name;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::any& Blackboard::entryValue(const uint8_t proc, const uint8_t dev, const uint8_t cmd) {
+    inline std::any& Blackboard::entryValue(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd) {
         return entryValue(entryKey(proc, dev, cmd, 0));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::any& Blackboard::entryValueId(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id) {
+    inline std::any& Blackboard::entryValueId(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id) {
         return entryValue(entryKey(proc, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -133,7 +138,8 @@ namespace rvr {
         return mDictionary[key].value;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline Blackboard::key_t Blackboard::entryKey(const uint8_t proc, const uint8_t dev, const uint8_t cmd, const uint8_t id) {
+    inline Blackboard::key_t Blackboard::entryKey(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd,
+        const uint8_t id) {
         return static_cast<key_t>(key_s(proc, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -171,9 +177,7 @@ namespace rvr {
                  << mys::tab << std::setw(45) << std::setfill(' ') << std::left << i.be.name << //
                  mys::tab << mys::tab << (( !i.be.value.has_value()) ? "" : i.be.value.type().name());
         }
-
     }
-
 } /* namespace rvr */
 
 #endif /* BLACKBOARD_H_ */

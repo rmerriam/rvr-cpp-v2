@@ -20,13 +20,16 @@
 //     Created: Nov 10, 2019
 //
 //======================================================================================================================
-#include <Blackboard.h>
+#include <limits>
 #include "Trace.h"
+
+#include "Blackboard.h"
 
 #include "CommandBase.h"
 #include "ApiShell.h"
 #include "Power.h"
-#include "SensorsNordic.h"
+#include "SensorsDirect.h"
+#include "SensorsStream.h"
 
 namespace rvr {
     /*
@@ -41,7 +44,7 @@ namespace rvr {
     using bb = Blackboard;
 
     //======================================================================================================================
-    int64_t Blackboard::int_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    int32_t Blackboard::int_convert(MsgArray::iterator begin, MsgArray::iterator end) {
         int64_t value { };
         for (auto it { begin }; it != end; ++it) {
             const uint8_t v { *it };
@@ -51,7 +54,7 @@ namespace rvr {
         return value;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    float Blackboard::float_convert(MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    float Blackboard::float_convert(MsgArray::iterator begin, MsgArray::iterator end) {
         union {
             uint8_t buf[4];
             float result;
@@ -63,7 +66,7 @@ namespace rvr {
         return result;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void raw_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void raw_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         std::cerr << std::hex;
         Blackboard::entryValue(key) = MsgArray(begin, end);
         terr << code_loc << std::hex << key << mys::sp;
@@ -71,73 +74,89 @@ namespace rvr {
 
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void string_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void string_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         Blackboard::entryValue(key) = std::string(begin, end);
         terr << code_loc << key << mys::sp << std::any_cast<std::string>(Blackboard::entryValue(key));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void float_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void float_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         Blackboard::entryValue(key) = bb::float_convert(begin, end);
         terr << code_loc << std::hex << key << mys::sp << std::any_cast<float>(Blackboard::entryValue(key));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void int_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void int_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         Blackboard::entryValue(key) = bb::int_convert(begin, end);
         terr << code_loc << std::hex << key << mys::sp << std::any_cast<int64_t>(Blackboard::entryValue(key));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void status_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void status_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         Blackboard::entryValue(key) = *(begin - 1);
         terr << code_loc << "status: " << (bool) *(begin - 1);
     }
-
-    float normalize(const int64_t value, const int64_t in_min, const int64_t in_max, const float out_min, const float out_max) {
-        return (((float(value) - in_min) / (in_max - in_min)) * (out_max - out_min)) + out_min;
+    //----------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    float normalize(const T value, const float out_min, const float out_max) {
+        T min { 0 }; //{ std::numeric_limits<T>::min() };
+        T max { std::numeric_limits<T>::max() };
+//        terr << float(value) << mys::tab << (float(value) - min) //
+//            << mys::tab << (max - min) //
+//            << mys::tab << (float(value) - min) / (max - min) //
+//            << mys::tab << ((float(value) - min) / (max - min)) + out_min; //
+        return (    //
+        ((float(value) - min) / (max - min)) //
+        * (out_max - out_min)) + out_min;
     }
     //----------------------------------------------------------------------------------------------------------------------
     // Notifications don't have sequence numbers so 'data' starts at what is usually the sequence
-    // They are just flags
-    void notification_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void notification_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         terr << code_loc << "notification: " << std::hex << key << mys::sp;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
         terr << code_loc << bb::int_convert(begin + 1, begin + 1 + 4); // << mys::tab << bb::int_convert(begin + 1 + 4, end);
 
-        int64_t value { bb::int_convert(begin + 1, begin + 1 + 4) };
+        uint32_t value { bb::int_convert(begin + 1, begin + 1 + 4) };
 
-        float res = normalize(value, 0, 0xFFFFFFFF, 0, 120000.f);
+        float res = normalize(value, -16000.0f, 16000.f);
 
         terr << code_loc << value << mys::tab << res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-//    void status_notification(const bb::key_t key, MsgArray::const_iterator seq, MsgArray::const_iterator end) {
+//    void status_notification(const bb::key_t key, MsgArray::iterator seq, MsgArray::iterator end) {
 //        Blackboard::entryValue(key) = *seq;
 //    }
 //----------------------------------------------------------------------------------------------------------------------
-    void motor_fault_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
+    void motor_fault_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
+// ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         terr << code_loc << std::boolalpha << (begin[ -1] == 0);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    void motor_stall_data(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
-        // ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
+    void motor_stall_data(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
+// ******** NOT SURE THIS IS CORRECT **** RETURN FROM ENABLE DOESN"T HAVE SEQUENCE #
         char_ptr motor[] { "left", "right" };
         terr << code_loc << motor[begin[0]] << std::boolalpha << (begin[1] == 0);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    void mac_addr(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void mac_addr(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         for (auto it = begin; it < end - 2; ++it) {
             terr << code_loc << *it++ << *it << ":";
         }
         terr << code_loc << *(end - 2) << *(end - 1);
     }
+    //----------------------------------------------------------------------------------------------------------------------
+    void msg_array(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
+//        auto m_key = static_cast<bb::key_t>(key | (( *begin - 4)));
+
+        MsgArray msg { begin, end };
+        Blackboard::entryValue(key) = msg;
+        terr << code_loc << std::hex << key << mys::sp << std::any_cast<MsgArray>(Blackboard::entryValue(key));
+    }
 //----------------------------------------------------------------------------------------------------------------------
     using dev = Devices;
-    constexpr uint8_t nordic = CommandBase::nordic;
-    constexpr uint8_t btc = CommandBase::bluetoothSOC;
+    constexpr CommandBase::TargetPort nordic = CommandBase::nordic;
+    constexpr CommandBase::TargetPort btc = CommandBase::bluetoothSOC;
 
     bb::BBDictionary bb::mDictionary { //
 //
-    { entryKey(nordic, dev::api_and_shell, ApiShell::echo_cmd), BlackboardEntry { "echo", raw_data } }, //
+    { entryKey(nordic, dev::api_and_shell, 0x00), BlackboardEntry { "echo", raw_data } }, //
 //
     { entryKey(btc, dev::connection, 0x05), BlackboardEntry { "get_bluetooth_advertising_name", string_data } }, //
 #if 1
@@ -186,10 +205,12 @@ namespace rvr {
     { entryKey(nordic, dev::sensors, 0x32), BlackboardEntry { "stop_robot_to_robot_infrared_following", raw_data } }, //
     { entryKey(nordic, dev::sensors, 0x33), BlackboardEntry { "start_robot_to_robot_infrared_evading", raw_data } }, //
     { entryKey(nordic, dev::sensors, 0x34), BlackboardEntry { "stop_robot_to_robot_infrared_evading", raw_data } }, //
+
     { entryKey(btc, dev::sensors, 0x35), BlackboardEntry { "enable_color_detection_notify", status_data } }, //
-    { entryKey(btc, dev::sensors, 0x36), BlackboardEntry { "color_detection_notify", notification_data } }, //
+    { entryKey(btc, dev::sensors, 0x36), BlackboardEntry { "color_detection_notify", SensorsDirect::rxColotNotify } }, //
     { entryKey(btc, dev::sensors, 0x37), BlackboardEntry { "get_current_detected_color_reading", status_data } }, //
     { entryKey(btc, dev::sensors, 0x38), BlackboardEntry { "enable_color_detection", status_data } }, //
+
     { entryKey(nordic, dev::sensors, 0x39), BlackboardEntry { "configure_streaming_service", status_data } }, //
     { entryKey(btc, dev::sensors, 0x39), BlackboardEntry { "configure_streaming_service", status_data } }, //
     { entryKey(nordic, dev::sensors, 0x3A), BlackboardEntry { "start_streaming_service", status_data } }, //
@@ -203,24 +224,39 @@ namespace rvr {
     { entryKey(nordic, dev::sensors, 0x3E), BlackboardEntry { "enable_robot_infrared_message_notify", status_data } }, //
     { entryKey(nordic, dev::sensors, 0x3F), BlackboardEntry { "send_infrared_message", raw_data } }, //
     //
-    { entryKey(nordic, dev::sensors, 0x4A, 0), BlackboardEntry { "left_motor_temperature", SensorsNordic::motorTemperature } }, // left
-    { entryKey(nordic, dev::sensors, 0x4A, 1), BlackboardEntry { "right_motor_temperature", SensorsNordic::motorTemperature } }, // right
+//    { entryKey(nordic, dev::sensors, 0x4A, 0), BlackboardEntry { "left_motor_temperature", SensorsDirect::motorTemperature } }, // left
+    { entryKey(nordic, dev::sensors, 0x4A, 0), BlackboardEntry { "left_motor_temperature", msg_array } }, // left
+    { entryKey(nordic, dev::sensors, 0x4A, 1), BlackboardEntry { "right_motor_temperature", SensorsDirect::motorTemperature } }, // right
     { entryKey(nordic, dev::sensors, 0x4B), BlackboardEntry { "get_motor_thermal_protection_status", raw_data } }, //
     { entryKey(nordic, dev::sensors, 0x4C), BlackboardEntry { "enable_motor_thermal_protection_status_notify", status_data } }, //
     { entryKey(nordic, dev::sensors, 0x4D), BlackboardEntry { "motor_thermal_protection_status_notify", raw_data } }, //
 //
-    { entryKey(nordic, dev::system, 0x00), BlackboardEntry { "nordic_main_application_version", raw_data } }, //
-    { entryKey(btc, dev::system, 0x00), BlackboardEntry { "bt_main_application_version", raw_data } }, //
-    { entryKey(nordic, dev::system, 0x01), BlackboardEntry { "nordic_bootloader_version", raw_data } }, //
-    { entryKey(btc, dev::system, 0x01), BlackboardEntry { "bt_bootloader_version", raw_data } }, //
-    { entryKey(btc, dev::system, 0x03), BlackboardEntry { "board_revision", int_data } }, //
-    { entryKey(btc, dev::system, 0x06), BlackboardEntry { "mac_address", string_data } }, //
+    { entryKey(nordic, dev::system, 0x00), BlackboardEntry { "nordic_main_application_version", msg_array } }, //
+    { entryKey(btc, dev::system, 0x00), BlackboardEntry { "bt_main_application_version", msg_array } }, //
+    { entryKey(nordic, dev::system, 0x01), BlackboardEntry { "nordic_bootloader_version", msg_array } }, //
+    { entryKey(btc, dev::system, 0x01), BlackboardEntry { "bt_bootloader_version", msg_array } }, //
+    { entryKey(btc, dev::system, 0x03), BlackboardEntry { "board_revision", msg_array } }, //
+    { entryKey(btc, dev::system, 0x06), BlackboardEntry { "mac_address", msg_array } }, //
     { entryKey(btc, dev::system, 0x13), BlackboardEntry { "stats_id", int_data } }, //
-    { entryKey(nordic, dev::system, 0x1F), BlackboardEntry { "nordic_processor_name", string_data } }, //
-    { entryKey(btc, dev::system, 0x1F), BlackboardEntry { "bt_processor_name", string_data } }, //
-    { entryKey(btc, dev::system, 0x38), BlackboardEntry { "get_sku", string_data } }, //
-    { entryKey(nordic, dev::system, 0x39), BlackboardEntry { "get_core_up_time_in_milliseconds", int_data } }, //
+    { entryKey(nordic, dev::system, 0x1F), BlackboardEntry { "nordic_processor_name", msg_array } }, //
+    { entryKey(btc, dev::system, 0x1F), BlackboardEntry { "bt_processor_name", msg_array } }, //
+    { entryKey(btc, dev::system, 0x38), BlackboardEntry { "get_sku", msg_array } }, //
+    { entryKey(nordic, dev::system, 0x39), BlackboardEntry { "get_core_up_time_in_milliseconds", msg_array } }, //
 #endif
     };
+    MsgArray empty;
+
+    //----------------------------------------------------------------------------------------------------------------------
+    uint8_t Blackboard::byte_value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
+        std::any value { bb::entryValue(target, dev, cmd) };
+        return (value.has_value()) ? std::any_cast<MsgArray>(value)[0] : 0;
+    }
+
+    std::string Blackboard::stringValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev) {
+        std::any value { entryValue(target, dev, cmd) };
+        MsgArray msg { (value.has_value()) ? std::any_cast<MsgArray>(value) : empty };
+        return std::string { msg.begin(), msg.end() };
+    }
+
 }
 /* namespace rvr */

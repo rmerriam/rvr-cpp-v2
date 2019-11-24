@@ -34,7 +34,11 @@ namespace rvr {
         std::any value { bb::entryValue(mTarget, Devices::connection, get_bluetooth_advertising_name) };
         return (value.has_value()) ? std::any_cast<std::string>(value) : ""s;
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
+    MsgArray ApiShell::echo() {
+        std::any value { bb::entryValue(mTarget, Devices::api_and_shell, echo_cmd) };
+        return (value.has_value()) ? std::any_cast<MsgArray>(value) : MsgArray();
+    }
     //----------------------------------------------------------------------------------------------------------------------
     void ApiShell::echo(const MsgArray& data, const CommandResponse want_resp) {
         cmd_data(echo_cmd, data, want_resp);

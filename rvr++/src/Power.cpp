@@ -98,11 +98,11 @@ namespace rvr {
         value.reset();
     }    //======================================================================================================================
     // Deserialization methods
-//    void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+//    void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
 //        Blackboard::entryValue(key) = bb::float_convert(begin, end);
 //    }
 //    //----------------------------------------------------------------------------------------------------------------------
-    void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end) {
+    void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         Blackboard::entryValue(key) = bb::float_convert(begin, begin + 4);
         bb::key_s id_key { key };
         id_key.id = 1;

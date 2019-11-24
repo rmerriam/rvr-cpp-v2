@@ -42,9 +42,9 @@ namespace rvr {
         enum TargetPort : uint8_t {
             bluetoothSOC = 0x01, //
             nordic = 0x02,
-
         };
-        explicit CommandBase(const Devices device, Request& request, const uint8_t target);
+
+        explicit CommandBase(const Devices device, Request& request, const TargetPort target);
 
         uint8_t buildFlags(const CommandResponse want_resp) const;
 
@@ -67,10 +67,10 @@ namespace rvr {
         void cmd_data(const uint8_t cmd, const MsgArray& data, const CommandResponse want_resp = resp_on_error);
         void cmd_data_alt(const uint8_t cmd, const MsgArray& data, const CommandResponse want_resp = resp_on_error);
 
-        const uint8_t mDevice;
+        const Devices mDevice;
         Request& mRequest;
-        uint8_t mTarget;
-        uint8_t mAltTarget;
+        TargetPort mTarget;
+        TargetPort mAltTarget;
 
         CommandBase(const CommandBase& other) = delete;
         CommandBase(CommandBase&& other) = delete;
@@ -92,7 +92,7 @@ namespace rvr {
     };
 
 //----------------------------------------------------------------------------------------------------------------------
-    inline CommandBase::CommandBase(const Devices device, Request& request, const uint8_t target) :
+    inline CommandBase::CommandBase(const Devices device, Request& request, const TargetPort target) :
         mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
     }
 //----------------------------------------------------------------------------------------------------------------------

@@ -37,8 +37,8 @@ using namespace std::literals;
 #include "Drive.h"
 #include "IoLed.h"
 #include "Power.h"
-#include "SensorsBtSoc.h"
-#include "SensorsNordic.h"
+#include "SensorsDirect.h"
+#include "SensorsStream.h"
 #include "SystemInfo.h"
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
@@ -64,8 +64,9 @@ int main(int argc, char* argv[]) {
 //    rvr::Blackboard::dump();
     pow.awake();
     std::this_thread::sleep_for(500ms);
+    //---------------------------------------------------------------------------------------------------------------------
 
-#if 1
+#if 0
     //---------------------------------------------------------------------------------------------------------------------
     //  Setup the LED handling
     rvr::IoLed led(req);
@@ -73,21 +74,21 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     uint32_t led32 {    //
-    Led::status_indication_left | Led::status_indication_right |    //
-        Led::headlight_left | Led::headlight_right };
+        Led::status_indication_left | Led::status_indication_right |//
+        Led::headlight_left | Led::headlight_right};
 
     rvr::MsgArray colors[] { //
-    { 0x00, 0x00, 0xFF, //
-      0xFF, 0x00, 0x00, //
-      0x00, 0x00, 0xFF, //
-      0xFF, 0x00, 0x00, }, //
-    { 0xFF, 0x00, 0x00, //
-      0x00, 0x00, 0xFF, //
-      0xFF, 0x00, 0x00, //
-      0x00, 0x00, 0xFF, }, //
+        {   0x00, 0x00, 0xFF, //
+            0xFF, 0x00, 0x00,//
+            0x00, 0x00, 0xFF,//
+            0xFF, 0x00, 0x00,}, //
+        {   0xFF, 0x00, 0x00, //
+            0x00, 0x00, 0xFF,//
+            0xFF, 0x00, 0x00,//
+            0x00, 0x00, 0xFF,}, //
     };
 
-    for (auto i { 0 }; i < 12; ++i) {
+    for (auto i {0}; i < 1; ++i) {
         led.allLed(led32, colors[i % 2], RespYes);
         terr << "blink";
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -96,66 +97,66 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 1
-    rvr::SensorsBtSoc sen_b(req);
-    rvr::SensorsNordic sen_n(req);
-    //---------------------------------------------------------------------------------------------------------------------
-    //  Not working
-//    sen_b.enableColorDetection(RespYes);
-//    sen_b.enabeColorDetectionNotify(true, 500, 0, RespYes);
-//    std::this_thread::sleep_for(1000ms);
-//
-//    sen_b.getCurrentColor(RespYes);
-//    std::this_thread::sleep_for(4000ms);
-//---------------------------------------------------------------------------------------------------------------------
-//  working Nordic
-//    sen_n.enableThermal(RespYes);
-//    sen_n.getRightMotorTemp(RespYes);
-//    sen_n.getLeftMotorTemp(RespYes);
-//    sen_n.getThermalProtectionStatus(RespYes);
-//    sen_n.enableGyroMaxNotify(RespYes);
-//    sen_n.disableGyroMaxNotify(RespYes);
-//
-//    sen_n.getThermalProtectionStatus(RespYes);
-//    sen_n.enableThermal(RespYes);
-//    std::this_thread::sleep_for(500ms);
-//    sen_n.disableThermal(RespYes);
+#if 0
+    // Direct reading of sensors
+    rvr::SensorsDirect sen_d(req);
 
-//---------------------------------------------------------------------------------------------------------------------
-// working BTC
-    sen_b.getAmbient(RespYes);
+//    sen_d.getAmbient(RespYes);
+
+//    sen_d.enableColorDetection(RespYes);
+//    sen_d.enabeColorDetectionNotify(true, 500, 0, RespYes);
+//    std::this_thread::sleep_for(500ms);
+
+//    sen_d.getCurrentColor(RespYes);
+
+//    sen_d.enableThermal(RespYes);
+    sen_d.getRightMotorTemp(RespYes);
+    sen_d.getLeftMotorTemp(RespYes);
+//    sen_d.getThermalProtectionStatus(RespYes);
+//    sen_d.enableGyroMaxNotify(RespYes);
+
+//    sen_d.getThermalProtectionStatus(RespYes);
+//    sen_d.enableThermal(RespYes);
+
+//    std::this_thread::sleep_for(500ms);
+    sen_d.disableColorDetection(RespYes);
+//    sen_d.disableGyroMaxNotify(RespYes);
+//    sen_d.disableThermal(RespYes);
+
+#endif
+
+#if 1
+    //  Streaming data from sensors
+    rvr::SensorsStream sen_s(req);
+
 /// change size back to 15 in sensors!!!!
 //    rvr::MsgArray accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
-//    sen_n.configureStreaming(1, accel, 2, RespYes);
+//    sen_s.configureStreaming(1, accel, 2, RespYes);
 
 //    rvr::MsgArray core { 0x02, 0x00, 0x09, 0x01 };
-//    sen_n.configureStreaming(3, core, 1, RespYes);
+//    sen_s.configureStreaming(3, core, 1, RespYes);
 //
 //    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
-//    sen_n.configureStreaming(2, speed, 2, RespYes);
+//    sen_s.configureStreaming(2, speed, 2, RespYes);
 //
 //    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
-//    sen_n.configureStreaming(2, velocity, 2, RespYes);
+//    sen_s.configureStreaming(2, velocity, 2, RespYes);
 //
-    rvr::MsgArray ambient { 3, 0x00, 0x0A, 0x02 };
-
-//    sen_n.configureStreaming(ambient, RespYes);
-    sen_b.configureStreaming(ambient, RespYes);
+    rvr::MsgArray ambient { 2, 0x00, 0x0A, 0x02 };
+    sen_s.configureStreaming(ambient, RespYes);
 //
 //    rvr::MsgArray locator { 0x07, 0x00, 0x08, 0x02 };
-//    sen_n.configureStreaming(1, locator, 0, RespYes);
+//    sen_s.configureStreaming(1, locator, 0, RespYes);
 
-//    sen_n.enableStreaming(500, RespYes);
-    sen_b.enableStreaming(500, RespYes);
+    std::this_thread::sleep_for(20ms);
+    sen_s.enableStreaming(500, RespYes);
+//    sen_d.enableStreaming(500, RespYes);
     std::this_thread::sleep_for(2000ms);
 //
-    sen_n.disableStreaming(RespYes);
-    sen_n.clearStreaming(RespYes);
+    sen_s.disableStreaming(RespYes);
+    sen_s.clearStreaming(RespYes);
 
-    sen_b.disableStreaming(RespYes);
-    sen_b.clearStreaming(RespYes);
 //
-//    sen_b.disableColorDetection(RespYes);
 
     std::this_thread::sleep_for(500ms);
 
@@ -257,17 +258,17 @@ int main(int argc, char* argv[]) {
 
     terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
     terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion2();
-    terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
     terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
     terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion2();
-    terr << code_loc << "BT Name: " << cmd.name();
-    terr << code_loc << "Echo: " << std::hex << api.echo();
-    terr << code_loc << "MAC Addr: " << sys.macAddress();
+    terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
     terr << code_loc << "Processor: " << sys.processorName();
     terr << code_loc << "Processor: " << sys.processorName2();
+    terr << code_loc << "MAC Addr: " << sys.macAddress();
     terr << code_loc << "SKU: " << sys.sku();
     terr << code_loc << "Stats Id: " << sys.statsId();
     terr << code_loc << "Up Time: " << sys.upTime();
+    terr << code_loc << "Echo: " << std::hex << api.echo();
+    terr << code_loc << "BT Name: " << cmd.name();
 
     terr << code_loc << mys::nl;
 
@@ -278,13 +279,13 @@ int main(int argc, char* argv[]) {
 
 //    pow.sleep();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
+//    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
 
     end_tasks.set_value();
     resp_future.get();
 //    pow.powerOff();
 //    rvr::Blackboard::dump();
-//    rvr::Blackboard::m_to_v();
+    rvr::Blackboard::m_to_v();
 
     return 0;
 }

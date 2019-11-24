@@ -84,7 +84,7 @@ namespace rvr {
         bool isSleepNotify();
 
         // De-serialization handlers
-        static void rxBatteryThresholds(const bb::key_t key, MsgArray::const_iterator begin, MsgArray::const_iterator end);
+        static void rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end);
 
     private:
         enum BatteryVoltageStates : uint8_t {

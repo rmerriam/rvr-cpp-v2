@@ -1,5 +1,5 @@
-#ifndef Sensors_H_
-#define Sensors_H_
+#ifndef SensorsNordic_H_
+#define SensorsNordic_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -44,42 +44,69 @@
  -----------------------------------------------------------------------------------------
  | 0x0009 | Nordic (1), ST (2) | 3     | CoreTime           | TimeUpper, TimeLower       |
  -----------------------------------------------------------------------------------------
+ Quaternion -1.0 - 1.0
+ IMU -180 - 180
+ Accelerometer -16.0 - 16.0
+ Gyroscope -2000.0 - 2000.0
 
+ Normalize: (value) / Max * (rangeMax - rangeMin) + rangeMin
+
+ Accelerometer returns X = 7F B5 AF 00 = 2142613248
+ Normalize = 2142613248/4294967295 * (16 - -16) + -16
+ Normalize = .498866 * 32 - 16
+ Normalize = -0.036288
+
+ Thermal Protection
+ 0x00 = OK
+ 0x01 = WARN
+ 0x02 = CRITICAL_FORCED_COOL_DOWN
  */
 
 namespace rvr {
 
-    class SensorsBtSoc : protected CommandBase {
+    class SensorsStream : protected CommandBase {
 
     public:
         enum VoltageType : uint8_t {
             CalibratedFiltered = 0, CalibratedUnfiltered = 1, UncalibratedUnfiltered = 2,
         };
 
-        SensorsBtSoc(Request& req) :
-            CommandBase { Devices::sensors, req, bluetoothSOC } {
+        SensorsStream(Request& req) :
+            CommandBase { Devices::sensors, req, nordic } {
         }
-        using cfg_info = uint8_t[3];
-        struct Stream {
-            uint8_t token;
-            cfg_info cfg[1];
-        };
 
-        SensorsBtSoc(const SensorsBtSoc& other) = delete;
-        SensorsBtSoc(SensorsBtSoc&& other) = delete;
-        SensorsBtSoc& operator=(const SensorsBtSoc& other) = delete;
-
-        void getAmbient(const CommandResponse want_resp = resp_on_error);
-        void getCurrentColor(const CommandResponse want_resp);
-        void enableColorDetection(const CommandResponse want_resp);
-        void disableColorDetection(const CommandResponse want_resp);
-        void enabeColorDetectionNotify(const bool enable, const uint16_t timer, const uint8_t confidence, const CommandResponse want_resp);
+        SensorsStream(const SensorsStream& other) = delete;
+        SensorsStream(SensorsStream&& other) = delete;
+        SensorsStream& operator=(const SensorsStream& other) = delete;
 
         void configureStreaming(const MsgArray& cfg, const CommandResponse want_resp = resp_on_error);
         void enableStreaming(const uint16_t millis, const CommandResponse want_resp = resp_on_error);
         void disableStreaming(const CommandResponse want_resp = resp_on_error);
         void clearStreaming(const CommandResponse want_resp = resp_on_error);
+
+        //======================================================================================================================
+        // data access methods
+        //----------------------------------------------------------------------------------------------------------------------
+        //======================================================================================================================
+        // data conversion methods
+//        int batteryPercent() {
+//            std::any value { bb::entryValue(mTarget, Devices::power, get_battery_percentage) };
+//            return (value.has_value()) ? std::any_cast<int64_t>(value) : -1;
+//        }
+
     private:
+
+        enum ThermalProtectionStatusEnum : uint8_t {
+            ok = 0, warn = 1, critical = 2,
+        };
+
+        enum StreamingDataSizesEnum : uint8_t {
+            eight_bit = 0x00, sixteen_bit = 0x01, thirty_two_bit = 0x02,
+        };
+
+        enum struct GyroMaxFlagsBitmask : uint8_t {
+            none = 0, max_plus_x = 1, max_minus_x = 2, max_plus_y = 4, max_minus_y = 8, max_plus_z = 16, max_minus_z = 32,
+        };
 
         enum struct LocatorFlagsBitmask : uint8_t {
             none = 0, auto_calibrate = 1,
@@ -130,44 +157,26 @@ namespace rvr {
         };
 
     };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsBtSoc::getCurrentColor(const CommandResponse want_resp) {
-        cmd_basic(get_current_detected_color_reading, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsBtSoc::getAmbient(const CommandResponse want_resp) {
-        cmd_basic(get_ambient_light_sensor_value, want_resp);
-    }
 
-    inline void SensorsBtSoc::enableColorDetection(const CommandResponse want_resp) {
-        cmd_enable(enable_color_detection, true, want_resp);
-    }
-
-    inline void SensorsBtSoc::disableColorDetection(const CommandResponse want_resp) {
-        cmd_enable(enable_color_detection, false, want_resp);
-    }
-
-    inline void SensorsBtSoc::enabeColorDetectionNotify(const bool enable, const uint16_t timer, const uint8_t confidence,
-        const CommandResponse want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, enable_color_detection_notify, sequence(), //
-                       enable, static_cast<uint8_t>(timer >> 8), static_cast<uint8_t>(timer & 0xFF), confidence };
-        mRequest.send(msg);
-    }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsBtSoc::configureStreaming(const MsgArray& cfg, const CommandResponse want_resp) {
+    inline void SensorsStream::configureStreaming(const MsgArray& cfg, const CommandResponse want_resp) {
         cmd_data(configure_streaming_service, cfg, want_resp);
+        cmd_data_alt(configure_streaming_service, cfg, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsBtSoc::enableStreaming(const uint16_t millis, const CommandResponse want_resp) {
+    inline void SensorsStream::enableStreaming(const uint16_t millis, const CommandResponse want_resp) {
         cmd_int(start_streaming_service, millis, want_resp);
+        cmd_int_alt(start_streaming_service, millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsBtSoc::disableStreaming(const CommandResponse want_resp) {
+    inline void SensorsStream::disableStreaming(const CommandResponse want_resp) {
         cmd_basic(stop_streaming_service, want_resp);
+        cmd_basic_alt(stop_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsBtSoc::clearStreaming(const CommandResponse want_resp) {
+    inline void SensorsStream::clearStreaming(const CommandResponse want_resp) {
         cmd_basic(clear_streaming_service, want_resp);
+        cmd_basic_alt(clear_streaming_service, want_resp);
     }
 
 } /* namespace rvr */

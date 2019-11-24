@@ -60,7 +60,7 @@ namespace rvr {
     private:
         static void decode_flags(const uint8_t f);
         static void decode_error(auto err_byte);
-        static rvr::Blackboard::key_t msgKey(const uint8_t src, const uint8_t dev, const uint8_t cmd, const uint8_t seq);
+        static rvr::Blackboard::key_t msgKey(const CommandBase::TargetPort src, const Devices dev, const uint8_t cmd, const uint8_t seq);
 
         std::shared_future<void> mEnd;
     };
