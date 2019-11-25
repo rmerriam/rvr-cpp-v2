@@ -27,8 +27,7 @@ namespace rvr {
     // data access methods
     //----------------------------------------------------------------------------------------------------------------------
     int Power::batteryPercent() {
-        std::any value { bb::entryValue(mTarget, Devices::power, get_battery_percentage) };
-        return (value.has_value()) ? std::any_cast<int64_t>(value) : -1;
+        return bb::byteValue(get_battery_percentage, mTarget, Devices::power);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::motorCurrent(const MotorSide ms) {
@@ -48,9 +47,7 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     std::string Power::voltState() {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        std::any value { bb::entryValue(mTarget, Devices::power, get_battery_voltage_state) };
-        const int64_t st { (value.has_value()) ? std::any_cast<int64_t>(value) : unknown };
-        return state[st];
+        return state[bb::byteValue(get_battery_voltage_state, mTarget, Devices::power)];
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltThresholdCritical() {
@@ -74,7 +71,6 @@ namespace rvr {
     bool Power::checkBatteryStateChange() {
         std::any value { bb::entryValue(mTarget, Devices::power, enable_battery_voltage_state_change_notify) };
         return value.has_value();
-//        return (value.has_value()) ? (std::any_cast<int64_t>(value)) == 0 : false;
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isSleepNotify() {
@@ -94,7 +90,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Power::resetNotify(const uint8_t cmd) const {
-        std::any& value { bb::entryValue(mTarget, Devices::power, cmd) };
+        std::any &value { bb::entryValue(mTarget, Devices::power, cmd) };
         value.reset();
     }    //======================================================================================================================
     // Deserialization methods

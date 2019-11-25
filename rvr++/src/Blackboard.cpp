@@ -173,14 +173,15 @@ namespace rvr {
     { entryKey(btc, dev::io_led, 0x1A), BlackboardEntry { "set_all_leds", status_data } }, //
     { entryKey(btc, dev::io_led, 0x4E), BlackboardEntry { "release_led_requests", status_data } }, //
 //
-    { entryKey(btc, dev::power, 0x01), BlackboardEntry { "snooze", status_data } }, //
-    { entryKey(btc, dev::power, 0x0D), BlackboardEntry { "wake", status_data } }, //
-    { entryKey(btc, dev::power, 0x10), BlackboardEntry { "get_battery_percentage", int_data } }, //
-    { entryKey(btc, dev::power, 0x11), BlackboardEntry { "system_awake_notification", notification_data } }, //
-    { entryKey(btc, dev::power, 0x17), BlackboardEntry { "get_battery_voltage_state", int_data } }, //
-    { entryKey(btc, dev::power, 0x19), BlackboardEntry { "will_sleep_notify", notification_data } }, //
-    { entryKey(btc, dev::power, 0x1A), BlackboardEntry { "did_sleep_notify", notification_data } }, //
-    { entryKey(btc, dev::power, 0x1B), BlackboardEntry { "enable_battery_voltage_state_change_notify", int_data } }, //
+    { entryKey(btc, dev::power, 0x00), BlackboardEntry { "power off", raw_data } }, //
+    { entryKey(btc, dev::power, 0x01), BlackboardEntry { "snooze", msg_array } }, //
+    { entryKey(btc, dev::power, 0x0D), BlackboardEntry { "wake", msg_array } }, //
+    { entryKey(btc, dev::power, 0x10), BlackboardEntry { "get_battery_percentage", msg_array } }, //
+    { entryKey(btc, dev::power, 0x11), BlackboardEntry { "system_awake_notification", msg_array } }, //
+    { entryKey(btc, dev::power, 0x17), BlackboardEntry { "get_battery_voltage_state", msg_array } }, //
+    { entryKey(btc, dev::power, 0x19), BlackboardEntry { "will_sleep_notify", msg_array } }, //
+    { entryKey(btc, dev::power, 0x1A), BlackboardEntry { "did_sleep_notify", msg_array } }, //
+    { entryKey(btc, dev::power, 0x1B), BlackboardEntry { "enable_battery_voltage_state_change_notify", msg_array } }, //
     { entryKey(btc, dev::power, 0x1C), BlackboardEntry { "battery_voltage_state_change_notify", notification_data } }, //
     { entryKey(btc, dev::power, 0x25, Power::CalibratedFiltered), BlackboardEntry { "get_battery_voltage_in_volts", float_data } }, //
     { entryKey(btc, dev::power, 0x25, Power::CalibratedUnfiltered), BlackboardEntry { "get_battery_voltage_in_volts", float_data } }, //
