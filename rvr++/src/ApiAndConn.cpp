@@ -35,8 +35,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     MsgArray ApiShell::echo() {
-        MsgArray value { bb::entryValue(mTarget, Devices::api_and_shell, echo_cmd) };
-        return value;
+        return bb::msgValue(mTarget, mDevice, echo_cmd);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void ApiShell::echo(MsgArray const& data, CommandResponse const want_resp) {

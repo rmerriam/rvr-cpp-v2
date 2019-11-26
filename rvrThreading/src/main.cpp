@@ -29,8 +29,8 @@
 using namespace std::literals;
 
 #include "Trace.h"
+#include "Blackboard.h"
 #include "Response.h"
-#include <Blackboard.h>
 
 #include "ApiShell.h"
 #include "Connection.h"
@@ -97,11 +97,11 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 0
+#if 1
     // Direct reading of sensors
     rvr::SensorsDirect sen_d(req);
 
-//    sen_d.getAmbient(RespYes);
+    sen_d.getAmbient(RespYes);
 
 //    sen_d.enableColorDetection(RespYes);
 //    sen_d.enabeColorDetectionNotify(true, 500, 0, RespYes);
@@ -122,6 +122,15 @@ int main(int argc, char* argv[]) {
     sen_d.disableColorDetection(RespYes);
 //    sen_d.disableGyroMaxNotify(RespYes);
 //    sen_d.disableThermal(RespYes);
+
+    std::this_thread::sleep_for(500ms);
+
+    terr << code_loc;
+    terr << code_loc << "sense direct";
+
+    terr << code_loc << mys::sp << "Ambient: " << sen_d.ambient();
+    terr << code_loc << mys::sp << "Left Temp: " << sen_d.leftMotorTemp();
+    terr << code_loc << mys::sp << "Right Temp: " << sen_d.rightMotorTemp();
 
 #endif
 
@@ -161,7 +170,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(500ms);
 
 #endif
-#if 1
+#if 0
 
     terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
 

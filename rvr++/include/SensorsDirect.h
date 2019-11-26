@@ -24,6 +24,7 @@
 //======================================================================================================================
 #include <array>
 
+#include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
 
@@ -60,42 +61,37 @@ namespace rvr {
             CommandBase { Devices::sensors, req, bluetoothSOC } {
         }
 
-        SensorsDirect(const SensorsDirect& other) = delete;
+        SensorsDirect(SensorsDirect const& other) = delete;
         SensorsDirect(SensorsDirect&& other) = delete;
-        SensorsDirect& operator=(const SensorsDirect& other) = delete;
+        SensorsDirect& operator=(SensorsDirect const& other) = delete;
 
-        void enableGyroMaxNotify(const CommandResponse want_resp = resp_on_error);
-        void disableGyroMaxNotify(const CommandResponse want_resp = resp_on_error);
+        void enableGyroMaxNotify(CommandResponse const want_resp = resp_on_error);
+        void disableGyroMaxNotify(CommandResponse const want_resp = resp_on_error);
 
-        void getRightMotorTemp(const CommandResponse want_resp = resp_on_error);
-        void getLeftMotorTemp(const CommandResponse want_resp = resp_on_error);
+        void getRightMotorTemp(CommandResponse const want_resp = resp_on_error);
+        void getLeftMotorTemp(CommandResponse const want_resp = resp_on_error);
 
-        void getThermalProtectionStatus(const CommandResponse want_resp);
-        void enableThermal(const CommandResponse want_resp = resp_on_error);
-        void disableThermal(const CommandResponse want_resp = resp_on_error);
+        void getThermalProtectionStatus(CommandResponse const want_resp);
+        void enableThermal(CommandResponse const want_resp = resp_on_error);
+        void disableThermal(CommandResponse const want_resp = resp_on_error);
 
-        void getAmbient(const CommandResponse want_resp = resp_on_error);
+        void getAmbient(CommandResponse const want_resp = resp_on_error);
 
-        void disableColorDetection(const CommandResponse want_resp);
-        void enabeColorDetectionNotify(const bool enable, const uint16_t timer, const uint8_t confidence, const CommandResponse want_resp);
-        void enableColorDetection(const CommandResponse want_resp);
-        void getCurrentColor(const CommandResponse want_resp);
+        void disableColorDetection(CommandResponse const want_resp);
+        void enabeColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence, CommandResponse const want_resp);
+        void enableColorDetection(CommandResponse const want_resp);
+        void getCurrentColor(CommandResponse const want_resp);
 
-        //----------------------------------------------------------------------------------------------------------------------
-        // 0x08 is the Nordic die temperature sensor
-
-        static void motorTemperature(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
-            auto m_key = static_cast<bb::key_t>(key | (( *begin - 4)));
-            //            Blackboard::entryValue(m_key) = bb::float_convert(begin + 1, end);
-            //            terr << code_loc << std::hex << m_key << mys::sp << MsgArray_cast<float>(Blackboard::entryValue(m_key));
-
-            MsgArray msg { begin, end };
-            Blackboard::entryValue(m_key) = msg;
-            terr << code_loc << std::hex << m_key << mys::sp << msg;
+        float ambient() const {
+            return bb::floatValue(mTarget, mDevice, get_ambient_light_sensor_value);
         }
-        //----------------------------------------------------------------------------------------------------------------------
-        // Notification data converter
-        static void rxColotNotify(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end);
+        float leftMotorTemp() const {
+            return bb::floatValue(mAltTarget, mDevice, get_motor_temperature, 0, 4);
+        }
+        float rightMotorTemp() const {
+            return bb::floatValue(mAltTarget, mDevice, get_motor_temperature, 0, 5);
+        }
+
     private:
         //----------------------------------------------------------------------------------------------------------------------
         struct color_note {
@@ -156,69 +152,68 @@ namespace rvr {
     };
 
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::enableGyroMaxNotify(const CommandResponse want_resp) {
+    inline void SensorsDirect::enableGyroMaxNotify(CommandResponse const want_resp) {
         cmd_enable_alt(enable_gyro_max_notify, true, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::disableGyroMaxNotify(const CommandResponse want_resp) {
+    inline void SensorsDirect::disableGyroMaxNotify(CommandResponse const want_resp) {
         cmd_enable_alt(enable_gyro_max_notify, false, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getRightMotorTemp(const CommandResponse want_resp) {
-        MsgArray m { 4, 5 };
-        cmd_data_alt(get_motor_temperature, m, want_resp);
+    inline void SensorsDirect::getRightMotorTemp(CommandResponse const want_resp) {
+        cmd_byte_alt_id(get_motor_temperature, 0x05, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getLeftMotorTemp(const CommandResponse want_resp) {
-        cmd_byte_alt(get_motor_temperature, 0x04, want_resp);
+    inline void SensorsDirect::getLeftMotorTemp(CommandResponse const want_resp) {
+        cmd_byte_alt_id(get_motor_temperature, 0x04, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getThermalProtectionStatus(const CommandResponse want_resp) {
+    inline void SensorsDirect::getThermalProtectionStatus(CommandResponse const want_resp) {
         cmd_basic_alt(get_motor_thermal_protection_status, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::enableThermal(const CommandResponse want_resp) {
+    inline void SensorsDirect::enableThermal(CommandResponse const want_resp) {
         cmd_enable_alt(enable_motor_thermal_protection_status_notify, true, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::disableThermal(const CommandResponse want_resp) {
+    inline void SensorsDirect::disableThermal(CommandResponse const want_resp) {
         cmd_enable_alt(enable_motor_thermal_protection_status_notify, false, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getAmbient(const CommandResponse want_resp) {
+    inline void SensorsDirect::getAmbient(CommandResponse const want_resp) {
         cmd_basic(get_ambient_light_sensor_value, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getCurrentColor(const CommandResponse want_resp) {
+    inline void SensorsDirect::getCurrentColor(CommandResponse const want_resp) {
         cmd_basic(get_current_detected_color_reading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::enableColorDetection(const CommandResponse want_resp) {
+    inline void SensorsDirect::enableColorDetection(CommandResponse const want_resp) {
         cmd_enable(enable_color_detection, true, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::disableColorDetection(const CommandResponse want_resp) {
+    inline void SensorsDirect::disableColorDetection(CommandResponse const want_resp) {
         cmd_enable(enable_color_detection, false, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::enabeColorDetectionNotify(const bool enable, const uint16_t timer, const uint8_t confidence,
-        const CommandResponse want_resp) {
+    inline void SensorsDirect::enabeColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
+        CommandResponse const want_resp) {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, enable_color_detection_notify, sequence(), //
                        enable, static_cast<uint8_t>(timer >> 8), static_cast<uint8_t>(timer & 0xFF), confidence };
         mRequest.send(msg);
     }
 
-    inline void SensorsDirect::rxColotNotify(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
-        terr << code_loc << "notification: " << std::hex << key << mys::sp;
-        std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
-        const color_note &cn = *new ( &( *begin)) color_note;
-        terr << code_loc << std::hex << //
-             (int)cn.red << mys::sp //
-             << (int)cn.green << mys::sp //
-             << (int)cn.blue << mys::sp //
-             << (int)cn.confidence << mys::sp //
-             << (int)cn.classification;
-    }
+//    inline void SensorsDirect::rxColotNotify(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
+//        terr << code_loc << "notification: " << std::hex << key << mys::sp;
+//        std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
+//        const color_note &cn = *new ( &( *begin)) color_note;
+//        terr << code_loc << std::hex << //
+//             (int)cn.red << mys::sp //
+//             << (int)cn.green << mys::sp //
+//             << (int)cn.blue << mys::sp //
+//             << (int)cn.confidence << mys::sp //
+//             << (int)cn.classification;
+//    }
 
 } /* namespace rvr */
 

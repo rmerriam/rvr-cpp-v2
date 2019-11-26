@@ -29,6 +29,7 @@
 #include "ReadPacket.h"
 
 namespace rvr {
+    class Blackboard;
 
     class Response : public ReadPacket {
     public:
@@ -49,18 +50,19 @@ namespace rvr {
         Response(SerialPort& s, std::shared_future<void> end) :
             ReadPacket { s }, mEnd { end } {
         }
-        Response(const Response& other) = delete;
+        Response(Response const& other) = delete;
         Response(Response&& other) = default;
-        Response& operator=(const Response& other) = delete;
+        Response& operator=(Response const& other) = delete;
 
         bool operator ()();
 
         static void decode(MsgArray packet);
 
     private:
-        static void decode_flags(const uint8_t f);
+        static void decode_flags(uint8_t const f);
         static void decode_error(auto err_byte);
-        static rvr::Blackboard::key_t msgKey(const CommandBase::TargetPort src, const Devices dev, const uint8_t cmd, const uint8_t seq);
+
+        static Blackboard::key_t msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
 
         std::shared_future<void> mEnd;
     };

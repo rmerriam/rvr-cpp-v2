@@ -92,10 +92,6 @@ namespace rvr {
     };
 
 //----------------------------------------------------------------------------------------------------------------------
-    inline CommandBase::CommandBase(Devices const device, Request& request, TargetPort const target) :
-        mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
-    }
-//----------------------------------------------------------------------------------------------------------------------
     inline uint8_t CommandBase::buildFlags(CommandResponse const want_resp) const {
         int flags { want_resp | activity | has_target };
         return static_cast<uint8_t>(flags);
@@ -110,7 +106,7 @@ namespace rvr {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
         mRequest.send(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_basic_alt(uint8_t const cmd, CommandResponse const want_resp) {
         MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
         mRequest.send(msg);
@@ -124,7 +120,7 @@ namespace rvr {
         MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), state };
         mRequest.send(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void CommandBase::cmd_disable(uint8_t const cmd, bool const state, CommandResponse const want_resp) {
         MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, state, sequence() };
         mRequest.send(msg);

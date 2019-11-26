@@ -33,11 +33,33 @@
 namespace rvr {
 
     class Blackboard {
+        friend class Response;
+
     public:
         Blackboard();
         Blackboard(Blackboard const& other) = delete;
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(Blackboard const& other) = delete;
+
+        static bool boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static uint8_t byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static int16_t intValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t pos = 0,
+            uint8_t const id = 0);
+
+        static void resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static MsgArray const& msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static void m_to_v();
+
+    private:
+        inline static float const NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
 
         /*  =============================================================================================================
          * Key stuff is gnarly because of using unorderedmap which uses a hash table but has limited hashing capability
@@ -75,43 +97,30 @@ namespace rvr {
             MsgArray value { };
         };
 
+        using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
+        static BBDictionary mDictionary;
+
         static FuncPtr entryFunc(key_t const key);
+
         static std::string entryName(key_t const key);
         static MsgArray& entryValue(key_t const key);
         static MsgArray& entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
-        static int32_t int_convert(MsgArray::iterator begin, MsgArray::iterator end);
-
-        static bool boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        static uint8_t byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-        static int16_t intValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-        static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-        static uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t pos = 0,
-            uint8_t const id = 0);
-
-        static void resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        static std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-
+        static uint64_t uintConvert(MsgArray::const_iterator begin, uint8_t n);
         static key_t entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
-        using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
+        // functions for processing received responses
+        static void notification_data(key_t const key, MsgArray::iterator begin, MsgArray::iterator end);
+        static void msgArray(key_t const key, MsgArray::iterator begin, MsgArray::iterator end);
+        static void msgArrayWithId(key_t const key, MsgArray::iterator begin, MsgArray::iterator end);
+        static void rawData(key_t const key, MsgArray::iterator begin, MsgArray::iterator end);
 
-//        static void dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b);
-//        static void dump();
-        static void m_to_v();
-        static BBDictionary mDictionary;
+        static int32_t int_convert(MsgArray::iterator begin, MsgArray::iterator end);
 
-        inline static float const NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
-
-    private:
-        static uint64_t uintConvert(MsgArray::const_iterator begin, uint8_t n);
+        friend std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
+    std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
 
 } /* namespace rvr */
 
