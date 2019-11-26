@@ -90,8 +90,8 @@ namespace rvr {
         //======================================================================================================================
         // data conversion methods
 //        int batteryPercent() {
-//            std::any value { bb::entryValue(mTarget, Devices::power, get_battery_percentage) };
-//            return (value.has_value()) ? std::any_cast<int64_t>(value) : -1;
+//            MsgArray value { bb::entryValue(mTarget, Devices::power, get_battery_percentage) };
+//            return (value.has_value()) ? MsgArray_cast<int64_t>(value) : -1;
 //        }
 
     private:

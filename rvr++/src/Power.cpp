@@ -27,84 +27,71 @@ namespace rvr {
     // data access methods
     //----------------------------------------------------------------------------------------------------------------------
     int Power::batteryPercent() {
-        return bb::byteValue(get_battery_percentage, mTarget, Devices::power);
+        return bb::byteValue(mTarget, Devices::power, get_battery_percentage);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::motorCurrent(const MotorSide ms) {
-        std::any value { bb::entryValueId(mAltTarget, Devices::power, get_current_sense_amplifier_current, ms) };
-        return (value.has_value()) ? std::any_cast<float>(value) : -1;
+    float Power::motorCurrent(MotorSide const ms) {
+        return bb::floatValue(mTarget, Devices::power, get_current_sense_amplifier_current, ms);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedFiltered() {
-        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, CalibratedFiltered) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
+        return bb::floatValue(mTarget, Devices::power, get_battery_voltage_in_volts, 0, CalibratedFiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedUnfiltered() {
-        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, CalibratedUnfiltered) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
+        return bb::floatValue(mTarget, Devices::power, get_battery_voltage_in_volts, 0, CalibratedUnfiltered);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    float Power::voltsUncalibratedUnfiltered() {
+        return bb::floatValue(mTarget, Devices::power, get_battery_voltage_in_volts, 0, UncalibratedUnfiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string Power::voltState() {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        return state[bb::byteValue(get_battery_voltage_state, mTarget, Devices::power)];
+        return state[bb::byteValue(mTarget, Devices::power, get_battery_voltage_state)];
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltThresholdCritical() {
-        std::any value { bb::entryValue(mTarget, Devices::power, get_battery_voltage_state_thresholds) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
-    }
-    float Power::voltThresholdLow() {
-        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_state_thresholds, 1) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
-    }
-    float Power::voltThresholdHysteresis() {
-        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_state_thresholds, 2) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
+        return bb::floatValue(mTarget, Devices::power, get_battery_voltage_state_thresholds);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltsUncalibratedUnfiltered() {
-        std::any value { bb::entryValueId(mTarget, Devices::power, get_battery_voltage_in_volts, UncalibratedUnfiltered) };
-        return (value.has_value()) ? std::any_cast<float>(value) : NaN;
+    float Power::voltThresholdLow() {
+        return bb::floatValue(mTarget, Devices::power, get_battery_voltage_state_thresholds, 1);
     }
-//    //----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
+    float Power::voltThresholdHysteresis() {
+        return bb::floatValue(mTarget, Devices::power, get_battery_voltage_state_thresholds, 2);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     bool Power::checkBatteryStateChange() {
-        std::any value { bb::entryValue(mTarget, Devices::power, enable_battery_voltage_state_change_notify) };
-        return value.has_value();
+        return bb::boolValue(mTarget, Devices::power, enable_battery_voltage_state_change_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isSleepNotify() {
-        std::any value { bb::entryValue(mTarget, Devices::power, did_sleep_notify) };
-        return value.has_value();
+        return bb::boolValue(mTarget, Devices::power, did_sleep_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isWakeNotify() {
-        std::any value { bb::entryValue(mTarget, Devices::power, system_awake_notify) };
-        return value.has_value();
+        return bb::boolValue(mTarget, Devices::power, system_awake_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Power::resetWakeNotify() {
-//        std::any& value { bb::entryValue(mTarget, Devices::power, system_awake_notify) };
-//        value.reset();
-        resetNotify(system_awake_notify);
+        bb::resetNotify(mTarget, Devices::power, system_awake_notify);
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Power::resetNotify(const uint8_t cmd) const {
-        std::any &value { bb::entryValue(mTarget, Devices::power, cmd) };
-        value.reset();
-    }    //======================================================================================================================
-    // Deserialization methods
+
+//======================================================================================================================
+// Deserialization methods
 //    void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
 //        Blackboard::entryValue(key) = bb::float_convert(begin, end);
 //    }
 //    //----------------------------------------------------------------------------------------------------------------------
-    void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
-        Blackboard::entryValue(key) = bb::float_convert(begin, begin + 4);
-        bb::key_s id_key { key };
-        id_key.id = 1;
-        Blackboard::entryValue(id_key) = bb::float_convert(begin + 4, begin + 8);
-        id_key.id = 2;
-        Blackboard::entryValue(id_key) = bb::float_convert(begin + 8, end);
-    }
+//    void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
+//        Blackboard::entryValue(key) = bb::float_convert(begin, begin + 4);
+//        bb::key_s id_key { key };
+//        id_key.id = 1;
+//        Blackboard::entryValue(id_key) = bb::float_convert(begin + 4, begin + 8);
+//        id_key.id = 2;
+//        Blackboard::entryValue(id_key) = bb::float_convert(begin + 8, end);
+//    }
 }
 

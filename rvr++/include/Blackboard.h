@@ -35,9 +35,9 @@ namespace rvr {
     class Blackboard {
     public:
         Blackboard();
-        Blackboard(const Blackboard& other) = delete;
+        Blackboard(Blackboard const& other) = delete;
         Blackboard(Blackboard&& other) = delete;
-        Blackboard& operator=(const Blackboard& other) = delete;
+        Blackboard& operator=(Blackboard const& other) = delete;
 
         /*  =============================================================================================================
          * Key stuff is gnarly because of using unorderedmap which uses a hash table but has limited hashing capability
@@ -57,130 +57,62 @@ namespace rvr {
         struct key_s {
             key_s() {
             }
-            key_s(const key_t k) :
-                id { static_cast<uint8_t>(k & 0xFF) }, //
-                    cmd { static_cast<uint8_t>((k >> 8) & 0xFF) },  //
-                    dev { static_cast<uint8_t>((k >> 16) & 0xFF) },  //
-                    proc { static_cast<uint8_t>((k >> 24) & 0xFF) } {
-            }
+            key_s(key_t const k);
 
-            key_s(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id) :
-                id(id), cmd(cmd), dev(dev), proc(proc) {
-            }
-            operator key_t() {
-                return key_t(proc << 24 | (dev << 16) | (cmd << 8) | id);
-            }
+            key_s(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id);
+            operator key_t();
             uint8_t id { };
             uint8_t cmd { };
             Devices dev { };
             CommandBase::TargetPort proc { };
         };
 
-        using FuncPtr = void (*)(const key_t key, MsgArray::iterator , MsgArray::iterator );
+        using FuncPtr = void (*)(key_t const key, MsgArray::iterator , MsgArray::iterator );
 
         struct BlackboardEntry {
             std::string name;
             FuncPtr func;
-            std::any value { };
+            MsgArray value { };
         };
 
-        static FuncPtr entryFunc(const key_t key);
-        static std::string entryName(const key_t key);
-        static std::any& entryValue(const key_t key);
-        static std::any& entryValue(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd);
-        static std::any& entryValueId(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id);
+        static FuncPtr entryFunc(key_t const key);
+        static std::string entryName(key_t const key);
+        static MsgArray& entryValue(key_t const key);
+        static MsgArray& entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
-        static float float_convert(MsgArray::iterator begin, MsgArray::iterator end);
         static int32_t int_convert(MsgArray::iterator begin, MsgArray::iterator end);
 
-        static uint8_t byteValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
-        static int16_t intValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
-        static uint16_t uintValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
-        static uint64_t uint64Value(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+        static bool boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        static std::string stringValue(const uint8_t cmd, const CommandBase::TargetPort target, const Devices dev);
+        static uint8_t byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static int16_t intValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        static key_t entryKey(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id = 0);
+        static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t pos = 0,
+            uint8_t const id = 0);
+
+        static void resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static key_t entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
 
-        static void dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b);
-        static void dump();
+//        static void dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b);
+//        static void dump();
         static void m_to_v();
         static BBDictionary mDictionary;
+
+        inline static float const NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
 
     private:
         static uint64_t uintConvert(MsgArray::const_iterator begin, uint8_t n);
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::ostream& operator<<(std::ostream& os, const Blackboard::key_s& k) {
-        os << k.proc << mys::sp  //
-           << k.dev << mys::sp //
-           << k.cmd << mys::sp //
-           << k.id;
-        return os;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline rvr::Blackboard::FuncPtr Blackboard::entryFunc(const key_t key) {
-        return mDictionary[key].func;
-    }
-//    //----------------------------------------------------------------------------------------------------------------------
-    inline std::string Blackboard::entryName(const key_t key) {
-        return mDictionary[key].name;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline std::any& Blackboard::entryValue(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd) {
-        return entryValue(entryKey(proc, dev, cmd, 0));
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline std::any& Blackboard::entryValueId(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd, const uint8_t id) {
-        return entryValue(entryKey(proc, dev, cmd, id));
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline std::any& Blackboard::entryValue(const key_t key) {
-        return mDictionary[key].value;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline Blackboard::key_t Blackboard::entryKey(const CommandBase::TargetPort proc, const Devices dev, const uint8_t cmd,
-        const uint8_t id) {
-        return static_cast<key_t>(key_s(proc, dev, cmd, id));
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Blackboard::dumpEntry(std::pair<const rvr::Blackboard::key_t, rvr::Blackboard::BlackboardEntry>& b) {
-        auto be { b.second };
-        terr << std::hex << std::uppercase << b.first //
-             << mys::tab << std::setw(45) << std::setfill(' ') << std::left << be.name << //
-             mys::tab << mys::tab << (( !be.value.has_value()) ? "" : be.value.type().name());
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Blackboard::dump() {
+    inline std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
 
-        for (auto b : rvr::Blackboard::mDictionary) {
-            dumpEntry(b);
-        }
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Blackboard::m_to_v() {
-        struct v_map {
-            Blackboard::key_t key;
-            BlackboardEntry be;
-        };
-        std::vector<v_map> vec;
-        for (auto b : rvr::Blackboard::mDictionary) {
-            v_map v { b.first, b.second };
-            vec.push_back(v);
-        }
-        std::sort(vec.begin(), vec.end(), //
-                  [](const v_map& a, const v_map& b) {
-                      return a.key < b.key;
-                  }
-        );
-        for (auto &i : vec) {
-            terr << std::hex << std::uppercase << i.key //
-                 << mys::tab << std::setw(45) << std::setfill(' ') << std::left << i.be.name << //
-                 mys::tab << mys::tab << (( !i.be.value.has_value()) ? "" : i.be.value.type().name());
-        }
-    }
 } /* namespace rvr */
 
 #endif /* BLACKBOARD_H_ */

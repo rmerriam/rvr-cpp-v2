@@ -61,7 +61,7 @@ namespace rvr {
         return true;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    void Response::decode_flags(const uint8_t f) {
+    void Response::decode_flags(uint8_t const f) {
         std::string flags { };
 
         for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
@@ -140,7 +140,7 @@ namespace rvr {
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-    rvr::Blackboard::key_t Response::msgKey(const CommandBase::TargetPort src, const Devices dev, const uint8_t cmd, const uint8_t seq) {
+    rvr::Blackboard::key_t Response::msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq) {
         using bb = rvr::Blackboard;
         bb::key_t key;
         if (seq >= 0x80) {
@@ -165,7 +165,7 @@ namespace rvr {
         uint8_t status { 0x05 };  //
         uint8_t data { 0x06 };    //
 
-        const bool is_resp { (packet[flags] & response) == response };   // versus notification
+        bool const is_resp { (packet[flags] & response) == response };   // versus notification
 
         if (packet[flags] & has_target) {  //
             ++src;
@@ -202,7 +202,7 @@ namespace rvr {
             }
             else {  // notification - sequence is 0xFF
                 bb::FuncPtr decode_func { bb::entryFunc(key) };
-                decode_func(key, packet.begin() + status, packet.end());
+                decode_func(key, packet.begin() + seq, packet.end());
             }
         }
         terr << __func__ << " **************";

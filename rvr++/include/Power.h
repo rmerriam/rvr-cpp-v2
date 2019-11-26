@@ -46,23 +46,23 @@ namespace rvr {
             right = 1
         };
 
-        Power(const Power& other) = delete;
+        Power(Power const& other) = delete;
         Power(Power&& other) = delete;
-        Power& operator=(const Power& other) = delete;
+        Power& operator=(Power const& other) = delete;
 
         // requests to RVR
-        void awake(const CommandResponse want_resp = resp_yes);
-        void powerOff(const CommandResponse want_resp = resp_yes);
-        void sleep(const CommandResponse want_resp = resp_yes);
+        void awake(CommandResponse const want_resp = resp_yes);
+        void powerOff(uint8_t const secs, CommandResponse const want_resp = resp_yes);
+        void sleep(CommandResponse const want_resp = resp_yes);
 
-        void batteryMotorCurrent(const MotorSide ms, const CommandResponse want_resp = resp_yes);
-        void batteryPercentage(const CommandResponse want_resp = resp_yes);
-        void batteryVoltage(const VoltageType vt, const CommandResponse want_resp = resp_yes);
-        void batteryVoltageState(const CommandResponse want_resp = resp_yes);
-        void batteryVoltThresholds(const CommandResponse want_resp = resp_yes);
+        void batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp = resp_yes);
+        void batteryPercentage(CommandResponse const want_resp = resp_yes);
+        void batteryVoltage(VoltageType const vt, CommandResponse const want_resp = resp_yes);
+        void batteryVoltageState(CommandResponse const want_resp = resp_yes);
+        void batteryVoltThresholds(CommandResponse const want_resp = resp_yes);
 
-        void enableBatteryStateChange(const CommandResponse want_resp = resp_on_error);
-        void disableBatteryStateChange(const CommandResponse want_resp = resp_on_error);
+        void enableBatteryStateChange(CommandResponse const want_resp = resp_on_error);
+        void disableBatteryStateChange(CommandResponse const want_resp = resp_on_error);
 
         // Data access methods`
         float voltsCalibratedFiltered();
@@ -73,7 +73,7 @@ namespace rvr {
         float voltThresholdLow();
         float voltThresholdHysteresis();
 
-        float motorCurrent(const MotorSide ms);
+        float motorCurrent(MotorSide const ms);
         int batteryPercent();
         std::string voltState();
 
@@ -84,7 +84,7 @@ namespace rvr {
         bool isSleepNotify();
 
         // De-serialization handlers
-        static void rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end);
+//        static void rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end);
 
     private:
         enum BatteryVoltageStates : uint8_t {
@@ -105,50 +105,47 @@ namespace rvr {
             get_current_sense_amplifier_current = 0x27, //
         };
 
-        void resetNotify(const uint8_t cmd) const;
-
-        inline static const float NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::awake(const CommandResponse want_resp) {
+    inline void Power::awake(CommandResponse const want_resp) {
         cmd_basic(wake, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::powerOff(const CommandResponse want_resp) {
-        cmd_basic(power_off, want_resp);
+    inline void Power::powerOff(uint8_t const secs, CommandResponse const want_resp) {
+        cmd_byte(power_off, secs, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::sleep(const CommandResponse want_resp) {
+    inline void Power::sleep(CommandResponse const want_resp) {
         cmd_basic(snooze, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::batteryPercentage(const CommandResponse want_resp) {
+    inline void Power::batteryPercentage(CommandResponse const want_resp) {
         cmd_basic(get_battery_percentage, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::batteryVoltageState(const CommandResponse want_resp) {
+    inline void Power::batteryVoltageState(CommandResponse const want_resp) {
         cmd_basic(get_battery_voltage_state, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::batteryVoltage(const VoltageType vt, const CommandResponse want_resp) {
+    inline void Power::batteryVoltage(VoltageType const vt, CommandResponse const want_resp) {
         cmd_byte_id(get_battery_voltage_in_volts, vt, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::batteryVoltThresholds(const CommandResponse want_resp) {
+    inline void Power::batteryVoltThresholds(CommandResponse const want_resp) {
         cmd_basic(get_battery_voltage_state_thresholds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::batteryMotorCurrent(const MotorSide ms, const CommandResponse want_resp) {
+    inline void Power::batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp) {
         cmd_byte_alt_id(get_current_sense_amplifier_current, ms, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::enableBatteryStateChange(const CommandResponse want_resp) {
+    inline void Power::enableBatteryStateChange(CommandResponse const want_resp) {
         cmd_enable(enable_battery_voltage_state_change_notify, true, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::disableBatteryStateChange(const CommandResponse want_resp) {
+    inline void Power::disableBatteryStateChange(CommandResponse const want_resp) {
         cmd_enable(enable_battery_voltage_state_change_notify, false, want_resp);
-        resetNotify(enable_battery_voltage_state_change_notify);
+//        bb::resetNotify(enable_battery_voltage_state_change_notify);
         // cannot do this because the response puts a value back into the dictionary
     }
 

@@ -36,18 +36,18 @@ namespace rvr {
         SystemInfo(Request& req) :
             CommandBase { Devices::system, req, nordic } {
         }
-        SystemInfo(const SystemInfo& other) = delete;
+        SystemInfo(SystemInfo const& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;
-        SystemInfo& operator=(const SystemInfo& other) = delete;
+        SystemInfo& operator=(SystemInfo const& other) = delete;
 
-        void getBoardRevision(const CommandResponse want_resp = resp_on_error);
-        void getBootloaderVersion(const CommandResponse want_resp = resp_on_error);
-        void getMacId(const CommandResponse want_resp = resp_on_error);
-        void getMainAppVersion(const CommandResponse want_resp = resp_on_error);
-        void getProcessorName(const CommandResponse want_resp = resp_on_error);
-        void getSku(const CommandResponse want_resp = resp_on_error);
-        void getStatsId(const CommandResponse want_resp = resp_on_error);
-        void getUpTime(const CommandResponse want_resp = resp_on_error);
+        void getBoardRevision(CommandResponse const want_resp = resp_on_error);
+        void getBootloaderVersion(CommandResponse const want_resp = resp_on_error);
+        void getMacId(CommandResponse const want_resp = resp_on_error);
+        void getMainAppVersion(CommandResponse const want_resp = resp_on_error);
+        void getProcessorName(CommandResponse const want_resp = resp_on_error);
+        void getSku(CommandResponse const want_resp = resp_on_error);
+        void getStatsId(CommandResponse const want_resp = resp_on_error);
+        void getUpTime(CommandResponse const want_resp = resp_on_error);
 
         int64_t boardVersion();
         std::string bootVersion();
@@ -73,41 +73,41 @@ namespace rvr {
             get_core_up_time_in_milliseconds = 0x39, //
         };
 
-        std::string versionValue(const uint8_t cmd, const TargetPort target, const Devices dev);
+        std::string versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getMainAppVersion(const CommandResponse want_resp) {
+    inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {
         cmd_basic(get_main_application_version, want_resp);
         cmd_basic_alt(get_main_application_version, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getBootloaderVersion(const CommandResponse want_resp) {
+    inline void SystemInfo::getBootloaderVersion(CommandResponse const want_resp) {
         cmd_basic(get_bootloader_version, want_resp);
         cmd_basic_alt(get_bootloader_version, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getBoardRevision(const CommandResponse want_resp) {
+    inline void SystemInfo::getBoardRevision(CommandResponse const want_resp) {
         cmd_basic_alt(get_board_revision, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getMacId(const CommandResponse want_resp) {
+    inline void SystemInfo::getMacId(CommandResponse const want_resp) {
         cmd_basic_alt(get_mac_address, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getStatsId(const CommandResponse want_resp) {
+    inline void SystemInfo::getStatsId(CommandResponse const want_resp) {
         cmd_basic_alt(get_stats_id, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getProcessorName(const CommandResponse want_resp) {
+    inline void SystemInfo::getProcessorName(CommandResponse const want_resp) {
         cmd_basic(get_processor_name, want_resp);
         cmd_basic_alt(get_processor_name, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getUpTime(const CommandResponse want_resp) {
+    inline void SystemInfo::getUpTime(CommandResponse const want_resp) {
         cmd_basic(get_core_up_time_in_milliseconds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getSku(const CommandResponse want_resp) {
+    inline void SystemInfo::getSku(CommandResponse const want_resp) {
         cmd_basic_alt(get_sku, want_resp);
     }
 

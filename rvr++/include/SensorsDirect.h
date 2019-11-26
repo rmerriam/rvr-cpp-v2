@@ -87,11 +87,11 @@ namespace rvr {
         static void motorTemperature(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
             auto m_key = static_cast<bb::key_t>(key | (( *begin - 4)));
             //            Blackboard::entryValue(m_key) = bb::float_convert(begin + 1, end);
-            //            terr << code_loc << std::hex << m_key << mys::sp << std::any_cast<float>(Blackboard::entryValue(m_key));
+            //            terr << code_loc << std::hex << m_key << mys::sp << MsgArray_cast<float>(Blackboard::entryValue(m_key));
 
             MsgArray msg { begin, end };
             Blackboard::entryValue(m_key) = msg;
-            terr << code_loc << std::hex << m_key << mys::sp << std::any_cast<MsgArray>(Blackboard::entryValue(m_key));
+            terr << code_loc << std::hex << m_key << mys::sp << msg;
         }
         //----------------------------------------------------------------------------------------------------------------------
         // Notification data converter
@@ -211,7 +211,7 @@ namespace rvr {
     inline void SensorsDirect::rxColotNotify(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
         terr << code_loc << "notification: " << std::hex << key << mys::sp;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
-        const color_note& cn = *new ( &( *begin)) color_note;
+        const color_note &cn = *new ( &( *begin)) color_note;
         terr << code_loc << std::hex << //
              (int)cn.red << mys::sp //
              << (int)cn.green << mys::sp //

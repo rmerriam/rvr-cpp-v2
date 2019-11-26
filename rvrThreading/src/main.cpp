@@ -163,51 +163,51 @@ int main(int argc, char* argv[]) {
 #endif
 #if 1
 
-//    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
-//
-//    pow.enableBatteryStateChange(RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-//    terr << code_loc << mys::sp << "Set State Change on?: " << pow.checkBatteryStateChange();
-//
-    pow.disableBatteryStateChange(RespYes);
+    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
+
+    pow.enableBatteryStateChange(RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    terr << code_loc << mys::sp << "Set State Change on?: " << pow.checkBatteryStateChange();
+
+//    pow.disableBatteryStateChange(RespYes);
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-//
+
     terr << code_loc << mys::sp << "Set State Change off?: " << pow.checkBatteryStateChange();
 
     pow.batteryVoltageState(RespYes);
-//    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
-//    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
-//    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
+    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
+    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
+    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
 
-//    pow.batteryVoltThresholds(RespYes);
-//    pow.batteryMotorCurrent(rvr::Power::MotorSide::left, RespYes);
-//    pow.batteryMotorCurrent(rvr::Power::MotorSide::right, RespYes);
+    pow.batteryVoltThresholds(RespYes);
+    pow.batteryMotorCurrent(rvr::Power::MotorSide::left, RespYes);
+    pow.batteryMotorCurrent(rvr::Power::MotorSide::right, RespYes);
     pow.batteryVoltageState(RespYes);
     pow.batteryPercentage(RespYes);
 
     std::this_thread::sleep_for(1s);
-//    rvr::Blackboard::dump();
+
     terr << code_loc << mys::nl;
 
-    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
+    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify();
     terr << code_loc << mys::sp << "State: " << pow.voltState();
 
-    //    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify() << " =========";
-//    pow.resetWakeNotify();
-//    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify() << " =========";
+    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify();
+    pow.resetWakeNotify();
+    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify();
 
-//    terr << code_loc << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
-//    terr << code_loc << mys::sp << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
-//    terr << code_loc << mys::sp << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
-//    terr << code_loc << mys::sp << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
-//    terr << code_loc << mys::sp << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
-//    terr << code_loc << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
-//    terr << code_loc << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
-//    terr << code_loc << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
+    terr << code_loc << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
+    terr << code_loc << mys::sp << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
+    terr << code_loc << mys::sp << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
+    terr << code_loc << mys::sp << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
+    terr << code_loc << mys::sp << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
+    terr << code_loc << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
+    terr << code_loc << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
+    terr << code_loc << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
     terr << code_loc << mys::sp << "VPercent: " << pow.batteryPercent();
-//
-//    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
-//    terr << code_loc << mys::nl;
+
+    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
+    terr << code_loc << mys::nl;
 
 #endif
 #if 0
@@ -278,14 +278,15 @@ int main(int argc, char* argv[]) {
     terr << code_loc << "----------------" << mys::nl;
 
     pow.sleep();
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+//    pow.powerOff(5);
+//    std::this_thread::sleep_for(10s);
 //    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
 
     end_tasks.set_value();
     resp_future.get();
-//    pow.powerOff();
 
-//    rvr::Blackboard::m_to_v();
+    rvr::Blackboard::m_to_v();
 
     return 0;
 }

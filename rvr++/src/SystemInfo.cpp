@@ -25,11 +25,10 @@
 #include "SystemInfo.h"
 namespace rvr {
 //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::versionValue(const uint8_t cmd, const TargetPort target, const Devices dev) {
-        std::any value { bb::entryValue(target, mDevice, get_main_application_version) };
+    std::string SystemInfo::versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
+        MsgArray& msg { bb::entryValue(target, dev, cmd) };
         std::string ver;
-        if (value.has_value()) {
-            MsgArray msg { std::any_cast<MsgArray>(value) };
+        if ( !msg.empty()) {
             ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
                 std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
                 std::to_string(((msg[4] << 8) | msg[5]));
@@ -38,42 +37,42 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::processorName() {
-        return bb::stringValue(get_processor_name, mTarget, mDevice);
+        return bb::stringValue(mTarget, mDevice, get_processor_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::processorName2() {
-        return bb::stringValue(get_processor_name, mAltTarget, mDevice);
+        return bb::stringValue(mAltTarget, mDevice, get_processor_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::sku() {
-        return bb::stringValue(get_sku, mAltTarget, mDevice);
+        return bb::stringValue(mAltTarget, mDevice, get_sku);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::mainAppVersion() {
-        return versionValue(get_main_application_version, mTarget, mDevice);
+        return versionValue(mTarget, mDevice, get_main_application_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::mainAppVersion2() {
-        return versionValue(get_main_application_version, mAltTarget, mDevice);
+        return versionValue(mAltTarget, mDevice, get_main_application_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::bootVersion() {
-        return versionValue(get_bootloader_version, mTarget, mDevice);
+        return versionValue(mTarget, mDevice, get_bootloader_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::bootVersion2() {
-        return versionValue(get_bootloader_version, mAltTarget, mDevice);
+        return versionValue(mAltTarget, mDevice, get_bootloader_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::boardVersion() {
-        return bb::byteValue(get_board_revision, mAltTarget, mDevice);
+        return bb::byteValue(mAltTarget, mDevice, get_board_revision);
     }
 //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::macAddress() {
-        std::string mac { bb::stringValue(get_mac_address, mAltTarget, mDevice) };
+        std::string mac { bb::stringValue(mAltTarget, mDevice, get_mac_address) };
 
         if ( !mac.empty()) {
-            const char *colon { ":" };
+            char const* colon { ":" };
             mac.insert(10, colon);
             mac.insert(8, colon);
             mac.insert(6, colon);
@@ -85,14 +84,14 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     int16_t SystemInfo::statsId() {
-//        std::any value { bb::entryValue(mAltTarget, mDevice, get_stats_id) };
-        return bb::intValue(get_stats_id, mAltTarget, mDevice);
+//        MsgArray value { bb::entryValue(mAltTarget, mDevice, get_stats_id) };
+        return bb::intValue(mAltTarget, mDevice, get_stats_id);
 
     }
 //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::upTime() {
-//        std::any value { bb::entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
-        return bb::uint64Value(get_core_up_time_in_milliseconds, mTarget, mDevice);
+//        MsgArray value { bb::entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
+        return bb::uint64Value(mTarget, mDevice, get_core_up_time_in_milliseconds);
 
     }
 
