@@ -13,13 +13,13 @@ namespace rvr {
         auto [l_speed, l_mode] = speed_mode(left);
         auto [r_speed, r_mode] = speed_mode(right);
 
-        MsgArray msg { l_mode, l_speed, r_mode, r_speed };
+        RvrMsg msg { l_mode, l_speed, r_mode, r_speed };
         cmd_data(raw_motors, msg, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::spin_drive(const double& speed, const int& heading, const CommandResponse want_resp) {
         auto [spd, mode] = speed_mode(speed);
-        MsgArray msg { spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), mode };
+        RvrMsg msg { spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), mode };
         cmd_data(drive_with_heading, msg, want_resp);
     }
 }

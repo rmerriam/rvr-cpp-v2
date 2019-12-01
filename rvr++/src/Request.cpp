@@ -28,9 +28,9 @@
 
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::send(MsgArray const& p) {
-        MsgArray payload { p };
-        MsgArray mMsg;
+    void Request::send(RvrMsg const& p) {
+        RvrMsg payload { p };
+        RvrMsg mMsg;
         mMsg.clear();
         mMsg.push_back(SOP);
 
@@ -49,7 +49,7 @@ namespace rvr {
         terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    auto Request::escape_char(MsgArray::iterator& p, MsgArray& payload) {
+    auto Request::escape_char(RvrMsg::iterator& p, RvrMsg& payload) {
 
         switch ( *p) {
             case SOP: {
@@ -72,7 +72,7 @@ namespace rvr {
         return p;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::checksum(MsgArray const& payload) const {
+    uint8_t Request::checksum(RvrMsg const& payload) const {
         unsigned int sum { };
         sum = ~std::accumulate(payload.begin(), payload.end(), 0);
         return sum;
@@ -82,7 +82,7 @@ namespace rvr {
         return (c == SOP) || (c == EOP) || (c == ESC);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::escape_msg(MsgArray& payload) {
+    void Request::escape_msg(RvrMsg& payload) {
         for (auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end();
             p = find_if(p, payload.end(), isPacketChar)) {
             p = escape_char(p, payload);

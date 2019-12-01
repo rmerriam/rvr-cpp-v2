@@ -40,8 +40,8 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     bool Response::operator ()() {
-        rvr::MsgArray in;
-        rvr::MsgArray packet;
+        rvr::RvrMsg in;
+        rvr::RvrMsg packet;
         in.reserve(80);
 
         while (mEnd.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
@@ -148,7 +148,7 @@ namespace rvr {
         return key;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Response::decode(MsgArray packet) {
+    void Response::decode(RvrMsg packet) {
         using bb = rvr::Blackboard;
 
         // typeical positions of header bytes when target not present, the usual case

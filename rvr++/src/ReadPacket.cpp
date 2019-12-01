@@ -25,18 +25,18 @@
 namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
-    void ReadPacket::read(rvr::MsgArray& in, rvr::MsgArray& out) {
+    void ReadPacket::read(rvr::RvrMsg& in, rvr::RvrMsg& out) {
         checkForData(in);
         processData(in, out);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ReadPacket::removeDelimiters(MsgArray& payload) {
+    void ReadPacket::removeDelimiters(RvrMsg& payload) {
         payload.erase(payload.begin()); // SOP
         payload.erase(payload.end() - 1); // EOP
         payload.erase(payload.end() - 1); // sum
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ReadPacket::checkForData(rvr::MsgArray& in) {
+    void ReadPacket::checkForData(rvr::RvrMsg& in) {
         if (mSerialPort.count() != 0) {
             uint8_t r[in.capacity()];
             int cnt = mSerialPort.read(r, in.capacity());
@@ -44,7 +44,7 @@ namespace rvr {
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ReadPacket::processData(rvr::MsgArray& in, rvr::MsgArray& packet) {
+    void ReadPacket::processData(rvr::RvrMsg& in, rvr::RvrMsg& packet) {
         constexpr uint8_t EopSop[] { EOP, SOP };
 
         auto pos = std::search(in.begin(), in.end(), EopSop, &EopSop[1]);
@@ -57,7 +57,7 @@ namespace rvr {
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ReadPacket::unescape_char(auto& p, MsgArray& payload) {
+    void ReadPacket::unescape_char(auto& p, RvrMsg& payload) {
         auto n { p + 1 };
         switch ( *n) {
             case escaped_SOP: {
@@ -76,7 +76,7 @@ namespace rvr {
         payload.erase(p);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ReadPacket::unescape_msg(MsgArray& payload) {
+    void ReadPacket::unescape_msg(RvrMsg& payload) {
         for (auto p { find(payload.begin(), payload.end(), ESC) }; p != payload.end(); p = find(p + 1, payload.end(), ESC)) {
             unescape_char(p, payload);
         }

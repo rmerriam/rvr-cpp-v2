@@ -57,11 +57,11 @@ namespace rvr {
         return mDictionary[key].name;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    MsgArray& Blackboard::entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id) {
+    RvrMsg& Blackboard::entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id) {
         return entryValue(entryKey(proc, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    MsgArray& Blackboard::entryValue(key_t const key) {
+    RvrMsg& Blackboard::entryValue(key_t const key) {
         return mDictionary[key].value;
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace rvr {
         return key_t(proc << 24 | (dev << 16) | (cmd << 8) | id);
     }
     //======================================================================================================================
-    int32_t Blackboard::int_convert(MsgArray::iterator begin, MsgArray::iterator end) {
+    int32_t Blackboard::int_convert(RvrMsg::iterator begin, RvrMsg::iterator end) {
         int64_t value { };
         for (auto it { begin }; it != end; ++it) {
             uint8_t const v { *it };
@@ -79,9 +79,9 @@ namespace rvr {
         return value;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void bb::rawData(bb::key_t const key, MsgArray::iterator begin, MsgArray::iterator end) {
+    void bb::rawData(bb::key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end) {
         std::cerr << std::hex;
-        Blackboard::entryValue(key) = MsgArray(begin, end);
+        Blackboard::entryValue(key) = RvrMsg(begin, end);
         terr << code_loc << std::hex << key << mys::sp;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
 
@@ -101,7 +101,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     // Notifications don't have sequence numbers so 'data' starts at what is usually the sequence
-    void bb::notification_data(bb::key_t const key, MsgArray::iterator begin, MsgArray::iterator end) {
+    void bb::notification_data(bb::key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end) {
         terr << code_loc << "notification: " << std::hex << key << mys::sp;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
         terr << code_loc << bb::int_convert(begin + 1, begin + 1 + 4); // << mys::tab << bb::int_convert(begin + 1 + 4, end);
@@ -140,8 +140,8 @@ namespace rvr {
 //        terr << code_loc << "status: " << (bool) *(begin - 1);
 //    }
     //----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::msgArray(bb::key_t const key, MsgArray::iterator begin, MsgArray::iterator end) {
-        MsgArray msg { begin, end };
+    void Blackboard::msgArray(bb::key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end) {
+        RvrMsg msg { begin, end };
         if (msg.empty()) {
             msg.push_back(0xFF);
         }
@@ -149,7 +149,7 @@ namespace rvr {
         terr << code_loc << std::hex << key << mys::sp << msg;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::msgArrayWithId(bb::key_t const key, MsgArray::iterator begin, MsgArray::iterator end) {
+    void Blackboard::msgArrayWithId(bb::key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end) {
         msgArray(key, begin + 1, end);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -249,14 +249,14 @@ namespace rvr {
 #endif
     };
     //----------------------------------------------------------------------------------------------------------------------
-    MsgArray empty;
+    RvrMsg empty;
     constexpr uint8_t two_byte_size { sizeof(uint16_t) };
     //----------------------------------------------------------------------------------------------------------------------
     Blackboard::key_t Blackboard::entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id) {
         return static_cast<key_t>(key_s(proc, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint64_t Blackboard::uintConvert(MsgArray::const_iterator begin, uint8_t const n) {
+    uint64_t Blackboard::uintConvert(RvrMsg::const_iterator begin, uint8_t const n) {
         uint64_t res { };
         for (auto it { begin }; it != begin + n; ++it) {
             res <<= 8;
@@ -266,7 +266,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Blackboard::boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        MsgArray& msg { entryValue(target, dev, cmd) };
+        RvrMsg& msg { entryValue(target, dev, cmd) };
         bool res { };
         if ( !msg.empty()) {
             res = msg[0] != 0;
@@ -275,7 +275,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint8_t Blackboard::byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        MsgArray& msg { bb::entryValue(target, dev, cmd) };
+        RvrMsg& msg { bb::entryValue(target, dev, cmd) };
         uint8_t res { };
         if ( !msg.empty()) {
             res = msg[0];
@@ -284,7 +284,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint16_t Blackboard::uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        MsgArray msg { bb::entryValue(target, dev, cmd) };
+        RvrMsg msg { bb::entryValue(target, dev, cmd) };
         uint16_t res { };
         if (msg.size() >= two_byte_size) {
             res = uintConvert(msg.begin(), two_byte_size);
@@ -297,7 +297,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint64_t Blackboard::uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        MsgArray msg { bb::entryValue(target, dev, cmd) };
+        RvrMsg msg { bb::entryValue(target, dev, cmd) };
         uint64_t res { };
 
         if (msg.size() >= sizeof(uint64_t)) {
@@ -308,7 +308,7 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     float Blackboard::floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t pos,
         uint8_t const id) {
-        MsgArray& msg { entryValue(target, dev, cmd, id) };
+        RvrMsg& msg { entryValue(target, dev, cmd, id) };
         union {
             uint8_t buf[4];
             float result { };
@@ -325,7 +325,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        MsgArray& msg { entryValue(target, dev, cmd) };
+        RvrMsg& msg { entryValue(target, dev, cmd) };
         if (msg.empty()) {
             msg.push_back(0);
         }
@@ -333,11 +333,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        MsgArray msg { entryValue(target, dev, cmd) };
+        RvrMsg msg { entryValue(target, dev, cmd) };
         return std::string { msg.begin(), msg.end() };
     }
     //----------------------------------------------------------------------------------------------------------------------
-    MsgArray const& Blackboard::msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
+    RvrMsg const& Blackboard::msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         return {entryValue(target, dev, cmd)};
     }
     //======================================================================================================================

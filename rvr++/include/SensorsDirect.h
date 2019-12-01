@@ -198,7 +198,7 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enabeColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
         CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, enable_color_detection_notify, sequence(), //
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, enable_color_detection_notify, sequence(), //
                        enable, static_cast<uint8_t>(timer >> 8), static_cast<uint8_t>(timer & 0xFF), confidence };
         mRequest.send(msg);
     }

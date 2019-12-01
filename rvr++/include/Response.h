@@ -56,7 +56,7 @@ namespace rvr {
 
         bool operator ()();
 
-        static void decode(MsgArray packet);
+        static void decode(RvrMsg packet);
 
     private:
         static void decode_flags(uint8_t const f);

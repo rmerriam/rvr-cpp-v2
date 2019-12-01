@@ -34,14 +34,14 @@ namespace rvr {
             mSerialPort { s } {
         }
 
-        void send(const MsgArray& p);
+        void send(const RvrMsg& p);
 
     private:
-        uint8_t checksum(const MsgArray& payload) const;
+        uint8_t checksum(const RvrMsg& payload) const;
         static bool isPacketChar(const uint8_t c);
 
-        auto escape_char(MsgArray::iterator& p, MsgArray& payload);
-        void escape_msg(MsgArray& payload);
+        auto escape_char(RvrMsg::iterator& p, RvrMsg& payload);
+        void escape_msg(RvrMsg& payload);
 
         SerialPort& mSerialPort;
     };

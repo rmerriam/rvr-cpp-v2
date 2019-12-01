@@ -33,7 +33,7 @@ using char_ptr = char const *;
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace rvr {
-    using MsgArray = std::u8string;
+    using RvrMsg = std::u8string;
 
     enum flags : uint8_t {
         no_response = 0x00, //

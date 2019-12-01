@@ -23,9 +23,9 @@
 #include "IoLed.h"
 namespace rvr {
 
-    void IoLed::allLed(const uint32_t led_bits, const MsgArray& colors, const CommandResponse want_resp) {
+    void IoLed::allLed(const uint32_t led_bits, const RvrMsg& colors, const CommandResponse want_resp) {
 
-        MsgArray leds { //
+        RvrMsg leds { //
         static_cast<uint8_t>(led_bits >> 24), //
         static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
         static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
