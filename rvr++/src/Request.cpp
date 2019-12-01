@@ -28,7 +28,7 @@
 
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::send(const MsgArray& p) {
+    void Request::send(MsgArray const& p) {
         MsgArray payload { p };
         MsgArray mMsg;
         mMsg.clear();
@@ -44,7 +44,7 @@ namespace rvr {
 
         mMsg.push_back(EOP);
 
-        mSerialPort.write(mMsg.data(), mMsg.size());
+        mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
 
         terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
     }
@@ -72,13 +72,13 @@ namespace rvr {
         return p;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::checksum(const MsgArray& payload) const {
+    uint8_t Request::checksum(MsgArray const& payload) const {
         unsigned int sum { };
         sum = ~std::accumulate(payload.begin(), payload.end(), 0);
         return sum;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Request::isPacketChar(const uint8_t c) {
+    bool Request::isPacketChar(uint8_t const c) {
         return (c == SOP) || (c == EOP) || (c == ESC);
     }
     //----------------------------------------------------------------------------------------------------------------------

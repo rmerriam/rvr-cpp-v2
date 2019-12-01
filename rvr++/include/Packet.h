@@ -22,18 +22,18 @@
 //     Created: Nov 15, 2019
 //
 //======================================================================================================================
-
+#include <string>
 #include <vector>
 
 #include "Trace.h"
 
 #include "SerialPort.h"
 //----------------------------------------------------------------------------------------------------------------------
-using char_ptr = const char *;
+using char_ptr = char const *;
 //----------------------------------------------------------------------------------------------------------------------
 
 namespace rvr {
-    using MsgArray = std::vector<uint8_t>;
+    using MsgArray = std::u8string;
 
     enum flags : uint8_t {
         no_response = 0x00, //
