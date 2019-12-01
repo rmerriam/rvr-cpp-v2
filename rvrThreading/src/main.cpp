@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 1
+#if 0
     // Direct reading of sensors
     rvr::SensorsDirect sen_d(req);
 
@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(500ms);
 
 #endif
-#if 0
+#if 1
 
     terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
 

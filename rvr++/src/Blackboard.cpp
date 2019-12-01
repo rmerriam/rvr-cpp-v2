@@ -30,6 +30,7 @@
 #include "Power.h"
 #include "SensorsDirect.h"
 #include "SensorsStream.h"
+#include <string_view>
 
 namespace rvr {
 
@@ -44,9 +45,9 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     Blackboard::key_s::key_s(key_t const k) :
         id { static_cast<uint8_t>(k & 0xFF) }, //
-            cmd { static_cast<uint8_t>((k >> 8) & 0xFF) }, //
-            dev { static_cast<uint8_t>((k >> 16) & 0xFF) }, //
-            proc { static_cast<uint8_t>((k >> 24) & 0xFF) } {
+        cmd { static_cast<uint8_t>((k >> 8) & 0xFF) }, //
+        dev { static_cast<uint8_t>((k >> 16) & 0xFF) }, //
+        proc { static_cast<uint8_t>((k >> 24) & 0xFF) } {
     }
     //----------------------------------------------------------------------------------------------------------------------
     Blackboard::FuncPtr Blackboard::entryFunc(key_t const key) {
@@ -84,7 +85,6 @@ namespace rvr {
         Blackboard::entryValue(key) = RvrMsg(begin, end);
         terr << code_loc << std::hex << key << mys::sp;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
-
     }
     //----------------------------------------------------------------------------------------------------------------------
     template <typename T>
@@ -104,9 +104,9 @@ namespace rvr {
     void bb::notification_data(bb::key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end) {
         terr << code_loc << "notification: " << std::hex << key << mys::sp;
         std::copy(begin, end, std::ostream_iterator<int>(std::cerr, " "));
-        terr << code_loc << bb::int_convert(begin + 1, begin + 1 + 4); // << mys::tab << bb::int_convert(begin + 1 + 4, end);
+        terr << code_loc << bb::int_convert(begin, begin + 4); // << mys::tab << bb::int_convert(begin + 1 + 4, end);
 
-        uint32_t value { bb::int_convert(begin + 1, begin + 1 + 4) };
+        uint32_t value { bb::int_convert(begin, begin + 4) };
 
         float res = normalize(value, -16000.0f, 16000.f);
 
@@ -161,91 +161,91 @@ namespace rvr {
 //
     { entryKey(nordic, dev::api_and_shell, 0x00), BlackboardEntry { "echo", rawData } }, //
 //
-    { entryKey(btc, dev::connection, 0x05), BlackboardEntry { "get_bluetooth_advertising_name", msgArray } }, //
+        { entryKey(btc, dev::connection, 0x05), BlackboardEntry { "get_bluetooth_advertising_name", msgArray } }, //
 #if 1
 //
-    { entryKey(nordic, dev::drive, 0x01), BlackboardEntry { "raw_motors", msgArray } }, //
-    { entryKey(nordic, dev::drive, 0x06), BlackboardEntry { "reset_yaw", msgArray } }, //
-    { entryKey(nordic, dev::drive, 0x07), BlackboardEntry { "drive_with_heading", msgArray } }, //
-    { entryKey(nordic, dev::drive, 0x25), BlackboardEntry { "enable_motor_stall_notify", msgArray } }, //
-    { entryKey(nordic, dev::drive, 0x26), BlackboardEntry { "motor_stall_notify", notification_data } }, //
-    { entryKey(nordic, dev::drive, 0x27), BlackboardEntry { "enable_motor_fault_notify", msgArray } }, //
-    { entryKey(nordic, dev::drive, 0x28), BlackboardEntry { "motor_fault_notify", notification_data } }, //
-    { entryKey(nordic, dev::drive, 0x29), BlackboardEntry { "get_motor_fault_state", msgArray } },
+        { entryKey(nordic, dev::drive, 0x01), BlackboardEntry { "raw_motors", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x06), BlackboardEntry { "reset_yaw", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x07), BlackboardEntry { "drive_with_heading", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x25), BlackboardEntry { "enable_motor_stall_notify", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x26), BlackboardEntry { "motor_stall_notify", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x27), BlackboardEntry { "enable_motor_fault_notify", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x28), BlackboardEntry { "motor_fault_notify", msgArray } }, //
+        { entryKey(nordic, dev::drive, 0x29), BlackboardEntry { "get_motor_fault_state", msgArray } },
 //
-    { entryKey(btc, dev::io_led, 0x1A), BlackboardEntry { "set_all_leds", msgArray } }, //
-    { entryKey(btc, dev::io_led, 0x4E), BlackboardEntry { "release_led_requests", msgArray } }, //
+        { entryKey(btc, dev::io_led, 0x1A), BlackboardEntry { "set_all_leds", msgArray } }, //
+        { entryKey(btc, dev::io_led, 0x4E), BlackboardEntry { "release_led_requests", msgArray } }, //
 //
-    { entryKey(btc, dev::power, 0x00), BlackboardEntry { "power off", rawData } }, //
-    { entryKey(btc, dev::power, 0x01), BlackboardEntry { "snooze", msgArray } }, //
-    { entryKey(btc, dev::power, 0x0D), BlackboardEntry { "wake", msgArray } }, //
-    { entryKey(btc, dev::power, 0x10), BlackboardEntry { "get_battery_percentage", msgArray } }, //
-    { entryKey(btc, dev::power, 0x11), BlackboardEntry { "system_awake_notification", msgArray } }, //
-    { entryKey(btc, dev::power, 0x17), BlackboardEntry { "get_battery_voltage_state", msgArray } }, //
-    { entryKey(btc, dev::power, 0x19), BlackboardEntry { "will_sleep_notify", msgArray } }, //
-    { entryKey(btc, dev::power, 0x1A), BlackboardEntry { "did_sleep_notify", msgArray } }, //
-    { entryKey(btc, dev::power, 0x1B), BlackboardEntry { "enable_battery_voltage_state_change_notify", msgArray } }, //
-    { entryKey(btc, dev::power, 0x1C), BlackboardEntry { "battery_voltage_state_change_notify", notification_data } }, //
-    { entryKey(btc, dev::power, 0x25, Power::CalibratedFiltered), BlackboardEntry { "get_battery_voltage_in_volts", msgArray } }, //
-    { entryKey(btc, dev::power, 0x25, Power::CalibratedUnfiltered), BlackboardEntry { "get_battery_voltage_in_volts", msgArray } }, //
-    { entryKey(btc, dev::power, 0x25, Power::UncalibratedUnfiltered), BlackboardEntry { "get_battery_voltage_in_volts", msgArray } }, //
-    { entryKey(btc, dev::power, 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds", msgArray } }, //
-    { entryKey(btc, dev::power, 0x26, 1), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
-    { entryKey(btc, dev::power, 0x26, 2), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
-    { entryKey(nordic, dev::power, 0x27), BlackboardEntry { "get_current_sense_amplifier_current", msgArray } }, //
-    { entryKey(nordic, dev::power, 0x27, 1), BlackboardEntry { "get_current_sense_amplifier_current", msgArray } }, //
+        { entryKey(btc, dev::power, 0x00), BlackboardEntry { "power off", msgArray } }, //
+        { entryKey(btc, dev::power, 0x01), BlackboardEntry { "snooze", msgArray } }, //
+        { entryKey(btc, dev::power, 0x0D), BlackboardEntry { "wake", msgArray } }, //
+        { entryKey(btc, dev::power, 0x10), BlackboardEntry { "get_battery_percentage", msgArray } }, //
+        { entryKey(btc, dev::power, 0x11), BlackboardEntry { "system_awake_notification", msgArray } }, //
+        { entryKey(btc, dev::power, 0x17), BlackboardEntry { "get_battery_voltage_state", msgArray } }, //
+        { entryKey(btc, dev::power, 0x19), BlackboardEntry { "will_sleep_notify", msgArray } }, //
+        { entryKey(btc, dev::power, 0x1A), BlackboardEntry { "did_sleep_notify", msgArray } }, //
+        { entryKey(btc, dev::power, 0x1B), BlackboardEntry { "enable_battery_voltage_state_change_notify", msgArray } }, //
+        { entryKey(btc, dev::power, 0x1C), BlackboardEntry { "battery_voltage_state_change_notify", notification_data } }, //
+        { entryKey(btc, dev::power, 0x25, Power::CalibratedFiltered), BlackboardEntry { "get_battery_voltage_in_volts", msgArray } }, //
+        { entryKey(btc, dev::power, 0x25, Power::CalibratedUnfiltered), BlackboardEntry { "get_battery_voltage_in_volts", msgArray } }, //
+        { entryKey(btc, dev::power, 0x25, Power::UncalibratedUnfiltered), BlackboardEntry { "get_battery_voltage_in_volts", msgArray } }, //
+        { entryKey(btc, dev::power, 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds", msgArray } }, //
+        { entryKey(btc, dev::power, 0x26, 1), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
+        { entryKey(btc, dev::power, 0x26, 2), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
+        { entryKey(nordic, dev::power, 0x27), BlackboardEntry { "get_current_sense_amplifier_current", msgArray } }, //
+        { entryKey(nordic, dev::power, 0x27, 1), BlackboardEntry { "get_current_sense_amplifier_current", msgArray } }, //
 //
-    { entryKey(nordic, dev::sensors, 0x0F), BlackboardEntry { "enable_gyro_max_notify", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x10), BlackboardEntry { "gyro_max_notify", notification_data } }, //
-    { entryKey(nordic, dev::sensors, 0x13), BlackboardEntry { "reset_locator_x_and_y", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x17), BlackboardEntry { "set_locator_flags ", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x22), BlackboardEntry { "get_bot_to_bot_infrared_readings ", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x23), BlackboardEntry { "get_rgbc_senso", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x27), BlackboardEntry { "start_robot_to_robot_infrared_broadcasting", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x28), BlackboardEntry { "start_robot_to_robot_infrared_following", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x29), BlackboardEntry { "stop_robot_to_robot_infrared_broadcasting", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x2C), BlackboardEntry { "robot_to_robot_infrared_message_received_notify", notification_data } }, //
-    { entryKey(btc, dev::sensors, 0x30), BlackboardEntry { "get_ambient_light_sensor_value", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x32), BlackboardEntry { "stop_robot_to_robot_infrared_following", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x33), BlackboardEntry { "start_robot_to_robot_infrared_evading", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x34), BlackboardEntry { "stop_robot_to_robot_infrared_evading", rawData } }, //
+        { entryKey(nordic, dev::sensors, 0x0F), BlackboardEntry { "enable_gyro_max_notify", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x10), BlackboardEntry { "gyro_max_notify", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x13), BlackboardEntry { "reset_locator_x_and_y", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x17), BlackboardEntry { "set_locator_flags ", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x22), BlackboardEntry { "get_bot_to_bot_infrared_readings ", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x23), BlackboardEntry { "get_rgbc_senso", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x27), BlackboardEntry { "start_robot_to_robot_infrared_broadcasting", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x28), BlackboardEntry { "start_robot_to_robot_infrared_following", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x29), BlackboardEntry { "stop_robot_to_robot_infrared_broadcasting", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x2C), BlackboardEntry { "robot_to_robot_infrared_message_received_notify", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x30), BlackboardEntry { "get_ambient_light_sensor_value", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x32), BlackboardEntry { "stop_robot_to_robot_infrared_following", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x33), BlackboardEntry { "start_robot_to_robot_infrared_evading", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x34), BlackboardEntry { "stop_robot_to_robot_infrared_evading", msgArray } }, //
 
-    { entryKey(btc, dev::sensors, 0x35), BlackboardEntry { "enable_color_detection_notify", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x36), BlackboardEntry { "color_detection_notify", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x37), BlackboardEntry { "get_current_detected_color_reading", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x38), BlackboardEntry { "enable_color_detection", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x35), BlackboardEntry { "enable_color_detection_notify", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x36), BlackboardEntry { "color_detection_notify", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x37), BlackboardEntry { "get_current_detected_color_reading", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x38), BlackboardEntry { "enable_color_detection", msgArray } }, //
 
-    { entryKey(nordic, dev::sensors, 0x39), BlackboardEntry { "configure_streaming_service", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x39), BlackboardEntry { "configure_streaming_service", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x3A), BlackboardEntry { "start_streaming_service", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x3A), BlackboardEntry { "start_streaming_service", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x3B), BlackboardEntry { "stop_streaming_service", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x3B), BlackboardEntry { "stop_streaming_service", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x3C), BlackboardEntry { "clear_streaming_service", msgArray } }, //
-    { entryKey(btc, dev::sensors, 0x3C), BlackboardEntry { "clear_streaming_service", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x3D), BlackboardEntry { "streaming_service_data_notify", notification_data } }, //
-    { entryKey(btc, dev::sensors, 0x3D), BlackboardEntry { "streaming_service_data_notify", notification_data } }, //
-    { entryKey(nordic, dev::sensors, 0x3E), BlackboardEntry { "enable_robot_infrared_message_notify", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x3F), BlackboardEntry { "send_infrared_message", rawData } }, //
-    //
+        { entryKey(nordic, dev::sensors, 0x39), BlackboardEntry { "configure_streaming_service", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x39), BlackboardEntry { "configure_streaming_service", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x3A), BlackboardEntry { "start_streaming_service", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x3A), BlackboardEntry { "start_streaming_service", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x3B), BlackboardEntry { "stop_streaming_service", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x3B), BlackboardEntry { "stop_streaming_service", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x3C), BlackboardEntry { "clear_streaming_service", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x3C), BlackboardEntry { "clear_streaming_service", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x3D), BlackboardEntry { "streaming_service_data_notify", msgArray } }, //
+        { entryKey(btc, dev::sensors, 0x3D), BlackboardEntry { "streaming_service_data_notify", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x3E), BlackboardEntry { "enable_robot_infrared_message_notify", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x3F), BlackboardEntry { "send_infrared_message", msgArray } }, //
+        //
 //    { entryKey(nordic, dev::sensors, 0x4A, 0), BlackboardEntry { "left_motor_temperature", SensorsDirect::motorTemperature } }, // left
-    { entryKey(nordic, dev::sensors, 0x4A, 4), BlackboardEntry { "left_motor_temperature", msgArrayWithId } }, // left
-    { entryKey(nordic, dev::sensors, 0x4A, 5), BlackboardEntry { "right_motor_temperature", msgArrayWithId } }, // right
-    { entryKey(nordic, dev::sensors, 0x4B), BlackboardEntry { "get_motor_thermal_protection_status", rawData } }, //
-    { entryKey(nordic, dev::sensors, 0x4C), BlackboardEntry { "enable_motor_thermal_protection_status_notify", msgArray } }, //
-    { entryKey(nordic, dev::sensors, 0x4D), BlackboardEntry { "motor_thermal_protection_status_notify", rawData } }, //
+        { entryKey(nordic, dev::sensors, 0x4A, 4), BlackboardEntry { "left_motor_temperature", msgArray } }, // left
+        { entryKey(nordic, dev::sensors, 0x4A, 5), BlackboardEntry { "right_motor_temperature", msgArray } }, // right
+        { entryKey(nordic, dev::sensors, 0x4B), BlackboardEntry { "get_motor_thermal_protection_status", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x4C), BlackboardEntry { "enable_motor_thermal_protection_status_notify", msgArray } }, //
+        { entryKey(nordic, dev::sensors, 0x4D), BlackboardEntry { "motor_thermal_protection_status_notify", msgArray } }, //
 //
-    { entryKey(nordic, dev::system, 0x00), BlackboardEntry { "nordic_main_application_version", msgArray } }, //
-    { entryKey(btc, dev::system, 0x00), BlackboardEntry { "bt_main_application_version", msgArray } }, //
-    { entryKey(nordic, dev::system, 0x01), BlackboardEntry { "nordic_bootloader_version", msgArray } }, //
-    { entryKey(btc, dev::system, 0x01), BlackboardEntry { "bt_bootloader_version", msgArray } }, //
-    { entryKey(btc, dev::system, 0x03), BlackboardEntry { "board_revision", msgArray } }, //
-    { entryKey(btc, dev::system, 0x06), BlackboardEntry { "mac_address", msgArray } }, //
-    { entryKey(btc, dev::system, 0x13), BlackboardEntry { "stats_id", msgArray } }, //
-    { entryKey(nordic, dev::system, 0x1F), BlackboardEntry { "nordic_processor_name", msgArray } }, //
-    { entryKey(btc, dev::system, 0x1F), BlackboardEntry { "bt_processor_name", msgArray } }, //
-    { entryKey(btc, dev::system, 0x38), BlackboardEntry { "get_sku", msgArray } }, //
-    { entryKey(nordic, dev::system, 0x39), BlackboardEntry { "get_core_up_time_in_milliseconds", msgArray } }, //
+        { entryKey(nordic, dev::system, 0x00), BlackboardEntry { "nordic_main_application_version", msgArray } }, //
+        { entryKey(btc, dev::system, 0x00), BlackboardEntry { "bt_main_application_version", msgArray } }, //
+        { entryKey(nordic, dev::system, 0x01), BlackboardEntry { "nordic_bootloader_version", msgArray } }, //
+        { entryKey(btc, dev::system, 0x01), BlackboardEntry { "bt_bootloader_version", msgArray } }, //
+        { entryKey(btc, dev::system, 0x03), BlackboardEntry { "board_revision", msgArray } }, //
+        { entryKey(btc, dev::system, 0x06), BlackboardEntry { "mac_address", msgArray } }, //
+        { entryKey(btc, dev::system, 0x13), BlackboardEntry { "stats_id", msgArray } }, //
+        { entryKey(nordic, dev::system, 0x1F), BlackboardEntry { "nordic_processor_name", msgArray } }, //
+        { entryKey(btc, dev::system, 0x1F), BlackboardEntry { "bt_processor_name", msgArray } }, //
+        { entryKey(btc, dev::system, 0x38), BlackboardEntry { "get_sku", msgArray } }, //
+        { entryKey(nordic, dev::system, 0x39), BlackboardEntry { "get_core_up_time_in_milliseconds", msgArray } }, //
 #endif
     };
     //----------------------------------------------------------------------------------------------------------------------
@@ -278,7 +278,7 @@ namespace rvr {
         RvrMsg& msg { bb::entryValue(target, dev, cmd) };
         uint8_t res { };
         if ( !msg.empty()) {
-            res = msg[0];
+            res = msg[2];
         }
         return res;
     }
@@ -314,16 +314,20 @@ namespace rvr {
             float result { };
         };
 
-        if (msg.size() >= static_cast<uint8_t>((1 + pos) * 4)) {
-            uint8_t offset { static_cast<uint8_t>(pos * 4) };
-            buf[0] = msg[2 + offset];
-            buf[1] = msg[3 + offset];
-            buf[2] = msg[1 + offset];
-            buf[3] = msg[0 + offset];
+        if (msg.size() >= static_cast<uint8_t>((pos * 4) + 2)) {
+
+            std::u8string_view sv(msg.c_str(), msg.size());
+            std::u8string_view sub_sv(sv.substr((pos * 4) + 2, 4));
+
+//            uint8_t offset { static_cast<uint8_t>(pos * 4) };
+            buf[0] = sub_sv[2];
+            buf[1] = sub_sv[3];
+            buf[2] = sub_sv[1];
+            buf[3] = sub_sv[0];
         }
         return result;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg& msg { entryValue(target, dev, cmd) };
         if (msg.empty()) {
@@ -331,21 +335,22 @@ namespace rvr {
         }
         msg[0] = 0;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg msg { entryValue(target, dev, cmd) };
         return std::string { msg.begin(), msg.end() };
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg const& Blackboard::msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
+//----------------------------------------------------------------------------------------------------------------------
+    RvrMsg
+    const& Blackboard::msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         return {entryValue(target, dev, cmd)};
     }
-    //======================================================================================================================
+//======================================================================================================================
     std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k) {
         os << k.proc << mys::sp << k.dev << mys::sp << k.cmd << mys::sp << k.id;
         return os;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void Blackboard::m_to_v() {
         struct v_map {
             Blackboard::key_t key;
@@ -357,13 +362,13 @@ namespace rvr {
             vec.push_back(v);
         }
         std::sort(vec.begin(), vec.end(), //
-                  [](v_map const& a, v_map const& b) {
-                      return a.key < b.key;
-                  }
+        [](v_map const& a, v_map const& b) {
+            return a.key < b.key;
+        }
         );
         for (auto& i : vec) {
             terr << std::hex << std::uppercase << i.key << mys::tab << std::setw(45) << std::setfill(' ') << std::left << i.be.name << //
-                 mys::tab << mys::tab << i.be.value;
+                mys::tab << mys::tab << i.be.value;
         }
     }
 

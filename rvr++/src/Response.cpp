@@ -31,12 +31,12 @@ namespace rvr {
     using DeviceDecoder = std::unordered_map <uint8_t, std::string>;
     DeviceDecoder device_names { //
     { 0x10, "api_and_shell" }, //
-    { 0x11, "system" }, //
-    { 0x13, "power" }, //
-    { 0x16, "drive" }, //
-    { 0x18, "sensors" }, //
-    { 0x19, "connection" }, //
-    { 0x1A, "io_led" }, //
+        { 0x11, "system" }, //
+        { 0x13, "power" }, //
+        { 0x16, "drive" }, //
+        { 0x18, "sensors" }, //
+        { 0x19, "connection" }, //
+        { 0x1A, "io_led" }, //
     };
     //----------------------------------------------------------------------------------------------------------------------
     bool Response::operator ()() {
@@ -193,7 +193,7 @@ namespace rvr {
                 }
                 else {
                     bb::FuncPtr decode_func { bb::entryFunc(key) };
-                    decode_func(key, packet.begin() + data, packet.end());
+                    decode_func(key, packet.begin() + seq, packet.end());
                 }
             }
             else {  // notification - sequence is 0xFF
