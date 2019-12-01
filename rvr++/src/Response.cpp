@@ -192,13 +192,13 @@ namespace rvr {
                     decode_error(err_byte);
                 }
                 else {
-                    bb::FuncPtr decode_func { bb::entryFunc(key) };
-                    decode_func(key, packet.begin() + seq, packet.end());
+//                    bb::FuncPtr decode_func { bb::msgArray(key) };
+                    bb::msgArray(key, packet.begin() + seq, packet.end());
                 }
             }
             else {  // notification - sequence is 0xFF
-                bb::FuncPtr decode_func { bb::entryFunc(key) };
-                decode_func(key, packet.begin() + seq, packet.end());
+//                bb::FuncPtr decode_func { bb::msgArray(key) };
+                bb::msgArray(key, packet.begin() + seq, packet.end());
             }
         }
         terr << __func__ << " **************";

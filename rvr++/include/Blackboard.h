@@ -93,14 +93,11 @@ namespace rvr {
 
         struct BlackboardEntry {
             std::string name;
-            FuncPtr func;
             RvrMsg value { };
         };
 
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
         static BBDictionary mDictionary;
-
-        static FuncPtr entryFunc(key_t const key);
 
         static std::string entryName(key_t const key);
         static RvrMsg& entryValue(key_t const key);
