@@ -178,26 +178,20 @@ namespace rvr {
         std::string device = device_names[packet[dev]];
         std::string command { bb::entryName(key) };
 
-        if (command.empty()) {
+        if ( !bb::mDictionary.contains(key)) {
             terr << code_loc << "Command not in decode table " << device //
                  << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key;
         }
         else {
             terr << code_loc << device << mys::sp << command;
 
-            if (is_resp) {
-                if (packet[status]) {
-                    auto err_byte { packet[status] };
-                    terr << code_loc << "ERROR: " << (uint16_t)err_byte;
-                    decode_error(err_byte);
-                }
-                else {
-//                    bb::FuncPtr decode_func { bb::msgArray(key) };
-                    bb::msgArray(key, packet.begin() + seq, packet.end());
-                }
+            if (is_resp && packet[status]) {
+                // a response will have a status of either 0 or and error code
+                auto err_byte { packet[status] };
+                terr << code_loc << "ERROR: " << (uint16_t)err_byte;
+                decode_error(err_byte);
             }
-            else {  // notification - sequence is 0xFF
-//                bb::FuncPtr decode_func { bb::msgArray(key) };
+            else {  // response with 0, notification or stream
                 bb::msgArray(key, packet.begin() + seq, packet.end());
             }
         }

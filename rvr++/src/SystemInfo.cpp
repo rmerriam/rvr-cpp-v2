@@ -30,9 +30,9 @@ namespace rvr {
 
         std::string ver;
         if ( !msg.empty()) {
-            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
-                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
+            ver = std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
+                std::to_string(((msg[4] << 8) | msg[5])) + '.' + //
+                std::to_string(((msg[6] << 8) | msg[7]));
         }
         return ver;
     }
@@ -71,29 +71,24 @@ namespace rvr {
 //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::macAddress() {
         std::string mac { bb::stringValue(mAltTarget, mDevice, get_mac_address) };
+        if (mac.size() == 12) {
 
-        if ( !mac.empty()) {
             char const* colon { ":" };
             mac.insert(10, colon);
             mac.insert(8, colon);
             mac.insert(6, colon);
             mac.insert(4, colon);
             mac.insert(2, colon);
-            return mac;
         }
-        return ""s;
+        return mac;
     }
 //----------------------------------------------------------------------------------------------------------------------
     int16_t SystemInfo::statsId() {
-//        MsgArray value { bb::entryValue(mAltTarget, mDevice, get_stats_id) };
         return bb::intValue(mAltTarget, mDevice, get_stats_id);
-
     }
 //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::upTime() {
-//        MsgArray value { bb::entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
         return bb::uint64Value(mTarget, mDevice, get_core_up_time_in_milliseconds);
-
     }
 
 }

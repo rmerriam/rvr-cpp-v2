@@ -130,15 +130,15 @@ namespace rvr {
             CommandBase { Devices::io_led, req, bluetoothSOC } {
         }
 
-        IoLed(const IoLed& other) = delete;
+        IoLed(IoLed const& other) = delete;
         IoLed(IoLed&& other) = delete;
-        IoLed& operator=(const IoLed& other) = delete;
+        IoLed& operator=(IoLed const& other) = delete;
 
-        void allLed(const uint32_t led_bits, const RvrMsg& colors, const CommandResponse want_resp = resp_on_error);
+        void allLed(uint32_t const led_bits, RvrMsg const& colors, CommandResponse const want_resp = resp_on_error) const;
 
-        void getActiveColorPalette(const CommandResponse want_resp = resp_on_error);
-        void getColorId(const CommandResponse want_resp = resp_on_error);
-        void idleLeds(const CommandResponse want_resp = resp_on_error);
+        void getActiveColorPalette(CommandResponse const want_resp = resp_on_error) const;
+        void getColorId(CommandResponse const want_resp = resp_on_error) const;
+        void idleLeds(CommandResponse const want_resp = resp_on_error) const;
 
         enum Cmd : uint8_t {
             set_all_leds = 0x1A, //
@@ -151,15 +151,15 @@ namespace rvr {
         };
     };
     //---------------------------------------------------------------------------------------------------------------------
-    inline void IoLed::idleLeds(const CommandResponse want_resp) {
+    inline void IoLed::idleLeds(CommandResponse const want_resp) const {
         cmd_basic(release_led_requests, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    inline void IoLed::getActiveColorPalette(const CommandResponse want_resp) {
+    inline void IoLed::getActiveColorPalette(CommandResponse const want_resp) const {
         cmd_basic(get_active_color_palette, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    inline void IoLed::getColorId(const CommandResponse want_resp) {
+    inline void IoLed::getColorId(CommandResponse const want_resp) const {
         cmd_basic(get_color_identification_report, want_resp);
     }
 

@@ -48,7 +48,7 @@ namespace rvr {
         static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t pos = 0,
+        static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
             uint8_t const id = 0);
 
         static void resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
@@ -107,10 +107,7 @@ namespace rvr {
         static key_t entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
         // functions for processing received responses
-        static void notification_data(key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end);
         static void msgArray(key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end);
-        static void msgArrayWithId(key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end);
-        static void rawData(key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end);
 
         static int32_t int_convert(RvrMsg::iterator begin, RvrMsg::iterator end);
 

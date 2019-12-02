@@ -46,7 +46,7 @@ rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
-    terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed;
+    terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed << std::boolalpha;
 
     SerialPort serial { argv[1], 115200 };
     rvr::Request req { serial };
@@ -74,21 +74,21 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
     uint32_t led32 {    //
-        Led::status_indication_left | Led::status_indication_right |//
-        Led::headlight_left | Led::headlight_right};
+    Led::status_indication_left | Led::status_indication_right |    //
+        Led::headlight_left | Led::headlight_right };
 
-    rvr::MsgArray colors[] { //
-        {   0x00, 0x00, 0xFF, //
-            0xFF, 0x00, 0x00,//
-            0x00, 0x00, 0xFF,//
-            0xFF, 0x00, 0x00,}, //
-        {   0xFF, 0x00, 0x00, //
-            0x00, 0x00, 0xFF,//
-            0xFF, 0x00, 0x00,//
-            0x00, 0x00, 0xFF,}, //
+    rvr::RvrMsg colors[] { //
+    { 0x00, 0x00, 0xFF, //
+        0xFF, 0x00, 0x00, //
+        0x00, 0x00, 0xFF, //
+        0xFF, 0x00, 0x00, }, //
+        { 0xFF, 0x00, 0x00, //
+            0x00, 0x00, 0xFF, //
+            0xFF, 0x00, 0x00, //
+            0x00, 0x00, 0xFF, }, //
     };
 
-    for (auto i {0}; i < 1; ++i) {
+    for (auto i { 0 }; i < 10; ++i) {
         led.allLed(led32, colors[i % 2], RespYes);
         terr << "blink";
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -97,34 +97,41 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 0
+#if 1
     // Direct reading of sensors
     rvr::SensorsDirect sen_d(req);
 
+    sen_d.enableThermal(RespYes);
+    sen_d.enableColorDetection(RespYes);
+    sen_d.enabeColorDetectionNotify(true, 500, 0, RespYes);
+    sen_d.enableGyroMaxNotify(RespYes);
+
+//    terr << code_loc << mys::sp << "Notify Thermal?: " << sen_d.isThermalNotifySet();
+//    terr << code_loc << mys::sp << "Notify Max Gyro?: " << sen_d.isMaxGyroNotifySet();
+    terr << code_loc;
+    terr << code_loc;
+
     sen_d.getAmbient(RespYes);
-
-//    sen_d.enableColorDetection(RespYes);
-//    sen_d.enabeColorDetectionNotify(true, 500, 0, RespYes);
-//    std::this_thread::sleep_for(500ms);
-
-//    sen_d.getCurrentColor(RespYes);
-
-//    sen_d.enableThermal(RespYes);
-    sen_d.getRightMotorTemp(RespYes);
-    sen_d.getLeftMotorTemp(RespYes);
-//    sen_d.getThermalProtectionStatus(RespYes);
-//    sen_d.enableGyroMaxNotify(RespYes);
-
-//    sen_d.getThermalProtectionStatus(RespYes);
-//    sen_d.enableThermal(RespYes);
-
-//    std::this_thread::sleep_for(500ms);
-    sen_d.disableColorDetection(RespYes);
-//    sen_d.disableGyroMaxNotify(RespYes);
-//    sen_d.disableThermal(RespYes);
 
     std::this_thread::sleep_for(500ms);
 
+    sen_d.getCurrentColor(RespYes);
+
+    sen_d.setLocatorFlags(true, RespYes);
+    sen_d.resetLocatorXY(RespYes);
+
+    sen_d.getRightMotorTemp(RespYes);
+    sen_d.getLeftMotorTemp(RespYes);
+    sen_d.getThermalProtectionStatus(RespYes);
+
+    std::this_thread::sleep_for(100ms);
+    sen_d.disableColorDetection(RespYes);
+    sen_d.disableGyroMaxNotify(RespYes);
+    sen_d.disableThermal(RespYes);
+
+    std::this_thread::sleep_for(500ms);
+
+    terr << code_loc;
     terr << code_loc;
     terr << code_loc << "sense direct";
 
@@ -139,22 +146,22 @@ int main(int argc, char* argv[]) {
     rvr::SensorsStream sen_s(req);
 
 /// change size back to 15 in sensors!!!!
-//    rvr::MsgArray accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
+//    rvr::RvrMsg accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
 //    sen_s.configureStreaming(1, accel, 2, RespYes);
 
-//    rvr::MsgArray core { 0x02, 0x00, 0x09, 0x01 };
+//    rvr::RvrMsg core { 0x02, 0x00, 0x09, 0x01 };
 //    sen_s.configureStreaming(3, core, 1, RespYes);
 //
-//    rvr::MsgArray speed { 0x02, 0x00, 0x08, 0x01 };
+//    rvr::RvrMsg speed { 0x02, 0x00, 0x08, 0x01 };
 //    sen_s.configureStreaming(2, speed, 2, RespYes);
 //
-//    rvr::MsgArray velocity { 0x02, 0x00, 0x07, 0x02 };
+//    rvr::RvrMsg velocity { 0x02, 0x00, 0x07, 0x02 };
 //    sen_s.configureStreaming(2, velocity, 2, RespYes);
 //
-    rvr::MsgArray ambient { 2, 0x00, 0x0A, 0x02 };
+    rvr::RvrMsg ambient { 2, 0x00, 0x0A, 0x02 };
     sen_s.configureStreaming(ambient, RespYes);
 //
-//    rvr::MsgArray locator { 0x07, 0x00, 0x08, 0x02 };
+//    rvr::RvrMsg locator { 0x07, 0x00, 0x08, 0x02 };
 //    sen_s.configureStreaming(1, locator, 0, RespYes);
 
     std::this_thread::sleep_for(20ms);
@@ -250,7 +257,7 @@ int main(int argc, char* argv[]) {
     rvr::Connection cmd(req);
     rvr::SystemInfo sys(req);
 
-    rvr::MsgArray dead { 0xDE, 0xAD, 0xFE, 0xED };
+    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
     api.echo(dead, RespYes);    // alt
     cmd.bluetoothName(RespYes);    //
     sys.getBoardRevision(RespYes);  // ??
