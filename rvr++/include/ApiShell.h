@@ -37,8 +37,8 @@ namespace rvr {
         ApiShell(ApiShell&& other) = delete;
         ApiShell& operator=(const ApiShell& other) = delete;
 
-        MsgArray echo();
-        void echo(const MsgArray& data, const CommandResponse want_resp = resp_on_error);
+        RvrMsg echo();
+        void echo(const RvrMsg& data, const CommandResponse want_resp = resp_on_error);
 
     private:
         enum Cmd : uint8_t {

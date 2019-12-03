@@ -31,17 +31,17 @@ namespace rvr {
     using DeviceDecoder = std::unordered_map <uint8_t, std::string>;
     DeviceDecoder device_names { //
     { 0x10, "api_and_shell" }, //
-    { 0x11, "system" }, //
-    { 0x13, "power" }, //
-    { 0x16, "drive" }, //
-    { 0x18, "sensors" }, //
-    { 0x19, "connection" }, //
-    { 0x1A, "io_led" }, //
+        { 0x11, "system" }, //
+        { 0x13, "power" }, //
+        { 0x16, "drive" }, //
+        { 0x18, "sensors" }, //
+        { 0x19, "connection" }, //
+        { 0x1A, "io_led" }, //
     };
     //----------------------------------------------------------------------------------------------------------------------
     bool Response::operator ()() {
-        rvr::MsgArray in;
-        rvr::MsgArray packet;
+        rvr::RvrMsg in;
+        rvr::RvrMsg packet;
         in.reserve(80);
 
         while (mEnd.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
@@ -148,7 +148,7 @@ namespace rvr {
         return key;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Response::decode(MsgArray packet) {
+    void Response::decode(RvrMsg packet) {
         using bb = rvr::Blackboard;
 
         // typeical positions of header bytes when target not present, the usual case
@@ -178,27 +178,21 @@ namespace rvr {
         std::string device = device_names[packet[dev]];
         std::string command { bb::entryName(key) };
 
-        if (command.empty()) {
+        if ( !bb::mDictionary.contains(key)) {
             terr << code_loc << "Command not in decode table " << device //
                  << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key;
         }
         else {
             terr << code_loc << device << mys::sp << command;
 
-            if (is_resp) {
-                if (packet[status]) {
-                    auto err_byte { packet[status] };
-                    terr << code_loc << "ERROR: " << (uint16_t)err_byte;
-                    decode_error(err_byte);
-                }
-                else {
-                    bb::FuncPtr decode_func { bb::entryFunc(key) };
-                    decode_func(key, packet.begin() + data, packet.end());
-                }
+            if (is_resp && packet[status]) {
+                // a response will have a status of either 0 or and error code
+                auto err_byte { packet[status] };
+                terr << code_loc << "ERROR: " << (uint16_t)err_byte;
+                decode_error(err_byte);
             }
-            else {  // notification - sequence is 0xFF
-                bb::FuncPtr decode_func { bb::entryFunc(key) };
-                decode_func(key, packet.begin() + seq, packet.end());
+            else {  // response with 0, notification or stream
+                bb::msgArray(key, packet.begin() + seq, packet.end());
             }
         }
         terr << __func__ << " **************";

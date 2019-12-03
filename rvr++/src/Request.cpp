@@ -28,9 +28,9 @@
 
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::send(const MsgArray& p) {
-        MsgArray payload { p };
-        MsgArray mMsg;
+    void Request::send(RvrMsg const& p) {
+        RvrMsg payload { p };
+        RvrMsg mMsg;
         mMsg.clear();
         mMsg.push_back(SOP);
 
@@ -44,12 +44,12 @@ namespace rvr {
 
         mMsg.push_back(EOP);
 
-        mSerialPort.write(mMsg.data(), mMsg.size());
+        mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
 
         terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    auto Request::escape_char(MsgArray::iterator& p, MsgArray& payload) {
+    auto Request::escape_char(RvrMsg::iterator& p, RvrMsg& payload) {
 
         switch ( *p) {
             case SOP: {
@@ -72,17 +72,17 @@ namespace rvr {
         return p;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::checksum(const MsgArray& payload) const {
+    uint8_t Request::checksum(RvrMsg const& payload) const {
         unsigned int sum { };
         sum = ~std::accumulate(payload.begin(), payload.end(), 0);
         return sum;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Request::isPacketChar(const uint8_t c) {
+    bool Request::isPacketChar(uint8_t const c) {
         return (c == SOP) || (c == EOP) || (c == ESC);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::escape_msg(MsgArray& payload) {
+    void Request::escape_msg(RvrMsg& payload) {
         for (auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end();
             p = find_if(p, payload.end(), isPacketChar)) {
             p = escape_char(p, payload);

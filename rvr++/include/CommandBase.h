@@ -48,24 +48,24 @@ namespace rvr {
 
         uint8_t buildFlags(CommandResponse const want_resp) const;
 
-        void cmd_basic(uint8_t const cmd, CommandResponse const want_resp = resp_on_error);
-        void cmd_basic_alt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error);
+        void cmd_basic(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_basic_alt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_byte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error);
-        void cmd_byte_alt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error);
+        void cmd_byte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_byte_alt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_byte_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error);
-        void cmd_byte_alt_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error);
+        void cmd_byte_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_byte_alt_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_int(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error);
-        void cmd_int_alt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error);
+        void cmd_int(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_int_alt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_enable(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error);
-        void cmd_enable_alt(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error);
-        void cmd_disable(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error);
+        void cmd_enable(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_enable_alt(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_disable(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_data(uint8_t const cmd, MsgArray const& data, CommandResponse const want_resp = resp_on_error);
-        void cmd_data_alt(uint8_t const cmd, MsgArray const& data, CommandResponse const want_resp = resp_on_error);
+        void cmd_data(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
+        void cmd_data_alt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
 
         Devices const mDevice;
         Request& mRequest;
@@ -82,7 +82,7 @@ namespace rvr {
         // It is used as a special field for some message that pass an ID. The ID is put in the sequence field.
         // During deserialization any sequence less than 0x80 is used as part of the dictionary key for updating
         // values in the dictionary.
-        uint8_t sequence() {
+        static uint8_t sequence() {
             return ++mSeq | 0x80;
         }
     private:
@@ -90,85 +90,6 @@ namespace rvr {
 
         uint8_t makeAltProc();
     };
-
-//----------------------------------------------------------------------------------------------------------------------
-    inline uint8_t CommandBase::buildFlags(CommandResponse const want_resp) const {
-        int flags { want_resp | activity | has_target };
-        return static_cast<uint8_t>(flags);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline uint8_t CommandBase::makeAltProc() {
-        uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
-        return alt_target;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_basic(uint8_t const cmd, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_basic_alt(uint8_t const cmd, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_enable(uint8_t const cmd, bool const state, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), state };
-        mRequest.send(msg);
-    }        //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_enable_alt(uint8_t const cmd, bool const state, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), state };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_disable(uint8_t const cmd, bool const state, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, state, sequence() };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_byte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_byte_alt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_byte_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_byte_alt_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, data, data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_int(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), //
-                       static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_int_alt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), //
-                       static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_data(uint8_t const cmd, MsgArray const& data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
-        msg.insert(msg.end(), data.begin(), data.end());
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void CommandBase::cmd_data_alt(uint8_t const cmd, MsgArray const& data, CommandResponse const want_resp) {
-        MsgArray msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
-        msg.insert(msg.end(), data.begin(), data.end());
-        mRequest.send(msg);
-    }
 
 } /* namespace rvr */
 

@@ -34,11 +34,11 @@ namespace rvr {
         return bb::stringValue(mTarget, Devices::connection, get_bluetooth_advertising_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    MsgArray ApiShell::echo() {
+    RvrMsg ApiShell::echo() {
         return bb::msgValue(mTarget, mDevice, echo_cmd);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ApiShell::echo(MsgArray const& data, CommandResponse const want_resp) {
+    void ApiShell::echo(RvrMsg const& data, CommandResponse const want_resp) {
         cmd_data(echo_cmd, data, want_resp);
         cmd_data_alt(echo_cmd, data, want_resp);
     }

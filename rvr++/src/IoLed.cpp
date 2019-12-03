@@ -23,13 +23,13 @@
 #include "IoLed.h"
 namespace rvr {
 
-    void IoLed::allLed(const uint32_t led_bits, const MsgArray& colors, const CommandResponse want_resp) {
+    void IoLed::allLed(uint32_t const led_bits, RvrMsg const& colors, CommandResponse const want_resp) const {
 
-        MsgArray leds { //
+        RvrMsg leds { //
         static_cast<uint8_t>(led_bits >> 24), //
-        static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
-        static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
-        static_cast<uint8_t>(led_bits & 0xFF) //
+            static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
+            static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
+            static_cast<uint8_t>(led_bits & 0xFF) //
         };
         leds.insert(leds.end(), colors.begin(), colors.end());
 

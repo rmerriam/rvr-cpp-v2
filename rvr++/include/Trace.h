@@ -29,6 +29,7 @@
 #include <iterator>
 #include <mutex>
 #include <ostream>
+#include <string>
 #include <type_traits>
 #include <vector>
 //---------------------------------------------------------------------------------------------------------------------
@@ -55,12 +56,12 @@ namespace mys {
     class Trace {
     public:
         Trace(std::ostream& os);
-        Trace(const Trace& other) = delete;
+        Trace(Trace const& other) = delete;
         Trace(Trace&& other) = delete;
-        Trace& operator=(const Trace& other) = delete;
+        Trace& operator=(Trace const& other) = delete;
 
         template <typename C>
-        Trace& operator<<(const C& data);
+        Trace& operator<<(C const& data);
 
         void off();
         void on();
@@ -73,12 +74,12 @@ namespace mys {
     class TraceStart : public Trace {
     public:
         TraceStart(std::ostream& os);
-        TraceStart(const Trace& other) = delete;
+        TraceStart(Trace const& other) = delete;
         TraceStart(Trace&& other) = delete;
-        TraceStart& operator=(const Trace& other) = delete;
+        TraceStart& operator=(Trace const& other) = delete;
 
         template <typename T>
-        mys::Trace& operator<<(const T& value);
+        mys::Trace& operator<<(T const& value);
 
     private:
         Trace& mTrace;
@@ -110,7 +111,7 @@ namespace mys {
     }
     //----------------------------------------------------------------------------------------------------------------------
     template <typename C>
-    inline mys::Trace& Trace::operator <<(const C& data) {
+    inline mys::Trace& Trace::operator <<(C const& data) {
         if constexpr (trace_active) {
             if constexpr (has_value_type<C>()) {
                 std::copy(data.begin(), data.end(), std::ostream_iterator<int>(mOs, " "));
@@ -123,7 +124,7 @@ namespace mys {
     }
     //----------------------------------------------------------------------------------------------------------------------
     template <>
-    inline mys::Trace& Trace::operator <<(const std::string& data) {
+    inline mys::Trace& Trace::operator <<(std::string const& data) {
         if constexpr (trace_active) {
             mOs << data;
         }
@@ -143,7 +144,7 @@ namespace mys {
     }
     //---------------------------------------------------------------------------------------------------------------------
     template <typename T>
-    inline mys::Trace& TraceStart::operator <<(const T& value) {
+    inline mys::Trace& TraceStart::operator <<(T const& value) {
         if constexpr (trace_active) {
             mOs << std::dec;
             time_stamp();

@@ -32,16 +32,16 @@ namespace rvr {
             mSerialPort { s } {
         }
 
-        void read(rvr::MsgArray& in, rvr::MsgArray& out);
+        void read(rvr::RvrMsg& in, rvr::RvrMsg& out);
 
     private:
 
-        void unescape_char(auto& p, MsgArray& payload);
-        void unescape_msg(MsgArray& payload);
-        void removeDelimiters(MsgArray& payload);
+        void unescape_char(auto& p, RvrMsg& payload);
+        void unescape_msg(RvrMsg& payload);
+        void removeDelimiters(RvrMsg& payload);
 
-        void checkForData(rvr::MsgArray& in);
-        void processData(rvr::MsgArray& in, rvr::MsgArray& out);
+        void checkForData(rvr::RvrMsg& in);
+        void processData(rvr::RvrMsg& in, rvr::RvrMsg& out);
 
         SerialPort& mSerialPort;
     };

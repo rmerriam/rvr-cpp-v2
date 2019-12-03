@@ -79,7 +79,7 @@ namespace rvr {
         SensorsStream(SensorsStream&& other) = delete;
         SensorsStream& operator=(const SensorsStream& other) = delete;
 
-        void configureStreaming(const MsgArray& cfg, const CommandResponse want_resp = resp_on_error);
+        void configureStreaming(const RvrMsg& cfg, const CommandResponse want_resp = resp_on_error);
         void enableStreaming(const uint16_t millis, const CommandResponse want_resp = resp_on_error);
         void disableStreaming(const CommandResponse want_resp = resp_on_error);
         void clearStreaming(const CommandResponse want_resp = resp_on_error);
@@ -159,7 +159,7 @@ namespace rvr {
     };
 
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::configureStreaming(const MsgArray& cfg, const CommandResponse want_resp) {
+    inline void SensorsStream::configureStreaming(const RvrMsg& cfg, const CommandResponse want_resp) {
         cmd_data(configure_streaming_service, cfg, want_resp);
         cmd_data_alt(configure_streaming_service, cfg, want_resp);
     }
