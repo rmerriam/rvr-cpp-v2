@@ -39,8 +39,8 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void ApiShell::echo(RvrMsg const& data, CommandResponse const want_resp) {
-        cmd_data(echo_cmd, data, want_resp);
-        cmd_data_alt(echo_cmd, data, want_resp);
+//        cmd_data(echo_cmd, data, want_resp);
+//        cmd_data_alt(echo_cmd, data, want_resp);
     }
 
 }
