@@ -108,43 +108,43 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::awake(CommandResponse const want_resp) const {
-        cmd_basic(wake, want_resp);
+        cmdBasic(wake, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::powerOff(uint8_t const secs, CommandResponse const want_resp) const {
-        cmd_byte(power_off, secs, want_resp);
+        cmdByte(power_off, secs, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::sleep(CommandResponse const want_resp) const {
-        cmd_basic(snooze, want_resp);
+        cmdBasic(snooze, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryPercentage(CommandResponse const want_resp) const {
-        cmd_basic(get_battery_percentage, want_resp);
+        cmdBasic(get_battery_percentage, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltageState(CommandResponse const want_resp) const {
-        cmd_basic(get_battery_voltage_state, want_resp);
+        cmdBasic(get_battery_voltage_state, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltage(VoltageType const vt, CommandResponse const want_resp) const {
-        cmd_byte_id(get_battery_voltage_in_volts, vt, want_resp);
+        cmdByteId(get_battery_voltage_in_volts, vt, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltThresholds(CommandResponse const want_resp) const {
-        cmd_basic(get_battery_voltage_state_thresholds, want_resp);
+        cmdBasic(get_battery_voltage_state_thresholds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp) const {
-        cmd_byte_alt_id(get_current_sense_amplifier_current, ms, want_resp);
+        cmdByteAltId(get_current_sense_amplifier_current, ms, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::enableBatteryStateChange(CommandResponse const want_resp) const {
-        cmd_enable(enable_battery_voltage_state_change_notify, true, want_resp);
+        cmdEnable(enable_battery_voltage_state_change_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::disableBatteryStateChange(CommandResponse const want_resp) const {
-        cmd_enable(enable_battery_voltage_state_change_notify, false, want_resp);
+        cmdDisable(enable_battery_voltage_state_change_notify, want_resp);
 //        bb::resetNotify(enable_battery_voltage_state_change_notify);
         // cannot do this because the response puts a value back into the dictionary
     }

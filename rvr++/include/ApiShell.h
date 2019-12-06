@@ -26,19 +26,19 @@
 #include "CommandBase.h"
 
 namespace rvr {
-    using bb= Blackboard;
 
     class ApiShell : protected CommandBase {
     public:
         ApiShell(Request& req) :
             CommandBase { Devices::api_and_shell, req, nordic } {
         }
-        ApiShell(const ApiShell& other) = delete;
+        ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;
-        ApiShell& operator=(const ApiShell& other) = delete;
+        ApiShell& operator=(ApiShell const& other) = delete;
 
-        RvrMsg echo();
-        void echo(const RvrMsg& data, const CommandResponse want_resp = resp_on_error);
+        RvrMsg echo() const;
+        RvrMsg echoAlt() const;
+        void echo(RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
 
     private:
         enum Cmd : uint8_t {

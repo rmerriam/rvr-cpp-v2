@@ -24,12 +24,15 @@
 //     Created: Oct 22, 2019
 //
 //======================================================================================================================
+#include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
 
 namespace rvr {
 
     class Drive : protected CommandBase {
+        using bb = Blackboard;
+
     public:
         Drive(Request& req) :
             CommandBase { Devices::drive, req, nordic } {
@@ -46,10 +49,25 @@ namespace rvr {
 
         void enableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
         void disableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
+
         void enableMotorStallNotify(CommandResponse const want_resp = resp_on_error) const;
         void disableMotorStallNotify(CommandResponse const want_resp = resp_on_error) const;
 
         void fixHeading(CommandResponse const want_resp = resp_on_error) const;
+
+        //======================================================================================================================
+        // Access data
+        bool motorFaultState() const {
+            return bb::boolValue(mTarget, mDevice, get_motor_fault_state);
+        }
+        //----------------------------------------------------------------------------------------------------------------------
+        bool motorFaultNotifySet() const {
+            return bb::notifyState(mTarget, mDevice, enable_motor_fault_notify);
+        }
+        //----------------------------------------------------------------------------------------------------------------------
+        bool motorStallNotifySet() const {
+            return bb::notifyState(mTarget, mDevice, enable_motor_stall_notify);
+        }
 
     private:
 
@@ -72,34 +90,7 @@ namespace rvr {
 
         std::tuple<uint8_t, uint8_t> const speed_mode(double const& speed) const;
     };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::stop(int const& heading, CommandResponse const want_resp) const {
-        spin_drive(0, heading, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::getMotorFault(CommandResponse const want_resp) const {
-        cmd_basic(get_motor_fault_state, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::enableMotorFaultNotify(CommandResponse const want_resp) const {
-        cmd_enable(enable_motor_fault_notify, true, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::disableMotorFaultNotify(CommandResponse const want_resp) const {
-        cmd_enable(enable_motor_fault_notify, false, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::enableMotorStallNotify(CommandResponse const want_resp) const {
-        cmd_enable(enable_motor_stall_notify, true, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::disableMotorStallNotify(CommandResponse const want_resp) const {
-        cmd_enable(enable_motor_stall_notify, false, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Drive::fixHeading(CommandResponse const want_resp) const {
-        cmd_basic(reset_yaw, want_resp);
-    }
+
 }
 /* namespace rvr */
 

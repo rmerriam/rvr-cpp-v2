@@ -29,18 +29,24 @@
 using namespace std::literals;
 
 namespace rvr {
+    using bb = Blackboard;
 
     std::string Connection::name() {
-        return bb::stringValue(mTarget, Devices::connection, get_bluetooth_advertising_name);
+        return bb::stringValue(mTarget, mDevice, get_bluetooth_advertising_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg ApiShell::echo() {
-        return bb::msgValue(mTarget, mDevice, echo_cmd);
+    RvrMsg ApiShell::echo() const {
+        RvrMsg msg { bb::msgValue(mTarget, mDevice, echo_cmd) };
+        return RvrMsg(msg.begin() + 2, msg.end());
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void ApiShell::echo(RvrMsg const& data, CommandResponse const want_resp) {
-//        cmd_data(echo_cmd, data, want_resp);
-//        cmd_data_alt(echo_cmd, data, want_resp);
+    RvrMsg ApiShell::echoAlt() const {
+        RvrMsg msg { bb::msgValue(mAltTarget, mDevice, echo_cmd) };
+        return RvrMsg(msg.begin() + 2, msg.end());
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
+    void ApiShell::echo(RvrMsg const& data, CommandResponse const want_resp) const {
+        cmdData(echo_cmd, data, want_resp);
+        cmdDataAlt(echo_cmd, data, want_resp);
+    }
 }

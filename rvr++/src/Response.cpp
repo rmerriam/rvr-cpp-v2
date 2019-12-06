@@ -31,12 +31,12 @@ namespace rvr {
     using DeviceDecoder = std::unordered_map <uint8_t, std::string>;
     DeviceDecoder device_names { //
     { 0x10, "api_and_shell" }, //
-        { 0x11, "system" }, //
-        { 0x13, "power" }, //
-        { 0x16, "drive" }, //
-        { 0x18, "sensors" }, //
-        { 0x19, "connection" }, //
-        { 0x1A, "io_led" }, //
+    { 0x11, "system" }, //
+    { 0x13, "power" }, //
+    { 0x16, "drive" }, //
+    { 0x18, "sensors" }, //
+    { 0x19, "connection" }, //
+    { 0x1A, "io_led" }, //
     };
     //----------------------------------------------------------------------------------------------------------------------
     bool Response::operator ()() {
@@ -178,7 +178,7 @@ namespace rvr {
         std::string device = device_names[packet[dev]];
         std::string command { bb::entryName(key) };
 
-        if ( !bb::mDictionary.contains(key)) {
+        if (command.empty()) {
             terr << code_loc << "Command not in decode table " << device //
                  << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key;
         }
@@ -191,7 +191,7 @@ namespace rvr {
                 terr << code_loc << "ERROR: " << (uint16_t)err_byte;
                 decode_error(err_byte);
             }
-            else {  // response with 0, notification or stream
+            else {
                 bb::msgArray(key, packet.begin() + seq, packet.end());
             }
         }

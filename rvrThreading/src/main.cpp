@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 1
+#if 0
     // Direct reading of sensors
     rvr::SensorsDirect sen_d(req);
 
@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(500ms);
 
 #endif
-#if 1
+#if 0
 
     terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
 
@@ -226,23 +226,23 @@ int main(int argc, char* argv[]) {
     terr << code_loc << mys::nl;
 
 #endif
-#if 0
+#if 1
     rvr::Drive drive(req);
 
     drive.fixHeading(RespYes);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    drive.stop(90, RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//    drive.stop(90, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    drive.drive(25, 25, RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//    drive.drive(25, 25, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//
+//    drive.spin_drive(0, 20, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-    drive.spin_drive(0, 20, RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    drive.fixHeading(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//    drive.fixHeading(RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     drive.enableMotorStallNotify(RespYes);
     drive.enableMotorFaultNotify(RespYes);
@@ -251,6 +251,20 @@ int main(int argc, char* argv[]) {
     drive.disableMotorFaultNotify(RespYes);
 
     drive.getMotorFault(RespYes);
+
+    std::this_thread::sleep_for(100ms);
+
+    terr << code_loc;
+    terr << code_loc;
+    terr << code_loc << "drive";
+
+    terr << code_loc << "Fault Notify State: " << drive.motorFaultState();
+    terr << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
+    terr << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
+
+    terr << code_loc;
+    terr << code_loc;
+
 #endif
 #if 0
     rvr::ApiShell api(req);
@@ -284,6 +298,7 @@ int main(int argc, char* argv[]) {
     terr << code_loc << "Stats Id: " << sys.statsId();
     terr << code_loc << "Up Time: " << sys.upTime();
     terr << code_loc << "Echo: " << std::hex << api.echo();
+    terr << code_loc << "Echo Alt: " << std::hex << api.echoAlt();
     terr << code_loc << "BT Name: " << cmd.name();
 
     terr << code_loc << mys::nl;

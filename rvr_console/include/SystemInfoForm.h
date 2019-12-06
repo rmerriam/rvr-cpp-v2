@@ -16,6 +16,7 @@ using namespace std;
 #include "FormBase.h"
 using namespace scr;
 
+#include <ApiShell.h>
 #include <Connection.h>
 #include <SystemInfo.h>
 //--------------------------------------------------------------------------------------------------------------------------
@@ -23,7 +24,7 @@ class SystemInfoForm : public FormBase {
     rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 
 public:
-    SystemInfoForm(const int y, const int x, rvr::Request& req);
+    SystemInfoForm(int const y, int const x, rvr::Request& req);
 
     virtual void fastData() override;
     virtual void onceData() override;
@@ -47,8 +48,12 @@ private:
 
     rvr::SystemInfo mSys;
 
-    DataFieldPtr mRvrName;
     rvr::Connection mConn;
+    DataFieldPtr mRvrName;
+
+    rvr::ApiShell mApi;
+    DataFieldPtr mPing;
+    DataFieldPtr mPingAlt;
 
 };
 #endif /* GeneralStatusForm_H_ */

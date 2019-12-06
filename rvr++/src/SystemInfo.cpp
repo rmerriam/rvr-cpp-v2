@@ -24,7 +24,9 @@
 #include "Blackboard.h"
 #include "SystemInfo.h"
 namespace rvr {
-//----------------------------------------------------------------------------------------------------------------------
+    using bb = Blackboard;
+
+    //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg const& msg { bb::msgValue(target, mDevice, cmd) };
 

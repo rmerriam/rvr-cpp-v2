@@ -22,7 +22,6 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
-#include <array>
 
 #include "Request.h"
 #include "CommandBase.h"
@@ -75,24 +74,18 @@ namespace rvr {
             CommandBase { Devices::sensors, req, nordic } {
         }
 
-        SensorsStream(const SensorsStream& other) = delete;
+        SensorsStream(SensorsStream const& other) = delete;
         SensorsStream(SensorsStream&& other) = delete;
-        SensorsStream& operator=(const SensorsStream& other) = delete;
+        SensorsStream& operator=(SensorsStream const& other) = delete;
 
-        void configureStreaming(const RvrMsg& cfg, const CommandResponse want_resp = resp_on_error);
-        void enableStreaming(const uint16_t millis, const CommandResponse want_resp = resp_on_error);
-        void disableStreaming(const CommandResponse want_resp = resp_on_error);
-        void clearStreaming(const CommandResponse want_resp = resp_on_error);
+        void configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
+        void enableStreaming(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+        void disableStreaming(CommandResponse const want_resp = resp_on_error);
+        void clearStreaming(CommandResponse const want_resp = resp_on_error);
 
         //======================================================================================================================
         // data access methods
         //----------------------------------------------------------------------------------------------------------------------
-        //======================================================================================================================
-        // data conversion methods
-//        int batteryPercent() {
-//            MsgArray value { bb::entryValue(mTarget, Devices::power, get_battery_percentage) };
-//            return (value.has_value()) ? MsgArray_cast<int64_t>(value) : -1;
-//        }
 
     private:
 
@@ -157,27 +150,6 @@ namespace rvr {
         };
 
     };
-
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::configureStreaming(const RvrMsg& cfg, const CommandResponse want_resp) {
-        cmd_data(configure_streaming_service, cfg, want_resp);
-        cmd_data_alt(configure_streaming_service, cfg, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::enableStreaming(const uint16_t millis, const CommandResponse want_resp) {
-        cmd_int(start_streaming_service, millis, want_resp);
-        cmd_int_alt(start_streaming_service, millis, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::disableStreaming(const CommandResponse want_resp) {
-        cmd_basic(stop_streaming_service, want_resp);
-        cmd_basic_alt(stop_streaming_service, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::clearStreaming(const CommandResponse want_resp) {
-        cmd_basic(clear_streaming_service, want_resp);
-        cmd_basic_alt(clear_streaming_service, want_resp);
-    }
 
 } /* namespace rvr */
 

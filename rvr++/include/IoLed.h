@@ -152,15 +152,15 @@ namespace rvr {
     };
     //---------------------------------------------------------------------------------------------------------------------
     inline void IoLed::idleLeds(CommandResponse const want_resp) const {
-        cmd_basic(release_led_requests, want_resp);
+        cmdBasic(release_led_requests, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getActiveColorPalette(CommandResponse const want_resp) const {
-        cmd_basic(get_active_color_palette, want_resp);
+        cmdBasic(get_active_color_palette, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getColorId(CommandResponse const want_resp) const {
-        cmd_basic(get_color_identification_report, want_resp);
+        cmdBasic(get_color_identification_report, want_resp);
     }
 
 } /* namespace rvr */

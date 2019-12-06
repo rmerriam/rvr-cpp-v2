@@ -78,20 +78,5 @@ namespace rvr {
     void Power::resetWakeNotify() {
         bb::resetNotify(mTarget, mDevice, system_awake_notify);
     }
-
-//======================================================================================================================
-// Deserialization methods
-//    void Power::rxBatVoltageInVolts(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
-//        Blackboard::entryValue(key) = bb::float_convert(begin, end);
-//    }
-//    //----------------------------------------------------------------------------------------------------------------------
-//    void Power::rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end) {
-//        Blackboard::entryValue(key) = bb::float_convert(begin, begin + 4);
-//        bb::key_s id_key { key };
-//        id_key.id = 1;
-//        Blackboard::entryValue(id_key) = bb::float_convert(begin + 4, begin + 8);
-//        id_key.id = 2;
-//        Blackboard::entryValue(id_key) = bb::float_convert(begin + 8, end);
-//    }
 }
 

@@ -42,15 +42,16 @@ namespace rvr {
         Blackboard& operator=(Blackboard const& other) = delete;
 
         static bool boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-
         static uint8_t byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static int16_t intValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-
         static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
             uint8_t const id = 0);
 
+        static bool notifyState(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static bool getNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static void resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
 
         static std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
@@ -73,8 +74,7 @@ namespace rvr {
          *
          */
 
-        enum key_t : uint32_t {
-        };
+        using key_t = uint32_t;
 
         struct key_s {
             key_s() {
@@ -89,8 +89,6 @@ namespace rvr {
             CommandBase::TargetPort proc { };
         };
 
-        using FuncPtr = void (*)(key_t const key, RvrMsg::iterator , RvrMsg::iterator );
-
         struct BlackboardEntry {
             std::string name;
             RvrMsg value { };
@@ -99,17 +97,18 @@ namespace rvr {
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
         static BBDictionary mDictionary;
 
-        static std::string entryName(key_t const key);
+        static std::string entryName(key_t key);
         static RvrMsg& entryValue(key_t const key);
         static RvrMsg& entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
-        static uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
         static key_t entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
-        // functions for processing received responses
-        static void msgArray(key_t const key, RvrMsg::iterator begin, RvrMsg::iterator end);
+        // methods for processing received responses
+        static void msgArray(key_t key, RvrMsg::iterator begin, RvrMsg::iterator end);
 
-        static int32_t int_convert(RvrMsg::iterator begin, RvrMsg::iterator end);
+        // methods for calculating values from dictionary entry
+        static uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
+        static float floatConvert(RvrMsg::const_iterator begin);
 
         friend std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
     };

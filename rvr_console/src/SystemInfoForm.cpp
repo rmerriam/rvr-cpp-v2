@@ -15,17 +15,17 @@ using namespace scr;
 extern std::string n;
 
 //--------------------------------------------------------------------------------------------------------------------------
-SystemInfoForm::SystemInfoForm(const int y, const int x, rvr::Request& req) :
-    FormBase(y, x), mSys { req }, mConn { req } {
+SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Request& req) :
+    FormBase(y, x), mSys { req }, mConn { req }, mApi { req } {
 
     uint8_t item_row { 2 };
     int width { 15 };
     NField::build_header(mFields, "System Information", 1, width + 20);
 
-//    mWallTime = NField::build_wide_data_item(mFields, "Wall Time:", item_row++, width, 13, 2);
-//    mSerialName = NField::build_data_item(mFields, "Port:", item_row++, width);
-
+    ++item_row;
     mRvrName = NField::build_data_item(mFields, "BT Name", item_row++, width);
+    ++item_row;
+
     mUpTime = NField::build_data_item(mFields, "Up Time", item_row++, width);
     mBoardVer = NField::build_data_item(mFields, "Board Ver:", item_row++, width);
     mBootVer = NField::build_data_item(mFields, "Boot Ver:", item_row++, width);
@@ -37,6 +37,10 @@ SystemInfoForm::SystemInfoForm(const int y, const int x, rvr::Request& req) :
     mMacAddr = NField::build_wide_data_item(mFields, "BT MAC Addr:", item_row++, width, 17);
     mStatsId = NField::build_data_item(mFields, "Stats Id:", item_row++, width);
     mSku = NField::build_data_item(mFields, "SKU:", item_row++, width);
+
+    ++item_row;
+    mPing = NField::build_data_item(mFields, "Ping:", item_row++, width);
+    mPingAlt = NField::build_data_item(mFields, "Ping2:", item_row++, width);
 
     mForm.init();
 }
@@ -59,6 +63,9 @@ void SystemInfoForm::onceData() {
     mSys.getStatsId(RespYes);
 
     mConn.bluetoothName(RespYes);
+
+    rvr::RvrMsg dead { 'P', 'i', 'n', 'g' };
+    mApi.echo(dead, RespYes);
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void SystemInfoForm::updateScreen() {
@@ -76,6 +83,9 @@ void SystemInfoForm::updateScreen() {
     mUpTime->setData(mSys.upTime());
 
     mRvrName->setData(mConn.name());
+
+    mPing->setData(mApi.echo());
+    mPingAlt->setData(mApi.echoAlt());
 
     wrefresh(mForm.win());
 }

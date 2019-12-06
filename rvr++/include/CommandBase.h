@@ -43,29 +43,32 @@ namespace rvr {
             bluetoothSOC = 0x01, //
             nordic = 0x02,
         };
-
+        enum SpecialSeq : uint8_t {
+            enable = 0x20, disable,
+        };
         explicit CommandBase(Devices const device, Request& request, TargetPort const target);
 
         uint8_t buildFlags(CommandResponse const want_resp) const;
 
-        void cmd_basic(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_basic_alt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmdBasic(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmdBasicAlt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_byte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_byte_alt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdByte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdByteAlt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_byte_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_byte_alt_id(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdByteId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdByteAltId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_int(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_int_alt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdInt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdIntAlt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_enable(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_enable_alt(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_disable(uint8_t const cmd, bool const state, CommandResponse const want_resp = resp_on_error) const;
+        void cmdEnable(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmdDisable(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
 
-        void cmd_data(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
-        void cmd_data_alt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdData(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdDataAlt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
 
         Devices const mDevice;
         Request& mRequest;
@@ -85,6 +88,7 @@ namespace rvr {
         static uint8_t sequence() {
             return ++mSeq | 0x80;
         }
+
     private:
         static inline uint8_t mSeq { 0x0 };
 

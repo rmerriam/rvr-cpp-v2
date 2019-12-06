@@ -48,7 +48,7 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void Connection::bluetoothName(CommandResponse const want_resp) const {
-        cmd_basic(get_bluetooth_advertising_name, want_resp);
+        cmdBasic(get_bluetooth_advertising_name, want_resp);
     }
 
 } /* namespace rvr */

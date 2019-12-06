@@ -33,7 +33,7 @@ namespace rvr {
         };
         leds.insert(leds.end(), colors.begin(), colors.end());
 
-        cmd_data(set_all_leds, leds, want_resp);
+        cmdData(set_all_leds, leds, want_resp);
 
 //        MsgArray msg { buildFlags(want_resp), mTarget, mDevice, set_all_leds, sequence() };
 //        msg.insert(msg.end(), leds.begin(), leds.end());

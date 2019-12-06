@@ -22,14 +22,13 @@
 //     Created: Oct 29, 2019
 //
 //======================================================================================================================
-#include "Blackboard.h"
+//#include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
 
 using namespace std::literals;
 
 namespace rvr {
-    using bb = Blackboard;
 
     class SystemInfo : protected CommandBase {
     public:
@@ -77,38 +76,38 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {
-        cmd_basic(get_main_application_version, want_resp);
-        cmd_basic_alt(get_main_application_version, want_resp);
+        cmdBasic(get_main_application_version, want_resp);
+        cmdBasicAlt(get_main_application_version, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getBootloaderVersion(CommandResponse const want_resp) {
-        cmd_basic(get_bootloader_version, want_resp);
-        cmd_basic_alt(get_bootloader_version, want_resp);
+        cmdBasic(get_bootloader_version, want_resp);
+        cmdBasicAlt(get_bootloader_version, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getBoardRevision(CommandResponse const want_resp) {
-        cmd_basic_alt(get_board_revision, want_resp);
+        cmdBasicAlt(get_board_revision, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMacId(CommandResponse const want_resp) {
-        cmd_basic_alt(get_mac_address, want_resp);
+        cmdBasicAlt(get_mac_address, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getStatsId(CommandResponse const want_resp) {
-        cmd_basic_alt(get_stats_id, want_resp);
+        cmdBasicAlt(get_stats_id, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getProcessorName(CommandResponse const want_resp) {
-        cmd_basic(get_processor_name, want_resp);
-        cmd_basic_alt(get_processor_name, want_resp);
+        cmdBasic(get_processor_name, want_resp);
+        cmdBasicAlt(get_processor_name, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getUpTime(CommandResponse const want_resp) {
-        cmd_basic(get_core_up_time_in_milliseconds, want_resp);
+        cmdBasic(get_core_up_time_in_milliseconds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getSku(CommandResponse const want_resp) {
-        cmd_basic_alt(get_sku, want_resp);
+        cmdBasicAlt(get_sku, want_resp);
     }
 
 } /* namespace rvr */
