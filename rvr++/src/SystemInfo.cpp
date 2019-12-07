@@ -89,7 +89,7 @@ namespace rvr {
         return bb::intValue(mAltTarget, mDevice, get_stats_id);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    int64_t SystemInfo::upTime() {
+    int64_t SystemInfo::coreUpTime() {
         return bb::uint64Value(mTarget, mDevice, get_core_up_time_in_milliseconds);
     }
 

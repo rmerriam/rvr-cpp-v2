@@ -43,17 +43,17 @@ namespace rvr {
 
         void drive(double const& left, double const& right, CommandResponse const want_resp = resp_on_error) const;
         void stop(int const& heading, CommandResponse const want_resp = resp_on_error) const;
-        void spin_drive(double const& speed, int const& heading, CommandResponse const want_resp = resp_on_error) const;
 
-        void getMotorFault(CommandResponse const want_resp = resp_on_error) const;
-
-        void enableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
-        void disableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
+        void resetYaw(CommandResponse const want_resp = resp_on_error) const;
+        void driveWithHeading(double const& speed, int const& heading, CommandResponse const want_resp = resp_on_error) const;
 
         void enableMotorStallNotify(CommandResponse const want_resp = resp_on_error) const;
         void disableMotorStallNotify(CommandResponse const want_resp = resp_on_error) const;
 
-        void fixHeading(CommandResponse const want_resp = resp_on_error) const;
+        void enableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
+        void disableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
+
+        void getMotorFault(CommandResponse const want_resp = resp_on_error) const;
 
         //======================================================================================================================
         // Access data

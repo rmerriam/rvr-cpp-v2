@@ -49,7 +49,7 @@ void SystemInfoForm::requestData() {
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void SystemInfoForm::fastData() {
-    mSys.getUpTime(RespYes);
+    mSys.getCoreUpTime(RespYes);
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void SystemInfoForm::onceData() {

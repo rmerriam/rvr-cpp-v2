@@ -66,33 +66,58 @@ namespace rvr {
         SensorsDirect(SensorsDirect&& other) = delete;
         SensorsDirect& operator=(SensorsDirect const& other) = delete;
 
-        void setLocatorFlags(bool const flag, CommandResponse const want_resp = resp_on_error) const;
+        void enableGyroMaxNotify(CommandResponse const want_resp = resp_yes) const;
+        void disableGyroMaxNotify(CommandResponse const want_resp = resp_yes) const;
+        // Gyro Max Notify
+        void resetMaxGyroNotify() const;    // not part of API
+
         void resetLocatorXY(CommandResponse const want_resp = resp_on_error) const;
+        void setLocatorFlags(bool const flag, CommandResponse const want_resp = resp_on_error) const;
 
-        void enableGyroMaxNotify(CommandResponse const want_resp = resp_on_error) const;
-        void disableGyroMaxNotify(CommandResponse const want_resp = resp_on_error) const;
+        //  Get Bot To Bot Infrared Readings
 
-        void getRightMotorTemp(CommandResponse const want_resp = resp_on_error) const;
-        void getLeftMotorTemp(CommandResponse const want_resp = resp_on_error) const;
+        void getRgbcSensorValue(CommandResponse const want_resp = resp_yes) const;
 
-        void getThermalProtectionStatus(CommandResponse const want_resp = resp_on_error) const;
-        void enableThermal(CommandResponse const want_resp = resp_on_error) const;
-        void disableThermal(CommandResponse const want_resp = resp_on_error) const;
+        //  Start Robot To Robot Infrared Broadcasting
+        //  Start Robot To Robot Infrared Following
+        //  Stop Robot To Robot Infrared Broadcasting
+        //  Robot To Robot Infrared Message Received Notify
 
-        void getAmbient(CommandResponse const want_resp = resp_on_error) const;
+        void getAmbienLightSensorValue(CommandResponse const want_resp = resp_yes) const;
 
-        void disableColorDetection(CommandResponse const want_resp = resp_on_error) const;
-        void enabeColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
-            CommandResponse const want_resp = resp_on_error) const;
-        void enableColorDetection(CommandResponse const want_resp = resp_on_error) const;
-        void getCurrentColor(CommandResponse const want_resp = resp_on_error) const;
+        //  Stop Robot To Robot Infrared Following
+        //  Start Robot To Robot Infrared Evading
+        //  Stop Robot To Robot Infrared Evading
+
+        void enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
+            CommandResponse const want_resp = resp_yes) const;
+        //  Color Detection Notify
+        void resetColorDetectionNotify() const;     // not part of API
+        void getCurrentDectectedColor(CommandResponse const want_resp = resp_yes) const;
+        void enableColorDetection(CommandResponse const want_resp = resp_yes) const;
+        void disableColorDetection(CommandResponse const want_resp = resp_yes) const;
+
+        //* implemented in SensorsStream class
+        //*     Configure Streaming Service
+        //*     Start Streaming Service
+        //*     Stop Streaming Service
+        //*     Clear Streaming Service
+        //*     Streaming Service Data Notify
+
+        //  Enable Robot Infrared Message Notify
+        //  Send Infrared Message
+
+        void getRightMotorTemp(CommandResponse const want_resp = resp_yes) const;
+        void getLeftMotorTemp(CommandResponse const want_resp = resp_yes) const;
+        void getThermalProtectionStatus(CommandResponse const want_resp = resp_yes) const;
+        void enableThermalProtectionNotify(CommandResponse const want_resp = resp_on_error) const;
+        void disableThermalProtectionNotify(CommandResponse const want_resp = resp_on_error) const;
+
+        //  Thermal Protection Notify
 
         float ambient() const;
         float leftMotorTemp() const;
         float rightMotorTemp() const;
-
-        void resetMaxGyroNotify() const;
-        void resetColorDetectionNotify() const;
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
@@ -172,6 +197,9 @@ namespace rvr {
     inline void SensorsDirect::getRightMotorTemp(CommandResponse const want_resp) const {
         cmdByteAltId(get_motor_temperature, 0x05, want_resp);
     }
+    inline void SensorsDirect::getRgbcSensorValue(CommandResponse const want_resp) const {
+        cmdBasic(get_rgbc_sensor_values, want_resp);
+    }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getLeftMotorTemp(CommandResponse const want_resp) const {
         cmdByteAltId(get_motor_temperature, 0x04, want_resp);
@@ -181,19 +209,19 @@ namespace rvr {
         cmdBasicAlt(get_motor_thermal_protection_status, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::enableThermal(CommandResponse const want_resp) const {
+    inline void SensorsDirect::enableThermalProtectionNotify(CommandResponse const want_resp) const {
         cmdEnableAlt(enable_motor_thermal_protection_status_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::disableThermal(CommandResponse const want_resp) const {
+    inline void SensorsDirect::disableThermalProtectionNotify(CommandResponse const want_resp) const {
         cmdDisableAlt(enable_motor_thermal_protection_status_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getAmbient(CommandResponse const want_resp) const {
+    inline void SensorsDirect::getAmbienLightSensorValue(CommandResponse const want_resp) const {
         cmdBasic(get_ambient_light_sensor_value, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getCurrentColor(CommandResponse const want_resp) const {
+    inline void SensorsDirect::getCurrentDectectedColor(CommandResponse const want_resp) const {
         cmdBasic(get_current_detected_color_reading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -202,10 +230,10 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::disableColorDetection(CommandResponse const want_resp) const {
-        cmdEnable(enable_color_detection, want_resp);
+        cmdDisable(enable_color_detection, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::enabeColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
+    inline void SensorsDirect::enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
         CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, enable_color_detection_notify, sequence(), //
                      enable, static_cast<uint8_t>(timer >> 8), static_cast<uint8_t>(timer & 0xFF), confidence };

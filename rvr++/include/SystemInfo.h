@@ -39,14 +39,14 @@ namespace rvr {
         SystemInfo(SystemInfo&& other) = delete;
         SystemInfo& operator=(SystemInfo const& other) = delete;
 
-        void getBoardRevision(CommandResponse const want_resp = resp_on_error);
-        void getBootloaderVersion(CommandResponse const want_resp = resp_on_error);
-        void getMacId(CommandResponse const want_resp = resp_on_error);
         void getMainAppVersion(CommandResponse const want_resp = resp_on_error);
+        void getBootloaderVersion(CommandResponse const want_resp = resp_on_error);
+        void getBoardRevision(CommandResponse const want_resp = resp_on_error);
+        void getMacId(CommandResponse const want_resp = resp_on_error);
+        void getStatsId(CommandResponse const want_resp = resp_on_error);
         void getProcessorName(CommandResponse const want_resp = resp_on_error);
         void getSku(CommandResponse const want_resp = resp_on_error);
-        void getStatsId(CommandResponse const want_resp = resp_on_error);
-        void getUpTime(CommandResponse const want_resp = resp_on_error);
+        void getCoreUpTime(CommandResponse const want_resp = resp_on_error);
 
         int64_t boardVersion();
         std::string bootVersion();
@@ -58,7 +58,7 @@ namespace rvr {
         std::string processorName2();
         int16_t statsId();
         std::string sku();
-        int64_t upTime();
+        int64_t coreUpTime();
 
     private:
         enum Cmd : uint8_t {
@@ -102,7 +102,7 @@ namespace rvr {
         cmdBasicAlt(get_processor_name, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SystemInfo::getUpTime(CommandResponse const want_resp) {
+    inline void SystemInfo::getCoreUpTime(CommandResponse const want_resp) {
         cmdBasic(get_core_up_time_in_milliseconds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------

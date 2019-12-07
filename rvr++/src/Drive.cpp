@@ -45,7 +45,7 @@ namespace rvr {
         cmdDisable(enable_motor_stall_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Drive::fixHeading(CommandResponse const want_resp) const {
+    void Drive::resetYaw(CommandResponse const want_resp) const {
         cmdBasic(reset_yaw, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -64,10 +64,10 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::stop(int const& heading, CommandResponse const want_resp) const {
-        spin_drive(0, heading, want_resp);
+        driveWithHeading(0, heading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Drive::spin_drive(double const& speed, int const& heading, CommandResponse const want_resp) const {
+    void Drive::driveWithHeading(double const& speed, int const& heading, CommandResponse const want_resp) const {
         auto [spd, mode] = speed_mode(speed);
         RvrMsg msg { spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), mode };
         cmdData(drive_with_heading, msg, want_resp);

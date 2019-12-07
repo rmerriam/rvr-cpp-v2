@@ -31,7 +31,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::motorCurrent(MotorSide const ms) {
-        return bb::floatValue(mTarget, mDevice, get_current_sense_amplifier_current, ms);
+        return bb::floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, ms);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedFiltered() {
@@ -46,7 +46,11 @@ namespace rvr {
         return bb::floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, UncalibratedUnfiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string Power::voltState() {
+    Power::BatteryVoltState Power::voltState() {
+        return static_cast<BatteryVoltState>(bb::byteValue(mTarget, mDevice, get_battery_voltage_state));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    std::string Power::voltStateText() {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
         return state[bb::byteValue(mTarget, mDevice, get_battery_voltage_state)];
     }
@@ -63,11 +67,11 @@ namespace rvr {
         return bb::floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 2);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Power::checkBatteryStateChange() {
+    bool Power::isBatteryStateChangeEnabled() {
         return bb::notifyState(mTarget, mDevice, enable_battery_voltage_state_change_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Power::isSleepNotify() {
+    bool Power::isDidSleepNotify() {
         return bb::notifyState(mTarget, mDevice, did_sleep_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------

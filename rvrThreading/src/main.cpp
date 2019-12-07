@@ -97,42 +97,40 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 0
+#if 1
     // Direct reading of sensors
     rvr::SensorsDirect sen_d(req);
 
-    sen_d.enableThermal(RespYes);
-    sen_d.enableColorDetection(RespYes);
-    sen_d.enabeColorDetectionNotify(true, 500, 0, RespYes);
-    sen_d.enableGyroMaxNotify(RespYes);
+    sen_d.enableGyroMaxNotify();
 
+    sen_d.resetLocatorXY(RespYes);
+    sen_d.setLocatorFlags(true, RespYes);   // set/reset? special id flags
+
+    sen_d.enableColorDetection();   // must preceed color detection to turn on bottom LEDs
+
+    sen_d.getRgbcSensorValue();
+    sen_d.getAmbienLightSensorValue();
+
+    sen_d.enableColorDetectionNotify(true, 500, 0);
+    sen_d.getCurrentDectectedColor();
+
+    sen_d.getLeftMotorTemp();
+    sen_d.getRightMotorTemp();
+
+    sen_d.getThermalProtectionStatus();
+    sen_d.enableThermalProtectionNotify();
+
+    sen_d.disableColorDetection(); // turns off LEDs
 //    terr << code_loc << mys::sp << "Notify Thermal?: " << sen_d.isThermalNotifySet();
 //    terr << code_loc << mys::sp << "Notify Max Gyro?: " << sen_d.isMaxGyroNotifySet();
-    terr << code_loc;
-    terr << code_loc;
 
-    sen_d.getAmbient(RespYes);
-
-    std::this_thread::sleep_for(500ms);
-
-    sen_d.getCurrentColor(RespYes);
-
-    sen_d.setLocatorFlags(true, RespYes);
-    sen_d.resetLocatorXY(RespYes);
-
-    sen_d.getRightMotorTemp(RespYes);
-    sen_d.getLeftMotorTemp(RespYes);
-    sen_d.getThermalProtectionStatus(RespYes);
-
-    std::this_thread::sleep_for(100ms);
-    sen_d.disableColorDetection(RespYes);
-    sen_d.disableGyroMaxNotify(RespYes);
-    sen_d.disableThermal(RespYes);
+//    sen_d.disableColorDetection();
+//    sen_d.disableGyroMaxNotify();
+//    sen_d.disableThermalProtectionNotify();
 
     std::this_thread::sleep_for(500ms);
 
-    terr << code_loc;
-    terr << code_loc;
+    terr << code_loc << mys::nl;
     terr << code_loc << "sense direct";
 
     terr << code_loc << mys::sp << "Ambient: " << sen_d.ambient();
@@ -177,39 +175,32 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(500ms);
 
 #endif
-#if 1
+#if 0
+    // POWER
 
-    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
+    pow.batteryPercentage();
+    pow.batteryVoltageState();
+
+    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
+    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
+    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
 
     pow.enableBatteryStateChange(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    terr << code_loc << mys::sp << "Set State Change on?: " << pow.checkBatteryStateChange();
 
-//    pow.disableBatteryStateChange(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-
-    terr << code_loc << mys::sp << "Set State Change off?: " << pow.checkBatteryStateChange();
-
-    pow.batteryVoltageState(RespYes);
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
-    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
-
-    pow.batteryVoltThresholds(RespYes);
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::left, RespYes);
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::right, RespYes);
-    pow.batteryVoltageState(RespYes);
-    pow.batteryPercentage(RespYes);
+    pow.batteryVoltThresholds();
+    pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
+    pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
 
     std::this_thread::sleep_for(1s);
 
     terr << code_loc << mys::nl;
+    terr << code_loc << "Power";
 
-    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify();
+    terr << code_loc << mys::sp << "VPercent: " << pow.batteryPercent();
+
+    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isDidSleepNotify();
     terr << code_loc << mys::sp << "State: " << pow.voltState();
 
-    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify();
-    pow.resetWakeNotify();
     terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify();
 
     terr << code_loc << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
@@ -220,29 +211,49 @@ int main(int argc, char* argv[]) {
     terr << code_loc << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
     terr << code_loc << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
     terr << code_loc << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
-    terr << code_loc << mys::sp << "VPercent: " << pow.batteryPercent();
 
-    terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
+    terr << code_loc << mys::sp << "Wake Notify Set?: " << pow.isWakeNotify();
+    terr << code_loc << mys::sp << "resetWakeNotify ";
+    pow.resetWakeNotify();
+    terr << code_loc << mys::sp << "Wake Notify Cleared?: " << pow.isWakeNotify();
+
+    terr << code_loc << mys::sp << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+
     terr << code_loc << mys::nl;
+    terr << code_loc << mys::sp << "disableBatteryStateChange";
+    pow.disableBatteryStateChange();
+    std::this_thread::sleep_for(50ms);
+
+    terr << code_loc << mys::sp << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+
+    terr << code_loc << mys::nl;
+#if 1
+    pow.sleep();
+
+    std::this_thread::sleep_for(5000ms);    // have to wait for notification
+    terr << code_loc << mys::sp << "Did Sleep Notify: " << pow.isDidSleepNotify();
+    terr << code_loc << mys::nl;
+#endif
 
 #endif
 #if 0
+    // DRIVE
     rvr::Drive drive(req);
 
-    drive.fixHeading(RespYes);
+    drive.resetYaw(RespYes);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-//    drive.stop(90, RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    drive.stop(90, RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-//    drive.drive(25, 25, RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-//
-//    drive.spin_drive(0, 20, RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    drive.drive(25, 25, RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
-//    drive.fixHeading(RespYes);
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    drive.driveWithHeading(0, 20, RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+    drive.resetYaw(RespYes);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 
     drive.enableMotorStallNotify(RespYes);
     drive.enableMotorFaultNotify(RespYes);
@@ -260,43 +271,48 @@ int main(int argc, char* argv[]) {
 
     terr << code_loc << "Fault Notify State: " << drive.motorFaultState();
     terr << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
-    terr << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
+
+    terr << code_loc << "Stall Notify State: " << drive.motorFaultState();
+terr << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
 
     terr << code_loc;
     terr << code_loc;
 
 #endif
 #if 0
-    rvr::ApiShell api(req);
+    // Connection, SysInfo, APIShell
     rvr::Connection cmd(req);
-    rvr::SystemInfo sys(req);
-
-    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
-    api.echo(dead);    // alt
     cmd.bluetoothName(RespYes);    //
-    sys.getBoardRevision(RespYes);  // ??
-    sys.getBootloaderVersion(RespYes);    //
-    sys.getMacId(RespYes);  // ??
+
+    rvr::SystemInfo sys(req);
     sys.getMainAppVersion(RespYes);    // alt
+    sys.getBootloaderVersion(RespYes);    //
+    sys.getBoardRevision(RespYes);  // ??
+    sys.getMacId(RespYes);  // ??
+    sys.getStatsId(RespYes);
     sys.getProcessorName(RespYes);  // alt
     sys.getSku(RespYes);    // ??
-    sys.getStatsId(RespYes);
-    sys.getUpTime(RespYes); //
+    sys.getCoreUpTime(RespYes); //
 
-    std::this_thread::sleep_for(1s);
+    rvr::ApiShell api(req);
+    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
+    api.echo(dead);    // alt
+
+    std::this_thread::sleep_for(100ms);
     terr << code_loc << mys::nl;
-
+    terr << code_loc << mys::nl;
+    terr << code_loc << mys::nl << "Connection, SysInfo, APIShell";
     terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
     terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion2();
     terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
     terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion2();
     terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
+    terr << code_loc << "MAC Addr: " << sys.macAddress();
+    terr << code_loc << "Stats Id: " << sys.statsId();
     terr << code_loc << "Processor: " << sys.processorName();
     terr << code_loc << "Processor: " << sys.processorName2();
-    terr << code_loc << "MAC Addr: " << sys.macAddress();
     terr << code_loc << "SKU: " << sys.sku();
-    terr << code_loc << "Stats Id: " << sys.statsId();
-    terr << code_loc << "Up Time: " << sys.upTime();
+    terr << code_loc << "Up Time: " << sys.coreUpTime();
 
     terr << code_loc << "BT Name: " << cmd.name();
 
@@ -311,10 +327,6 @@ int main(int argc, char* argv[]) {
     terr << code_loc << "----------------" << mys::nl;
 
     pow.sleep();
-
-//    pow.powerOff(5);
-//    std::this_thread::sleep_for(10s);
-//    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isSleepNotify() << " =========";
 
     end_tasks.set_value();
     resp_future.get();

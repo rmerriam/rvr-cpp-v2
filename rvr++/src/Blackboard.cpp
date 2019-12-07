@@ -68,7 +68,7 @@ namespace rvr {
     { entryKey(btc, dev::power, 0x01), BlackboardEntry { "snooze" } }, //
     { entryKey(btc, dev::power, 0x0D), BlackboardEntry { "wake" } }, //
     { entryKey(btc, dev::power, 0x10), BlackboardEntry { "get_battery_percentage" } }, //
-    { entryKey(btc, dev::power, 0x11), BlackboardEntry { "system_awake_notification" } }, //
+    { entryKey(btc, dev::power, 0x11), BlackboardEntry { "system_awake_notify" } }, //
     { entryKey(btc, dev::power, 0x17), BlackboardEntry { "get_battery_voltage_state" } }, //
     { entryKey(btc, dev::power, 0x19), BlackboardEntry { "will_sleep_notify" } }, //
     { entryKey(btc, dev::power, 0x1A), BlackboardEntry { "did_sleep_notify" } }, //
@@ -80,15 +80,15 @@ namespace rvr {
     { entryKey(btc, dev::power, 0x26), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
     { entryKey(btc, dev::power, 0x26, 1), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
     { entryKey(btc, dev::power, 0x26, 2), BlackboardEntry { "get_battery_voltage_state_thresholds" } }, //
-    { entryKey(nordic, dev::power, 0x27), BlackboardEntry { "get_current_sense_amplifier_current" } }, //
-    { entryKey(nordic, dev::power, 0x27, 1), BlackboardEntry { "get_current_sense_amplifier_current" } }, //
+    { entryKey(nordic, dev::power, 0x27), BlackboardEntry { "get_current_sense_amplifier_current left" } }, //
+    { entryKey(nordic, dev::power, 0x27, 1), BlackboardEntry { "get_current_sense_amplifier_current right" } }, //
 //
     { entryKey(nordic, dev::sensors, 0x0F), BlackboardEntry { "enable_gyro_max_notify" } }, //
     { entryKey(nordic, dev::sensors, 0x10), BlackboardEntry { "gyro_max_notify" } }, //
     { entryKey(nordic, dev::sensors, 0x13), BlackboardEntry { "reset_locator_x_and_y" } }, //
     { entryKey(nordic, dev::sensors, 0x17), BlackboardEntry { "set_locator_flags " } }, //
     { entryKey(nordic, dev::sensors, 0x22), BlackboardEntry { "get_bot_to_bot_infrared_readings " } }, //
-    { entryKey(nordic, dev::sensors, 0x23), BlackboardEntry { "get_rgbc_senso" } }, //
+    { entryKey(btc, dev::sensors, 0x23), BlackboardEntry { "get_rgbc_sensor" } }, //
     { entryKey(nordic, dev::sensors, 0x27), BlackboardEntry { "start_robot_to_robot_infrared_broadcasting" } }, //
     { entryKey(nordic, dev::sensors, 0x28), BlackboardEntry { "start_robot_to_robot_infrared_following" } }, //
     { entryKey(nordic, dev::sensors, 0x29), BlackboardEntry { "stop_robot_to_robot_infrared_broadcasting" } }, //
@@ -116,7 +116,6 @@ namespace rvr {
     { entryKey(nordic, dev::sensors, 0x3E), BlackboardEntry { "enable_robot_infrared_message_notify" } }, //
     { entryKey(nordic, dev::sensors, 0x3F), BlackboardEntry { "send_infrared_message" } }, //
     //
-//    { entryKey(nordic, dev::sensors, 0x4A, 0), BlackboardEntry { "left_motor_temperature", SensorsDirect::motorTemperature } }, // left
     { entryKey(nordic, dev::sensors, 0x4A, 4), BlackboardEntry { "left_motor_temperature" } }, // left
     { entryKey(nordic, dev::sensors, 0x4A, 5), BlackboardEntry { "right_motor_temperature" } }, // right
     { entryKey(nordic, dev::sensors, 0x4B), BlackboardEntry { "get_motor_thermal_protection_status" } }, //
@@ -200,15 +199,22 @@ namespace rvr {
         if (msg.empty()) {
             msg.push_back(0xFF);
         }
-        else if ((msg.size() >= 2) && (msg[0] < 0x80) && (msg[0] >= CommandBase::enable)) {
+        else if ((msg.size() >= 2) && (msg[0] < 0x80) && (msg[0] >= 0x04)) {
             // message seq has special flags that are not sequence number (> 0x80) or ids (< enable (0x20) - its a hack
             // because of the protocol
-            key &= static_cast<bb::key_t>(0xFFFFFF00);
-            switch (msg[0]) {
+            switch (msg.front()) {
+                // special case for motor temperatures
+                case 4:
+                case 5:
+                    msg.erase(msg.begin() + 2);
+                    break;
+
                 case CommandBase::enable:
+                    key &= static_cast<bb::key_t>(0xFFFFFF00);
                     msg[1] = true;
                     break;
                 case CommandBase::disable:
+                    key &= static_cast<bb::key_t>(0xFFFFFF00);
                     msg[1] = false;
                     break;
             }
@@ -241,7 +247,7 @@ namespace rvr {
         return res;
     }
 
-    RvrMsg fake_msg { 3, 0 };
+    RvrMsg fake_msg(3, 0);
 //----------------------------------------------------------------------------------------------------------------------
     template <typename T>
     float normalize(T const value, float const out_min, float const out_max) {
@@ -269,14 +275,20 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
+    // these two methods are for notifications that return a single 0xFF
     bool Blackboard::notifyState(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg& msg { bb::entryValue(target, dev, cmd) };
 
         bool res { };
-        if (msg.size() >= 2) {
-            res = msg[1] != 0;
+        if (msg.size() >= 1) {
+            res = msg[0] != 0;
         }
         return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Blackboard::resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsg& msg { entryValue(target, dev, cmd) };
+        msg = fake_msg;
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint16_t Blackboard::uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
@@ -325,14 +337,7 @@ namespace rvr {
         }
         return msg[2] != 0;
     }
-//----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg& msg { entryValue(target, dev, cmd) };
-        if (msg.empty()) {
-            msg = fake_msg;
-        }
-        msg[2] = 0;
-    }
+
 //----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg msg { entryValue(target, dev, cmd) };

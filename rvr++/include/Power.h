@@ -50,48 +50,58 @@ namespace rvr {
         Power(Power&& other) = delete;
         Power& operator=(Power const& other) = delete;
 
-        // requests to RVR
-        void awake(CommandResponse const want_resp = resp_on_error) const;
         void powerOff(uint8_t const secs, CommandResponse const want_resp = resp_on_error) const;
         void sleep(CommandResponse const want_resp = resp_on_error) const;
+        void awake(CommandResponse const want_resp = resp_on_error) const;
 
-        void batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp = resp_on_error) const;
-        void batteryPercentage(CommandResponse const want_resp = resp_on_error) const;
-        void batteryVoltage(VoltageType const vt, CommandResponse const want_resp = resp_on_error) const;
-        void batteryVoltageState(CommandResponse const want_resp = resp_on_error) const;
-        void batteryVoltThresholds(CommandResponse const want_resp = resp_on_error) const;
+        void batteryPercentage(CommandResponse const want_resp = resp_yes) const;
+        void batteryVoltageState(CommandResponse const want_resp = resp_yes) const;
+
+        //  Will Sleep Notify
+        //  Did Sleep Notify
 
         void enableBatteryStateChange(CommandResponse const want_resp = resp_on_error) const;
         void disableBatteryStateChange(CommandResponse const want_resp = resp_on_error) const;
 
-        // Data access methods`
+        void batteryVoltage(VoltageType const vt, CommandResponse const want_resp = resp_yes) const;
+        void batteryVoltThresholds(CommandResponse const want_resp = resp_yes) const;
+        void batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp = resp_yes) const;
+
+        //----------------------------------------------------------------------------------------------------------------------
+        // Data access methods
+
+        int batteryPercent();
+
+        enum BatteryVoltState : uint8_t {
+            unknown, ok, low, critical,
+        };
+        BatteryVoltState voltState();
+        std::string voltStateText();
+
+        // batteryVoltage
         float voltsCalibratedFiltered();
         float voltsCalibratedUnfiltered();
         float voltsUncalibratedUnfiltered();
 
+        // batteryVoltThresholds
         float voltThresholdCritical();
         float voltThresholdLow();
         float voltThresholdHysteresis();
 
+        // batteryMotorCurrent
         float motorCurrent(MotorSide const ms);
-        int batteryPercent();
-        std::string voltState();
 
         bool isWakeNotify();
         void resetWakeNotify();
 
-        bool checkBatteryStateChange();
-        bool isSleepNotify();
-
-        // De-serialization handlers
-//        static void rxBatteryThresholds(const bb::key_t key, MsgArray::iterator begin, MsgArray::iterator end);
+        bool isBatteryStateChangeEnabled();
+        bool isDidSleepNotify();
 
     private:
-        enum BatteryVoltageStates : uint8_t {
-            unknown, ok, low, critical,
-        };
+
         enum Cmd : uint8_t {
-            power_off = 0x00, snooze = 0x01, //
+            power_off = 0x00,        //
+            snooze = 0x01, //
             wake = 0x0D, //
             get_battery_percentage = 0x10, //
             system_awake_notify = 0x11, //

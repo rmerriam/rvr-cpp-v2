@@ -83,7 +83,7 @@ void PowerForm::updateScreen() {
     mLeftMotorCurrent->setData(mPow.motorCurrent(rvr::Power::left));
     mRightMotorCurrent->setData(mPow.motorCurrent(rvr::Power::right));
 
-    mBattStateChangeStatus->setData(mPow.checkBatteryStateChange());
+    mBattStateChangeStatus->setData(mPow.isBatteryStateChangeEnabled());
     mWakeNotify->setData(mPow.isWakeNotify());
 
     wrefresh(mForm.win());
