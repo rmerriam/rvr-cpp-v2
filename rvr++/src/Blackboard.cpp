@@ -47,6 +47,7 @@ namespace rvr {
     bb::BBDictionary bb::mDictionary { //
 //
     { entryKey(nordic, dev::api_and_shell, 0x00), BlackboardEntry { "echo" } }, //
+    { entryKey(btc, dev::api_and_shell, 0x00), BlackboardEntry { "echo" } }, //
 //
     { entryKey(btc, dev::connection, 0x05), BlackboardEntry { "get_bluetooth_advertising_name" } }, //
 #if 1
@@ -199,7 +200,9 @@ namespace rvr {
         if (msg.empty()) {
             msg.push_back(0xFF);
         }
-        else if ((msg.size() >= 2) && (msg[0] < 0x80)) {
+        else if ((msg.size() >= 2) && (msg[0] < 0x80) && (msg[0] >= CommandBase::enable)) {
+            // message seq has special flags that are not sequence number (> 0x80) or ids (< enable (0x20) - its a hack
+            // because of the protocol
             key &= static_cast<bb::key_t>(0xFFFFFF00);
             switch (msg[0]) {
                 case CommandBase::enable:
@@ -211,7 +214,7 @@ namespace rvr {
             }
         }
         entryValue(key) = msg;
-        terr << code_loc << std::hex << key << mys::sp << msg;
+        terr << code_loc << std::setfill('0') << std::hex << key << mys::sp << msg;
     }
 //======================================================================================================================
 //  Methods to calculate values from RvrMsg in dictionary
@@ -308,7 +311,8 @@ namespace rvr {
         begin += (pos * 4);
 
         float result { };
-        if ((msg.end() - begin) >= static_cast<long>(sizeof(float))) {
+//        if ((msg.end() - begin) >= static_cast<long>(sizeof(float)))
+        {
             result = floatConvert(begin);
         }
         return result;
@@ -361,7 +365,7 @@ namespace rvr {
         );
         for (auto& i : vec) {
             terr << std::hex << std::uppercase << i.key << mys::tab << std::setw(45) << std::setfill(' ') << std::left << i.be.name << //
-                mys::tab << mys::tab << i.be.value;
+                 mys::tab << mys::tab << i.be.value;
         }
     }
 

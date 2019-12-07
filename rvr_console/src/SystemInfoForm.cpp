@@ -65,7 +65,7 @@ void SystemInfoForm::onceData() {
     mConn.bluetoothName(RespYes);
 
     rvr::RvrMsg dead { 'P', 'i', 'n', 'g' };
-    mApi.echo(dead, RespYes);
+    mApi.echo(dead);
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void SystemInfoForm::updateScreen() {

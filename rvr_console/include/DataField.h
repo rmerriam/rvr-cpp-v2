@@ -9,21 +9,25 @@
 #define DataField_H_
 
 #include <charconv>
+#include <iostream>
 #include <string>
 using namespace std;
 
 #include "NField.h"
 
+using RvrMsg = std::basic_string<uint8_t>;
+
 namespace scr {
     //--------------------------------------------------------------------------------------------------------------------------
     class DataField : public NField {
     public:
-        DataField(int const height, int const width, int const row, int const col, int const nmem = 0, int const nbuf = 0);
+        DataField(uint8_t const height, uint8_t const width, uint8_t const row, uint8_t const col, uint8_t const nmem = 0,
+            uint8_t const nbuf = 0);
 
         template <typename T>
         void setData(T const& data);
         void setData(string const& data);
-        void setData(u8string const& data);
+        void setData(RvrMsg const& data);
         void setData(bool const& data);
 
     };
@@ -33,21 +37,6 @@ namespace scr {
         string txt { to_string(data) };
         write(txt);
     }
-    //--------------------------------------------------------------------------------------------------------------------------
-    inline void DataField::setData(string const& data) {
-        write(data);
-    }
-    //--------------------------------------------------------------------------------------------------------------------------
-    inline void DataField::setData(u8string const& data) {
-        string s { data.begin(), data.end() };
-        write(s);
-    }
-    //--------------------------------------------------------------------------------------------------------------------------
-    inline void DataField::setData(bool const& data) {
-        string txt { data ? "true" : "false" };
-        write(txt);
-    }
-
 } /* namespace scr */
 
 #endif /* DataField_H_ */

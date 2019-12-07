@@ -177,7 +177,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(500ms);
 
 #endif
-#if 0
+#if 1
 
     terr << code_loc << mys::sp << "Set State Change?: " << pow.checkBatteryStateChange();
 
@@ -226,7 +226,7 @@ int main(int argc, char* argv[]) {
     terr << code_loc << mys::nl;
 
 #endif
-#if 1
+#if 0
     rvr::Drive drive(req);
 
     drive.fixHeading(RespYes);
@@ -272,7 +272,7 @@ int main(int argc, char* argv[]) {
     rvr::SystemInfo sys(req);
 
     rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
-    api.echo(dead, RespYes);    // alt
+    api.echo(dead);    // alt
     cmd.bluetoothName(RespYes);    //
     sys.getBoardRevision(RespYes);  // ??
     sys.getBootloaderVersion(RespYes);    //
@@ -297,9 +297,11 @@ int main(int argc, char* argv[]) {
     terr << code_loc << "SKU: " << sys.sku();
     terr << code_loc << "Stats Id: " << sys.statsId();
     terr << code_loc << "Up Time: " << sys.upTime();
+
+    terr << code_loc << "BT Name: " << cmd.name();
+
     terr << code_loc << "Echo: " << std::hex << api.echo();
     terr << code_loc << "Echo Alt: " << std::hex << api.echoAlt();
-    terr << code_loc << "BT Name: " << cmd.name();
 
     terr << code_loc << mys::nl;
 

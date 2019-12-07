@@ -23,7 +23,9 @@ class PowerForm : public FormBase {
     rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 
 public:
-    PowerForm(const int y, const int x, rvr::Request& req);
+    PowerForm(int const y, int const x, rvr::Request& req);
+
+    virtual void onceData() override;
 
     virtual void requestData() override;
     virtual void updateScreen() override;
@@ -34,6 +36,8 @@ public:
     void disableBatt();
 
 private:
+
+    HeaderField* mHeader;
 
     DataFieldPtr mVoltState;
     DataFieldPtr mPercentage;
@@ -50,5 +54,7 @@ private:
     DataFieldPtr mWakeNotify;
 
     rvr::Power mPow;
+
+    void invertText();
 };
 #endif /* RobotPoseForm_H_ */

@@ -145,8 +145,6 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::disableBatteryStateChange(CommandResponse const want_resp) const {
         cmdDisable(enable_battery_voltage_state_change_notify, want_resp);
-//        bb::resetNotify(enable_battery_voltage_state_change_notify);
-        // cannot do this because the response puts a value back into the dictionary
     }
 
 } /* namespace rvr */

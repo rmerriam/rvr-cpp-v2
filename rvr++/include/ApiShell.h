@@ -36,9 +36,10 @@ namespace rvr {
         ApiShell(ApiShell&& other) = delete;
         ApiShell& operator=(ApiShell const& other) = delete;
 
+        void echo(RvrMsg const& data) const;
+
         RvrMsg echo() const;
         RvrMsg echoAlt() const;
-        void echo(RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
 
     private:
         enum Cmd : uint8_t {

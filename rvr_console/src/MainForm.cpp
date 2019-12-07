@@ -58,15 +58,13 @@ void MainForm::runWindows() {
                 if ((mevent.y == 17) && (mevent.x < 31)) {
                     power_form.disableBatt();
                 }
-//                break;
-
-            default:
-                power_form.updateScreen();
-                status_form.updateScreen();
-                sysinfo_form.updateScreen();
-                refresh();
                 break;
         }
+
+        power_form.updateScreen();
+        status_form.updateScreen();
+        sysinfo_form.updateScreen();
+        refresh();
 
         updateRequests();
 

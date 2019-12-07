@@ -64,15 +64,15 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::checkBatteryStateChange() {
-        return bb::boolValue(mTarget, mDevice, enable_battery_voltage_state_change_notify);
+        return bb::notifyState(mTarget, mDevice, enable_battery_voltage_state_change_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isSleepNotify() {
-        return bb::boolValue(mTarget, mDevice, did_sleep_notify);
+        return bb::notifyState(mTarget, mDevice, did_sleep_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isWakeNotify() {
-        return bb::boolValue(mTarget, mDevice, system_awake_notify);
+        return bb::notifyState(mTarget, mDevice, system_awake_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Power::resetWakeNotify() {

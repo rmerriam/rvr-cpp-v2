@@ -2,35 +2,39 @@
 namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
+    CommandBase::CommandBase(Devices const device, Request& request, TargetPort const target) :
+        mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     uint8_t CommandBase::buildFlags(CommandResponse const want_resp) const {
         int flags { want_resp | activity | has_target };
         return static_cast<uint8_t>(flags);
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
+    uint8_t CommandBase::makeAltProc() {
+        uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
+        return alt_target;
+    }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdBasic(uint8_t const cmd, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
         mRequest.send(msg);
     }
-
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdBasicAlt(uint8_t const cmd, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
         mRequest.send(msg);
     }
-
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdByte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), data };
         mRequest.send(msg);
     }
-
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdByteAlt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
         mRequest.send(msg);
     }
-
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdByteId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
@@ -67,32 +71,22 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdEnable(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, enable, true };
+        RvrMsg msg { buildFlags(resp_yes), mTarget, mDevice, cmd, enable, true };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, enable, true };
+        RvrMsg msg { buildFlags(resp_yes), mAltTarget, mDevice, cmd, enable, true };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdDisable(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, disable, false };
+        RvrMsg msg { buildFlags(resp_yes), mTarget, mDevice, cmd, disable, false };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, disable, false };
+        RvrMsg msg { buildFlags(resp_yes), mAltTarget, mDevice, cmd, disable, false };
         mRequest.send(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    CommandBase::CommandBase(Devices const device, Request& request, TargetPort const target) :
-        mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint8_t CommandBase::makeAltProc() {
-        uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
-        return alt_target;
-    }
-
 }

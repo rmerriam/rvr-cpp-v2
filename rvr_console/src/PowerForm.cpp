@@ -5,18 +5,21 @@
  *      Author: rmerriam
  */
 
+#include "HeaderField.h"
 #include "DataField.h"
 using namespace scr;
 
 #include "PowerForm.h"
+
 //--------------------------------------------------------------------------------------------------------------------------
-PowerForm::PowerForm(const int y, const int x, rvr::Request& req) :
+PowerForm::PowerForm(int const y, int const x, rvr::Request& req) :
     FormBase(y, x), mPow { req } {
 
     uint8_t item_row { 2 };
     constexpr int width { 20 };
 
-    NField::build_header(mFields, "Power", 1, 1.5 * width);
+    mHeader = NField::build_header(mFields, "Power", 1, 1.5 * width);
+
     NField::build_subhead(mFields, "Battery Voltage", item_row);
 
     mVoltState = NField::build_data_item(mFields, "State:", ++item_row, width);
@@ -39,10 +42,16 @@ PowerForm::PowerForm(const int y, const int x, rvr::Request& req) :
     NField::build_subhead(mFields, "Status", ++item_row);
 
     mBattStateChangeStatus = NField::build_data_item(mFields, "Batt State Enabled?", ++item_row, width);
+    mBattStateChangeStatus->invertText();
+
     mWakeNotify = NField::build_data_item(mFields, " Wake Notify?", ++item_row, width);
+    mWakeNotify->invertText();
 
     mForm.init();
     mPow.awake();
+}
+//--------------------------------------------------------------------------------------------------------------------------
+void PowerForm::onceData() {
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void PowerForm::requestData() {
@@ -58,8 +67,6 @@ void PowerForm::requestData() {
 
     mPow.batteryMotorCurrent(rvr::Power::left, RespYes);
     mPow.batteryMotorCurrent(rvr::Power::right, RespYes);
-
-//    mPow.enableBatteryStateChange(RespYes);
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void PowerForm::updateScreen() {
@@ -81,9 +88,11 @@ void PowerForm::updateScreen() {
 
     wrefresh(mForm.win());
 }
+//--------------------------------------------------------------------------------------------------------------------------
 extern int moused;
 void PowerForm::disableBatt() {
     static bool set { false };
+
     if (set) {
         mPow.disableBatteryStateChange(RespYes);
         set = false;
