@@ -44,7 +44,7 @@ namespace rvr {
         static bool boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static uint8_t byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static int16_t intValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-        static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static uint16_t uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
         static uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
             uint8_t const id = 0);
@@ -56,6 +56,8 @@ namespace rvr {
 
         static std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         static RvrMsg const& msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        static float floatConvert(RvrMsg::const_iterator begin);
 
         static void m_to_v();
 
@@ -108,7 +110,6 @@ namespace rvr {
 
         // methods for calculating values from dictionary entry
         static uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
-        static float floatConvert(RvrMsg::const_iterator begin);
 
         friend std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
     };

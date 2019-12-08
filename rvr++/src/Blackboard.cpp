@@ -88,7 +88,7 @@ namespace rvr {
     { entryKey(nordic, dev::sensors, 0x13), BlackboardEntry { "reset_locator_x_and_y" } }, //
     { entryKey(nordic, dev::sensors, 0x17), BlackboardEntry { "set_locator_flags " } }, //
     { entryKey(nordic, dev::sensors, 0x22), BlackboardEntry { "get_bot_to_bot_infrared_readings " } }, //
-    { entryKey(btc, dev::sensors, 0x23), BlackboardEntry { "get_rgbc_sensor" } }, //
+    { entryKey(btc, dev::sensors, 0x23), BlackboardEntry { "get_rgbc_sensor_values" } }, //
     { entryKey(nordic, dev::sensors, 0x27), BlackboardEntry { "start_robot_to_robot_infrared_broadcasting" } }, //
     { entryKey(nordic, dev::sensors, 0x28), BlackboardEntry { "start_robot_to_robot_infrared_following" } }, //
     { entryKey(nordic, dev::sensors, 0x29), BlackboardEntry { "stop_robot_to_robot_infrared_broadcasting" } }, //
@@ -291,12 +291,17 @@ namespace rvr {
         msg = fake_msg;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint16_t Blackboard::uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
+    uint16_t Blackboard::uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
 
         RvrMsg msg { bb::entryValue(target, dev, cmd) };
+
+        auto begin { msg.begin() + 2 };
+        begin += (pos * sizeof(uint16_t));
+
         uint16_t res { };
-        if (msg.size() >= sizeof(uint16_t)) {
-            res = uintConvert(msg.begin() + 2, sizeof(uint16_t));
+//                if (msg.size() >= sizeof(uint16_t))
+        {
+            res = uintConvert(begin, sizeof(uint16_t));
         }
         return res;
     }
@@ -323,7 +328,6 @@ namespace rvr {
         begin += (pos * 4);
 
         float result { };
-//        if ((msg.end() - begin) >= static_cast<long>(sizeof(float)))
         {
             result = floatConvert(begin);
         }
@@ -335,7 +339,7 @@ namespace rvr {
         if (msg.empty()) {
             msg = fake_msg;
         }
-        return msg[2] != 0;
+        return msg[1] != 0;
     }
 
 //----------------------------------------------------------------------------------------------------------------------
