@@ -41,13 +41,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     RvrMsg ApiShell::echo() const {
-        RvrMsg msg { bb::msgValue(mTarget, mDevice, echo_cmd) };
-        return RvrMsg(msg.begin() + 2, msg.end());
+        return bb::msgValue(mTarget, mDevice, echo_cmd);
     }
     //----------------------------------------------------------------------------------------------------------------------
     RvrMsg ApiShell::echoAlt() const {
-        RvrMsg msg { bb::msgValue(mAltTarget, mDevice, echo_cmd) };
-        return RvrMsg(msg.begin() + 2, msg.end());
+        return bb::msgValue(mAltTarget, mDevice, echo_cmd);
     }
 
 }

@@ -127,7 +127,7 @@ namespace rvr {
         };
         //----------------------------------------------------------------------------------------------------------------------
         IoLed(Request& req) :
-            CommandBase { Devices::io_led, req, bluetoothSOC } {
+            CommandBase { Devices::io_led, req, nordic } {
         }
 
         IoLed(IoLed const& other) = delete;

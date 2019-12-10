@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 //    led.idleLeds(RespYes);
 
 #endif
-#if 1
+#if 0
     // Direct reading of sensors
     rvr::SensorsDirect sen_d(req);
 
@@ -127,28 +127,28 @@ int main(int argc, char* argv[]) {
     terr << code_loc << mys::nl;
     terr << code_loc << "sense direct";
 
-    terr << code_loc << mys::sp << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
-    terr << code_loc << mys::sp << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
-    terr << code_loc << mys::sp << "isColorDetctionEnabled: " << sen_d.isColorDetctionEnabled();
-    terr << code_loc << mys::sp << "isColorDetctionNotifyEnabled: " << sen_d.isColorDetctionNotifyEnabled();
+    terr << code_loc  << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
+    terr << code_loc  << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
+    terr << code_loc  << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
+    terr << code_loc  << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
 
     {   // allow reuse of rbg
         auto [r, g, b, c] = sen_d.currentRGBValues();
-        terr << code_loc << mys::sp << "currentRGBValues: " << r << mys::sp << g << mys::sp << b << mys::sp << c << mys::sp;
-        terr << code_loc << mys::sp << "Red: " << (r >> 8) << mys::sp << (g >> 8);
+        terr << code_loc  << "currentRGBValues: " << r << mys::sp << g << mys::sp << b << mys::sp << c << mys::sp;
+        terr << code_loc  << "Red: " << (r >> 8) << mys::sp << (g >> 8);
     }
     {
         auto [r, g, b, conf, classification] = sen_d.colorDetectionValues();
-        terr << code_loc << mys::sp << "colorDetectionValues: " << r << mys::sp << g << mys::sp << b << mys::sp  //
+        terr << code_loc  << "colorDetectionValues: " << r << mys::sp << g << mys::sp << b << mys::sp  //
             << conf << mys::sp << classification << mys::sp;
     }
     auto [left_temp, left_status, right_temp, right_status] = sen_d.thermalProtectionValues();
-    terr << code_loc << mys::sp << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
+    terr << code_loc  << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
         << mys::sp << right_temp << mys::sp << (int)right_status;
 
-    terr << code_loc << mys::sp << "Ambient: " << sen_d.ambient();
-    terr << code_loc << mys::sp << "Left Temp: " << sen_d.leftMotorTemp();
-    terr << code_loc << mys::sp << "Right Temp: " << sen_d.rightMotorTemp();
+    terr << code_loc  << "Ambient: " << sen_d.ambient();
+    terr << code_loc  << "Left Temp: " << sen_d.leftMotorTemp();
+    terr << code_loc  << "Right Temp: " << sen_d.rightMotorTemp();
     terr << code_loc << mys::nl;
 
     sen_d.enableColorDetectionNotify(false, 500, 0);
@@ -158,49 +158,72 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(5000ms);
 
     terr << code_loc << mys::nl;
-    terr << code_loc << mys::sp << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
-    terr << code_loc << mys::sp << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
-    terr << code_loc << mys::sp << "isColorDetctionEnabled: " << sen_d.isColorDetctionEnabled();
-    terr << code_loc << mys::sp << "isColorDetctionNotifyEnabled: " << sen_d.isColorDetctionNotifyEnabled();
+    terr << code_loc  << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
+    terr << code_loc  << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
+    terr << code_loc  << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
+    terr << code_loc  << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
 
     terr << code_loc << mys::nl;
 
 #endif
 
-#if 0
+#if 1
     //  Streaming data from sensors
     rvr::SensorsStream sen_s(req);
 
-/// change size back to 15 in sensors!!!!
-//    rvr::RvrMsg accel { 0x01, 0x00, 0x02, 0x01, 0x00, 0x01, 0x01 };
-//    sen_s.configureStreaming(1, accel, 2, RespYes);
+//    sen_s.clearStreaming(RespYes);
 
-//    rvr::RvrMsg core { 0x02, 0x00, 0x09, 0x01 };
-//    sen_s.configureStreaming(3, core, 1, RespYes);
-//
-//    rvr::RvrMsg speed { 0x02, 0x00, 0x08, 0x01 };
-//    sen_s.configureStreaming(2, speed, 2, RespYes);
-//
-//    rvr::RvrMsg velocity { 0x02, 0x00, 0x07, 0x02 };
-//    sen_s.configureStreaming(2, velocity, 2, RespYes);
-//
-    rvr::RvrMsg ambient { 2, 0x00, 0x0A, 0x02 };
-    sen_s.configureStreaming(ambient, RespYes);
-//
-//    rvr::RvrMsg locator { 0x07, 0x00, 0x08, 0x02 };
-//    sen_s.configureStreaming(1, locator, 0, RespYes);
+    rvr::RvrMsg quat { 1, 0x00, 0x00, 0x02 };
+    sen_s.configureStreamingBT(quat, RespYes);
 
-    std::this_thread::sleep_for(20ms);
-    sen_s.enableStreaming(500, RespYes);
-//    sen_d.enableStreaming(500, RespYes);
-    std::this_thread::sleep_for(2000ms);
+#if 0
+    rvr::RvrMsg imu { 10, 0x00, 0x01, 0x02 };
+    sen_s.configureStreamingBT(imu, RespYes);
+
+    rvr::RvrMsg accel { 11, 0x00, 0x02, 0x02 };
+    sen_s.configureStreamingBT(accel, RespYes);
+
+    rvr::RvrMsg gyro { 2, 0x00, 0x04, 0x02 };
+    sen_s.configureStreamingBT(gyro, RespYes);
+
+    rvr::RvrMsg locator { 3, 0x00, 0x06, 0x02 };
+    sen_s.configureStreamingBT(locator, RespYes);
+
+    rvr::RvrMsg velocity { 4, 0x00, 0x07, 0x02 };
+    sen_s.configureStreamingBT(velocity, RespYes);
+
+    rvr::RvrMsg speed { 5, 0x00, 0x08, 0x02 };
+    sen_s.configureStreamingBT(speed, RespYes);
+#endif
+
+    sen_s.enableStreamingBT(50, RespYes);
+
+#if 0
+    rvr::RvrMsg core { 6, 0x00, 0x09, 0x02 };
+    sen_s.configureStreamingNordic(core, RespYes);
+
+    rvr::RvrMsg color { 7, 0x00, 0x03, 0x02 };
+    sen_s.configureStreamingNordic(color, RespYes);
+
+    rvr::RvrMsg core2 { 8, 0x00, 0x09, 0x02 };
+    sen_s.configureStreamingNordic(core2, RespYes);
+
+    rvr::RvrMsg ambient { 9, 0x00, 0x0A, 0x02 };
+    sen_s.configureStreamingNordic(ambient, RespYes);
+#endif
+
+    sen_s.enableStreamingNordic(50, RespYes);
+
+    std::this_thread::sleep_for(150ms);
+
+//    sen_s.disableStreamingNordic(RespYes);
+//    sen_s.clearStreamingNordic(RespYes);
 //
+//    sen_s.disableStreamingBT(RespYes);
+//    sen_s.clearStreamingBT(RespYes);
+
     sen_s.disableStreaming(RespYes);
     sen_s.clearStreaming(RespYes);
-
-//
-
-    std::this_thread::sleep_for(500ms);
 
 #endif
 #if 0
@@ -224,42 +247,42 @@ int main(int argc, char* argv[]) {
     terr << code_loc << mys::nl;
     terr << code_loc << "Power";
 
-    terr << code_loc << mys::sp << "VPercent: " << pow.batteryPercent();
+    terr << code_loc  << "VPercent: " << pow.batteryPercent();
 
-    terr << code_loc << mys::sp << "Sleep Notify: " << pow.isDidSleepNotify();
-    terr << code_loc << mys::sp << "State: " << pow.voltState();
+    terr << code_loc  << "Sleep Notify: " << pow.isDidSleepNotify();
+    terr << code_loc  << "State: " << pow.voltState();
 
-    terr << code_loc << mys::sp << "Wake Notify: " << pow.isWakeNotify();
+    terr << code_loc  << "Wake Notify: " << pow.isWakeNotify();
 
-    terr << code_loc << mys::sp << "VoltageCF: " << pow.voltsCalibratedFiltered();
-    terr << code_loc << mys::sp << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
-    terr << code_loc << mys::sp << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
-    terr << code_loc << mys::sp << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
-    terr << code_loc << mys::sp << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
-    terr << code_loc << mys::sp << "Critical Threshold: " << pow.voltThresholdCritical();
-    terr << code_loc << mys::sp << "Low Threshold: " << pow.voltThresholdLow();
-    terr << code_loc << mys::sp << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
+    terr << code_loc  << "VoltageCF: " << pow.voltsCalibratedFiltered();
+    terr << code_loc  << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
+    terr << code_loc  << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
+    terr << code_loc  << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
+    terr << code_loc  << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
+    terr << code_loc  << "Critical Threshold: " << pow.voltThresholdCritical();
+    terr << code_loc  << "Low Threshold: " << pow.voltThresholdLow();
+    terr << code_loc  << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
 
-    terr << code_loc << mys::sp << "Wake Notify Set?: " << pow.isWakeNotify();
-    terr << code_loc << mys::sp << "resetWakeNotify ";
+    terr << code_loc  << "Wake Notify Set?: " << pow.isWakeNotify();
+    terr << code_loc  << "resetWakeNotify ";
     pow.resetWakeNotify();
-    terr << code_loc << mys::sp << "Wake Notify Cleared?: " << pow.isWakeNotify();
+    terr << code_loc  << "Wake Notify Cleared?: " << pow.isWakeNotify();
 
-    terr << code_loc << mys::sp << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+    terr << code_loc  << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
 
     terr << code_loc << mys::nl;
-    terr << code_loc << mys::sp << "disableBatteryStateChange";
+    terr << code_loc  << "disableBatteryStateChange";
     pow.disableBatteryStateChange();
     std::this_thread::sleep_for(50ms);
 
-    terr << code_loc << mys::sp << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+    terr << code_loc  << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
 
     terr << code_loc << mys::nl;
 #if 1
     pow.sleep();
 
     std::this_thread::sleep_for(5000ms);    // have to wait for notification
-    terr << code_loc << mys::sp << "Did Sleep Notify: " << pow.isDidSleepNotify();
+    terr << code_loc  << "Did Sleep Notify: " << pow.isDidSleepNotify();
     terr << code_loc << mys::nl;
 #endif
 

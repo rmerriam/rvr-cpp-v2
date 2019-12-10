@@ -34,7 +34,7 @@ namespace rvr {
 
     public:
         Power(Request& req) :
-            CommandBase { Devices::power, req, bluetoothSOC } {
+            CommandBase { Devices::power, req, nordic } {
         }
         enum VoltageType : uint8_t {
             CalibratedFiltered = 0, //
@@ -60,8 +60,8 @@ namespace rvr {
         //  Will Sleep Notify
         //  Did Sleep Notify
 
-        void enableBatteryStateChange(CommandResponse const want_resp = resp_on_error) const;
-        void disableBatteryStateChange(CommandResponse const want_resp = resp_on_error) const;
+        void enableBatteryStateChange(CommandResponse const want_resp = resp_yes) const;
+        void disableBatteryStateChange(CommandResponse const want_resp = resp_yes) const;
 
         void batteryVoltage(VoltageType const vt, CommandResponse const want_resp = resp_yes) const;
         void batteryVoltThresholds(CommandResponse const want_resp = resp_yes) const;

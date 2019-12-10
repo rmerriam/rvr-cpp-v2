@@ -27,6 +27,8 @@
 #include "CommandBase.h"
 
 /*
+ * Also see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
+ *
  streaming service configuration for RVR:
  | Id     | Processor          | Token | Service            | Attributes                 |
  | ------ | ------------- -----| ----- | ------------------ | -------------------------- |
@@ -66,10 +68,6 @@ namespace rvr {
     class SensorsStream : protected CommandBase {
 
     public:
-        enum VoltageType : uint8_t {
-            CalibratedFiltered = 0, CalibratedUnfiltered = 1, UncalibratedUnfiltered = 2,
-        };
-
         SensorsStream(Request& req) :
             CommandBase { Devices::sensors, req, nordic } {
         }
@@ -78,10 +76,21 @@ namespace rvr {
         SensorsStream(SensorsStream&& other) = delete;
         SensorsStream& operator=(SensorsStream const& other) = delete;
 
+        void configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
+        void configureStreamingBT(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
         void configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
+
         void enableStreaming(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+        void enableStreamingNordic(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+        void enableStreamingBT(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+
         void disableStreaming(CommandResponse const want_resp = resp_on_error);
+        void disableStreamingNordic(CommandResponse const want_resp = resp_on_error);
+        void disableStreamingBT(CommandResponse const want_resp = resp_on_error);
+
         void clearStreaming(CommandResponse const want_resp = resp_on_error);
+        void clearStreamingNordic(CommandResponse const want_resp = resp_on_error);
+        void clearStreamingBT(CommandResponse const want_resp = resp_on_error);
 
         //======================================================================================================================
         // data access methods

@@ -119,8 +119,8 @@ namespace rvr {
 
         bool isGyroMaxNotifyEnabled() const;
         bool isThermalProtectionNotifyEnabled() const;
-        bool isColorDetctionEnabled() const;
-        bool isColorDetctionNotifyEnabled() const;
+        bool isColorDetectionEnabled() const;
+        bool isColorDetectionNotifyEnabled() const;
 
         float ambient() const;
         float leftMotorTemp() const;
@@ -197,11 +197,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableGyroMaxNotify(CommandResponse const want_resp) const {
-        cmdEnableAlt(enable_gyro_max_notify, want_resp);
+        cmdEnable(enable_gyro_max_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::disableGyroMaxNotify(CommandResponse const want_resp) const {
-        cmdDisableAlt(enable_gyro_max_notify, want_resp);
+        cmdDisable(enable_gyro_max_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getRightMotorTemp(CommandResponse const want_resp) const {
@@ -236,16 +236,16 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetection(CommandResponse const want_resp) const {
-        cmdEnable(enable_color_detection, want_resp);
+        cmdEnableAlt(enable_color_detection, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::disableColorDetection(CommandResponse const want_resp) const {
-        cmdDisable(enable_color_detection, want_resp);
+        cmdDisableAlt(enable_color_detection, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
         CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice,
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice,
                      enable_color_detection_notify, //
                      static_cast<uint8_t>(enable ? 0x20 : 0x21), enable, static_cast<uint8_t>(timer >> 8),
                      static_cast<uint8_t>(timer & 0xFF), confidence };
@@ -253,19 +253,19 @@ namespace rvr {
     }
 
     inline bool SensorsDirect::isGyroMaxNotifyEnabled() const {
-        return bb::getNotify(mAltTarget, mDevice, enable_gyro_max_notify);
+        return bb::getNotify(mTarget, mDevice, enable_gyro_max_notify);
     }
 
     inline bool SensorsDirect::isThermalProtectionNotifyEnabled() const {
         return bb::getNotify(mAltTarget, mDevice, enable_motor_thermal_protection_status_notify);
     }
 
-    inline bool SensorsDirect::isColorDetctionEnabled() const {
-        return bb::getNotify(mTarget, mDevice, enable_color_detection);
+    inline bool SensorsDirect::isColorDetectionEnabled() const {
+        return bb::getNotify(mAltTarget, mDevice, enable_color_detection);
     }
 
-    inline bool SensorsDirect::isColorDetctionNotifyEnabled() const {
-        return bb::getNotify(mTarget, mDevice, enable_color_detection_notify);
+    inline bool SensorsDirect::isColorDetectionNotifyEnabled() const {
+        return bb::getNotify(mAltTarget, mDevice, enable_color_detection_notify);
     }
 
     //----------------------------------------------------------------------------------------------------------------------

@@ -40,8 +40,8 @@ namespace rvr {
             bluetooth = 0x02,
         };
         enum TargetPort : uint8_t {
-            bluetoothSOC = 0x01, //
-            nordic = 0x02,
+            nordic = 0x01,  //
+            bluetoothSOC = 0x02, //
         };
         enum SpecialSeq : uint8_t {
             enable = 0x20, disable,
@@ -70,14 +70,16 @@ namespace rvr {
         void cmdData(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
         void cmdDataAlt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
 
-        Devices const mDevice;
-        Request& mRequest;
-        TargetPort mTarget;
-        TargetPort mAltTarget;
-
         CommandBase(CommandBase const& other) = delete;
         CommandBase(CommandBase&& other) = delete;
         CommandBase& operator=(CommandBase const& other) = delete;
+
+        TargetPort const altTarget() const;
+        Devices const device() const;
+        Request& request() const;
+        TargetPort const target() const;
+
+        static uint8_t seq();
 
     protected:
         // NOTE: HACK ALERT!!!
@@ -88,6 +90,11 @@ namespace rvr {
         static uint8_t sequence() {
             return ++mSeq | 0x80;
         }
+
+        Devices const mDevice;
+        Request& mRequest;
+        TargetPort const mTarget;
+        TargetPort const mAltTarget;
 
     private:
         static inline uint8_t mSeq { 0x0 };

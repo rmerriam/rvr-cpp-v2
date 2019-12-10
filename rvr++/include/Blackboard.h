@@ -55,7 +55,7 @@ namespace rvr {
         static void resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
 
         static std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-        static RvrMsg const& msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        static RvrMsg const msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
 
         static float floatConvert(RvrMsg::const_iterator begin);
 

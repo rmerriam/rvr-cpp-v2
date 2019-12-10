@@ -71,22 +71,43 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdEnable(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(resp_yes), mTarget, mDevice, cmd, enable, true };
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, enable, true };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(resp_yes), mAltTarget, mDevice, cmd, enable, true };
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, enable, true };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdDisable(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(resp_yes), mTarget, mDevice, cmd, disable, false };
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, disable, false };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void CommandBase::cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(resp_yes), mAltTarget, mDevice, cmd, disable, false };
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, disable, false };
         mRequest.send(msg);
     }
+    //----------------------------------------------------------------------------------------------------------------------
+    CommandBase::TargetPort const CommandBase::altTarget() const {
+        return mAltTarget;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    CommandBase::TargetPort const CommandBase::target() const {
+        return mTarget;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    Devices const CommandBase::device() const {
+        return mDevice;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    Request& CommandBase::request() const {
+        return mRequest;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint8_t CommandBase::seq() {
+        return mSeq;
+    }
+
 }

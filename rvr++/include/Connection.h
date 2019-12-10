@@ -30,13 +30,13 @@ namespace rvr {
     class Connection : protected CommandBase {
     public:
         Connection(Request& req) :
-            CommandBase { Devices::connection, req, bluetoothSOC } {
+            CommandBase { Devices::connection, req, nordic } {
         }
         Connection(Connection const& other) = delete;
         Connection(Connection&& other) = delete;
         Connection& operator=(Connection const& other) = delete;
 
-        void bluetoothName(CommandResponse const want_resp = resp_on_error) const;
+        void bluetoothName(CommandResponse const want_resp = resp_yes) const;
 
         std::string name();
 

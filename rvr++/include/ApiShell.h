@@ -27,10 +27,10 @@
 
 namespace rvr {
 
-    class ApiShell : protected CommandBase {
+    class ApiShell : public CommandBase {
     public:
         ApiShell(Request& req) :
-            CommandBase { Devices::api_and_shell, req, nordic } {
+            CommandBase { Devices::api_and_shell, req, bluetoothSOC } {
         }
         ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;

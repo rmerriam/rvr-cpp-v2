@@ -25,23 +25,55 @@
 
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp) {
+    void SensorsStream::configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp) {
         cmdData(configure_streaming_service, cfg, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::configureStreamingBT(RvrMsg const& cfg, CommandResponse const want_resp) {
         cmdDataAlt(configure_streaming_service, cfg, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::enableStreaming(uint16_t const millis, CommandResponse const want_resp) {
+    void SensorsStream::configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp) {
+        configureStreamingNordic(cfg, want_resp);
+        configureStreamingBT(cfg, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::enableStreamingNordic(uint16_t const millis, CommandResponse const want_resp) {
         cmdInt(start_streaming_service, millis, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::enableStreamingBT(uint16_t const millis, CommandResponse const want_resp) {
         cmdIntAlt(start_streaming_service, millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::disableStreaming(CommandResponse const want_resp) {
+    void SensorsStream::enableStreaming(uint16_t const millis, CommandResponse const want_resp) {
+        enableStreamingNordic(millis, want_resp);
+        enableStreamingBT(millis, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::disableStreamingNordic(CommandResponse const want_resp) {
         cmdBasic(stop_streaming_service, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::disableStreamingBT(CommandResponse const want_resp) {
         cmdBasicAlt(stop_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::clearStreaming(CommandResponse const want_resp) {
+    void SensorsStream::disableStreaming(CommandResponse const want_resp) {
+        disableStreamingNordic(want_resp);
+        disableStreamingBT(want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::clearStreamingNordic(CommandResponse const want_resp) {
         cmdBasic(clear_streaming_service, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::clearStreamingBT(CommandResponse const want_resp) {
         cmdBasicAlt(clear_streaming_service, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void SensorsStream::clearStreaming(CommandResponse const want_resp) {
+        clearStreamingNordic(want_resp);
+        clearStreamingBT(want_resp);
     }
 }

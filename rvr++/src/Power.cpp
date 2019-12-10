@@ -68,7 +68,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isBatteryStateChangeEnabled() {
-        return bb::notifyState(mTarget, mDevice, enable_battery_voltage_state_change_notify);
+        return bb::getNotify(mTarget, mDevice, enable_battery_voltage_state_change_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isDidSleepNotify() {

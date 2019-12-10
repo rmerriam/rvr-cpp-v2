@@ -33,20 +33,20 @@ namespace rvr {
     class SystemInfo : protected CommandBase {
     public:
         SystemInfo(Request& req) :
-            CommandBase { Devices::system, req, nordic } {
+            CommandBase { Devices::system, req, bluetoothSOC } {
         }
         SystemInfo(SystemInfo const& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;
         SystemInfo& operator=(SystemInfo const& other) = delete;
 
-        void getMainAppVersion(CommandResponse const want_resp = resp_on_error);
-        void getBootloaderVersion(CommandResponse const want_resp = resp_on_error);
-        void getBoardRevision(CommandResponse const want_resp = resp_on_error);
-        void getMacId(CommandResponse const want_resp = resp_on_error);
-        void getStatsId(CommandResponse const want_resp = resp_on_error);
-        void getProcessorName(CommandResponse const want_resp = resp_on_error);
-        void getSku(CommandResponse const want_resp = resp_on_error);
-        void getCoreUpTime(CommandResponse const want_resp = resp_on_error);
+        void getMainAppVersion(CommandResponse const want_resp = resp_yes);
+        void getBootloaderVersion(CommandResponse const want_resp = resp_yes);
+        void getBoardRevision(CommandResponse const want_resp = resp_yes);
+        void getMacId(CommandResponse const want_resp = resp_yes);
+        void getStatsId(CommandResponse const want_resp = resp_yes);
+        void getProcessorName(CommandResponse const want_resp = resp_yes);
+        void getSku(CommandResponse const want_resp = resp_yes);
+        void getCoreUpTime(CommandResponse const want_resp = resp_yes);
 
         int64_t boardVersion();
         std::string bootVersion();

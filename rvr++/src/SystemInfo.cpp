@@ -30,11 +30,11 @@ namespace rvr {
     std::string SystemInfo::versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg const& msg { bb::msgValue(target, mDevice, cmd) };
 
-        std::string ver;
-        if ( !msg.empty()) {
-            ver = std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5])) + '.' + //
-                std::to_string(((msg[6] << 8) | msg[7]));
+        std::string ver { };
+        if (msg.size() >= 6) {
+            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
+                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
+                std::to_string(((msg[4] << 8) | msg[5]));
         }
         return ver;
     }
@@ -72,10 +72,10 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::macAddress() {
-        std::string mac { bb::stringValue(mAltTarget, mDevice, get_mac_address) };
+        RvrMsg msg { bb::msgValue(mAltTarget, mDevice, get_mac_address) };
+        std::string mac { msg.begin(), msg.end() };
         if (mac.size() == 12) {
-
-            char const* colon { ":" };
+            static char const* colon { ":" };
             mac.insert(10, colon);
             mac.insert(8, colon);
             mac.insert(6, colon);
