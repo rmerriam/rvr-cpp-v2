@@ -22,7 +22,8 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
-
+#include <limits>
+#include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
 
@@ -66,8 +67,22 @@
 namespace rvr {
 
     class SensorsStream : protected CommandBase {
+        using bb = Blackboard;
 
     public:
+        enum Sensor : uint8_t {
+            quaternion = 0, //
+            imu = 1, //
+            accel = 2, //
+            color = 3, //
+            gyro = 4, //
+            locator = 6, //
+            velocity = 7, //
+            speed_sense = 8, //
+            core_time = 9, //
+            ambient_sense = 10,
+        };
+
         SensorsStream(Request& req) :
             CommandBase { Devices::sensors, req, nordic } {
         }
@@ -75,6 +90,18 @@ namespace rvr {
         SensorsStream(SensorsStream const& other) = delete;
         SensorsStream(SensorsStream&& other) = delete;
         SensorsStream& operator=(SensorsStream const& other) = delete;
+
+        void accelerometerConfig(CommandResponse const want_resp = resp_on_error);
+        void ambientConfig(CommandResponse const want_resp = resp_on_error);
+        void colorConfig(CommandResponse const want_resp = resp_on_error);
+        void coreNordicConfig(CommandResponse const want_resp = resp_on_error);
+        void coreBTConfig(CommandResponse const want_resp = resp_on_error);
+        void gyroConfig(CommandResponse const want_resp = resp_on_error);
+        void imuConfig(CommandResponse const want_resp = resp_on_error);
+        void locatorConfig(CommandResponse const want_resp = resp_on_error);
+        void quaternionConfig(CommandResponse const want_resp = resp_on_error);
+        void speedConfig(CommandResponse const want_resp = resp_on_error);
+        void velocityConfig(CommandResponse const want_resp = resp_on_error);
 
         void configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
         void configureStreamingBT(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
@@ -92,9 +119,25 @@ namespace rvr {
         void clearStreamingNordic(CommandResponse const want_resp = resp_on_error);
         void clearStreamingBT(CommandResponse const want_resp = resp_on_error);
 
+        template <TargetPort TP, Sensor ID>
+        void streamConfig(CommandResponse const want_resp) {
+            if constexpr (TP == nordic) {
+                configureStreamingNordic(rvr::RvrMsg { ID, 0x00, ID, 0x02 }, want_resp);
+            }
+            else {
+                configureStreamingBT(rvr::RvrMsg { ID, 0x00, ID, 0x02 }, want_resp);
+            }
+        }
+
+//        using a = streamConfig<bluetoothSOC, accel>;
+
         //======================================================================================================================
         // data access methods
-        //----------------------------------------------------------------------------------------------------------------------
+        template <typename T, typename M>
+        float normalize(T const value, M const min, float const out_min, float const out_max);
+        float ambient();
+        float speed();
+//        auto velocity();
 
     private:
 
@@ -158,7 +201,76 @@ namespace rvr {
             motor_thermal_protection_status_notify = 0x4D,
         };
 
+        using NormalizeFactor = std::pair<float, float>;
+        std::array<NormalizeFactor, 11> SensorFactors { //
+        NormalizeFactor { -1.0, 1.0 },          // 0 - quat
+        NormalizeFactor { -180.0, 180.0 },      // 1 - imu  -90/+90 roll
+        NormalizeFactor { -16.0, 16.0 },        // 2 - accel
+        NormalizeFactor { 0.0, std::numeric_limits<uint8_t>::max() }, // 3 - color
+        NormalizeFactor { -2000.0, 2000.0 },    // 4 - gyro
+//
+        NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },  // 5 - core lower
+        NormalizeFactor { -16000.0, 16000.0 },  // 6 - locator
+        NormalizeFactor { -5.0, 5.0 },          // 7 - velocity
+        NormalizeFactor { 0.0, 5.0 },           // 8 - speed
+        NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },  // 9 - core upper
+//
+        NormalizeFactor { 0.0, 1200000.0 },     // 10- ambient
+        };
     };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::accelerometerConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 2, 0x00, 0x02, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::ambientConfig(CommandResponse const want_resp) {
+        configureStreamingNordic(rvr::RvrMsg { 10, 0x00, 10, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::colorConfig(CommandResponse const want_resp) {
+        configureStreamingNordic(rvr::RvrMsg { 0x03, 0x00, 0x3, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::coreNordicConfig(CommandResponse const want_resp) {
+        configureStreamingNordic(rvr::RvrMsg { 9, 0x00, 0x09, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::coreBTConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 9, 0x00, 0x09, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::gyroConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 4, 0x00, 0x04, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::imuConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 1, 0x00, 0x01, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::locatorConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 6, 0x00, 0x06, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::quaternionConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 11, 0x00, 0x00, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::speedConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 8, 0x00, 0x08, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::velocityConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { 7, 0x00, 0x07, 0x02 }, want_resp);
+    }
+//======================================================================================================================
+    template <typename T, typename M>
+    inline float SensorsStream::normalize(T const value, M const min, float const out_min, float const out_max) {
+        T max { std::numeric_limits<T>::max() };
+        return (((float(value) - min) / (max - min)) * (out_max - out_min)) + out_min;
+    }
+
+//----------------------------------------------------------------------------------------------------------------------
+//    inline a    sen_s.speedConfig();
 
 } /* namespace rvr */
 

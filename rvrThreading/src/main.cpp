@@ -171,59 +171,45 @@ int main(int argc, char* argv[]) {
     //  Streaming data from sensors
     rvr::SensorsStream sen_s(req);
 
-//    sen_s.clearStreaming(RespYes);
+    rvr::SensorsDirect sen_d(req);
+    sen_d.enableColorDetection();   // must preceed color detection to turn on bottom LEDs
 
-    rvr::RvrMsg quat { 1, 0x00, 0x00, 0x02 };
-    sen_s.configureStreamingBT(quat, RespYes);
+    sen_s.clearStreaming(RespYes);
 
-#if 0
-    rvr::RvrMsg imu { 10, 0x00, 0x01, 0x02 };
-    sen_s.configureStreamingBT(imu, RespYes);
+//    sen_s.streamConfig<rvr::CommandBase::bluetoothSOC, sen_s.accel>(RespYes);
+//    sen_s.configAccel(RespYes);
 
-    rvr::RvrMsg accel { 11, 0x00, 0x02, 0x02 };
-    sen_s.configureStreamingBT(accel, RespYes);
-
-    rvr::RvrMsg gyro { 2, 0x00, 0x04, 0x02 };
-    sen_s.configureStreamingBT(gyro, RespYes);
-
-    rvr::RvrMsg locator { 3, 0x00, 0x06, 0x02 };
-    sen_s.configureStreamingBT(locator, RespYes);
-
-    rvr::RvrMsg velocity { 4, 0x00, 0x07, 0x02 };
-    sen_s.configureStreamingBT(velocity, RespYes);
-
-    rvr::RvrMsg speed { 5, 0x00, 0x08, 0x02 };
-    sen_s.configureStreamingBT(speed, RespYes);
-#endif
+    sen_s.ambientConfig();
+//    sen_s.colorConfig(RespYes);
+//    sen_s.coreNordicConfig();
+//    sen_s.coreBTConfig();
+//    sen_s.gyroConfig();
+//    sen_s.imuConfig();
+//    sen_s.locatorConfig();
+//    sen_s.quaternionConfig();
+    sen_s.speedConfig();
+//    sen_s.velocityConfig();
 
     sen_s.enableStreamingBT(50, RespYes);
-
-#if 0
-    rvr::RvrMsg core { 6, 0x00, 0x09, 0x02 };
-    sen_s.configureStreamingNordic(core, RespYes);
-
-    rvr::RvrMsg color { 7, 0x00, 0x03, 0x02 };
-    sen_s.configureStreamingNordic(color, RespYes);
-
-    rvr::RvrMsg core2 { 8, 0x00, 0x09, 0x02 };
-    sen_s.configureStreamingNordic(core2, RespYes);
-
-    rvr::RvrMsg ambient { 9, 0x00, 0x0A, 0x02 };
-    sen_s.configureStreamingNordic(ambient, RespYes);
-#endif
-
     sen_s.enableStreamingNordic(50, RespYes);
 
     std::this_thread::sleep_for(150ms);
 
-//    sen_s.disableStreamingNordic(RespYes);
-//    sen_s.clearStreamingNordic(RespYes);
-//
-//    sen_s.disableStreamingBT(RespYes);
-//    sen_s.clearStreamingBT(RespYes);
+    //    sen_s.disableStreamingNordic(RespYes);
+    //    sen_s.clearStreamingNordic(RespYes);
+    //
+    //    sen_s.disableStreamingBT(RespYes);
+    //    sen_s.clearStreamingBT(RespYes);
 
     sen_s.disableStreaming(RespYes);
     sen_s.clearStreaming(RespYes);
+
+    terr << code_loc << mys::nl;
+    terr << code_loc << "Streaming";
+
+    terr << code_loc << "Ambient: " << sen_s.ambient();
+    terr << code_loc << "Speed: " << sen_s.speed();
+    terr << code_loc << mys::nl;
 
 #endif
 #if 0

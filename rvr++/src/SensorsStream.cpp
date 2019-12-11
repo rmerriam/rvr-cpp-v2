@@ -76,4 +76,17 @@ namespace rvr {
         clearStreamingNordic(want_resp);
         clearStreamingBT(want_resp);
     }
+    //----------------------------------------------------------------------------------------------------------------------
+    float SensorsStream::ambient() {
+        uint32_t value { bb::uint32Value(mTarget, mDevice, streaming_service_data_notify, ambient_sense) };
+        return normalize(value, 0, SensorFactors[ambient_sense].first, SensorFactors[ambient_sense].second);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    float SensorsStream::speed() {
+        uint32_t value { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, speed_sense) };
+        return normalize(value, 0, SensorFactors[speed_sense].first, SensorFactors[speed_sense].second);
+    }
+//----------------------------------------------------------------------------------------------------------------------
+//    auto SensorsStream::velocity() {
+//    }
 }

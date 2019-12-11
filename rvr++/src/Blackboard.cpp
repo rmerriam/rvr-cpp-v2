@@ -113,6 +113,20 @@ namespace rvr {
     { entryKey(nordic, dev::sensors, 0x3C), BlackboardEntry { "clear_streaming_service" } }, //
     { entryKey(btc, dev::sensors, 0x3D), BlackboardEntry { "streaming_service_data_notify" } }, //
     { entryKey(nordic, dev::sensors, 0x3D), BlackboardEntry { "streaming_service_data_notify" } }, //
+    //
+    { entryKey(nordic, dev::sensors, 0x3D, 3), BlackboardEntry { "color stream" } }, //
+    { entryKey(nordic, dev::sensors, 0x3D, 9), BlackboardEntry { "core stream" } }, //
+    { entryKey(nordic, dev::sensors, 0x3D, 10), BlackboardEntry { "ambient stream" } }, //
+
+    { entryKey(btc, dev::sensors, 0x3D, 2), BlackboardEntry { "accelerometer stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 9), BlackboardEntry { "core stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 4), BlackboardEntry { "gyro stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 1), BlackboardEntry { "imu stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 6), BlackboardEntry { "locator stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 11), BlackboardEntry { "quat stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 8), BlackboardEntry { "speed stream" } }, //
+    { entryKey(btc, dev::sensors, 0x3D, 7), BlackboardEntry { "velocity stream" } }, //
+    //
     { entryKey(btc, dev::sensors, 0x3E), BlackboardEntry { "enable_robot_infrared_message_notify" } }, //
     { entryKey(btc, dev::sensors, 0x3F), BlackboardEntry { "send_infrared_message" } }, //
     //
@@ -121,7 +135,7 @@ namespace rvr {
     { entryKey(btc, dev::sensors, 0x4B), BlackboardEntry { "get_motor_thermal_protection_status" } }, //
     { entryKey(btc, dev::sensors, 0x4C), BlackboardEntry { "enable_motor_thermal_protection_status_notify" } }, //
     { entryKey(btc, dev::sensors, 0x4D), BlackboardEntry { "motor_thermal_protection_status_notify" } }, //
-//
+    //
     { entryKey(btc, dev::system, 0x00), BlackboardEntry { "nordic_main_application_version" } }, //
     { entryKey(nordic, dev::system, 0x00), BlackboardEntry { "bt_main_application_version" } }, //
     { entryKey(btc, dev::system, 0x01), BlackboardEntry { "nordic_bootloader_version" } }, //
@@ -133,6 +147,8 @@ namespace rvr {
     { entryKey(nordic, dev::system, 0x1F), BlackboardEntry { "bt_processor_name" } }, //
     { entryKey(nordic, dev::system, 0x38), BlackboardEntry { "get_sku" } }, //
     { entryKey(btc, dev::system, 0x39), BlackboardEntry { "get_core_up_time_in_milliseconds" } }, //
+    //
+
 #endif
     };
     //======================================================================================================================
@@ -189,25 +205,35 @@ namespace rvr {
         if (msg.empty()) {
             msg.push_back(0xFF);
         }
-        else if ((msg.size() >= 2) && (msg[0] < 0x80) && (msg[0] >= 0x04)) {
-            // message seq has special flags that are not sequence number (> 0x80) or ids (< enable (0x20) - its a hack
-            // because of the protocol
-            switch (msg.front()) {
-                // special case for motor temperatures
-                case 4:
-                case 5:
-                    msg.erase(msg.begin() + 2);
-                    break;
+        else if (msg.size() >= 2) {
+            uint8_t seq { msg.front() };
 
-                case CommandBase::enable:
-                    key &= static_cast<bb::key_t>(0xFFFFFF00);
-                    msg[1] = true;
-                    break;
-                case CommandBase::disable:
-                    key &= static_cast<bb::key_t>(0xFFFFFF00);
-                    msg[1] = false;
-                    break;
+            if (seq == 0xFF) {
+                key &= static_cast<bb::key_t>(0xFFFFFF00);
+                key |= static_cast<bb::key_t>(msg[1]);
             }
+            else if ((seq < 0x80) && (seq >= 0x04)) {
+                // message seq has special flags that are not sequence number (> 0x80) or ids (< enable (0x20) - its a hack
+                // because of the protocol
+                switch (seq) {
+                    // special case for motor temperatures
+                    case 4:
+                    case 5:
+                        msg.erase(msg.begin() + 2);
+                        break;
+
+                        // handling enable / disable messages
+                    case CommandBase::enable:
+                        key &= static_cast<bb::key_t>(0xFFFFFF00);
+                        msg[1] = true;
+                        break;
+                    case CommandBase::disable:
+                        key &= static_cast<bb::key_t>(0xFFFFFF00);
+                        msg[1] = false;
+                        break;
+                }
+            }
+
         }
         entryValue(key) = msg;
         terr << code_loc << std::setfill('0') << std::hex << key << mys::sp << msg;
@@ -239,23 +265,10 @@ namespace rvr {
 
     RvrMsg fake_msg(3, 0);
 //----------------------------------------------------------------------------------------------------------------------
-    template <typename T>
-    float normalize(T const value, float const out_min, float const out_max) {
-        T min { 0 }; //{ std::numeric_limits<T>::min() };
-        T max { std::numeric_limits<T>::max() };
-//        terr << float(value) << mys::tab << (float(value) - min) //
-//            << mys::tab << (max - min) //
-//            << mys::tab << (float(value) - min) / (max - min) //
-//            << mys::tab << ((float(value) - min) / (max - min)) + out_min; //
-        return (    //
-        ((float(value) - min) / (max - min)) //
-        * (out_max - out_min)) + out_min;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     bool Blackboard::boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         return (byteValue(target, dev, cmd) != 0);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     uint8_t Blackboard::byteValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg const& msg { bb::entryValue(target, dev, cmd) };
         uint8_t res { };
@@ -264,8 +277,8 @@ namespace rvr {
         }
         return res;
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    // these two methods are for notifications that return a single 0xFF
+//----------------------------------------------------------------------------------------------------------------------
+// these two methods are for notifications that return a single 0xFF
     bool Blackboard::notifyState(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg const& msg { bb::entryValue(target, dev, cmd) };
 
@@ -275,12 +288,12 @@ namespace rvr {
         }
         return res;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg& msg { entryValue(target, dev, cmd) };
         msg = fake_msg;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     uint16_t Blackboard::uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
 
         RvrMsg const& msg { bb::entryValue(target, dev, cmd) };
@@ -299,7 +312,17 @@ namespace rvr {
     int16_t Blackboard::intValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         return static_cast<int16_t>(uintValue(target, dev, cmd));
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
+    uint32_t Blackboard::uint32Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
+        RvrMsg const& msg { bb::entryValue(target, dev, cmd, id) };
+        uint32_t res { };
+
+        if (msg.size() >= sizeof(uint32_t)) {
+            res = uintConvert(msg.begin() + 2, sizeof(uint32_t));
+        }
+        return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     uint64_t Blackboard::uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg const& msg { bb::entryValue(target, dev, cmd) };
         uint64_t res { };
@@ -337,8 +360,8 @@ namespace rvr {
         return std::string { msg.begin() + 2, msg.end() - 1 };    // response is a zero terminated C string
     }
 //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg const Blackboard::msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { entryValue(target, dev, cmd) };
+    RvrMsg const Blackboard::msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
+        RvrMsg const& msg { entryValue(target, dev, cmd, id) };
         return RvrMsg { msg.begin() + 2, msg.end() };
     }
 //======================================================================================================================
