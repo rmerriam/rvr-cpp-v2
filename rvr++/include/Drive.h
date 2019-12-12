@@ -35,7 +35,7 @@ namespace rvr {
 
     public:
         Drive(Request& req) :
-            CommandBase { Devices::drive, req, nordic } {
+            CommandBase { Devices::drive, req, bluetoothSOC } {
         }
         Drive(Drive&& other) = delete;
         Drive(Drive const& other) = delete;

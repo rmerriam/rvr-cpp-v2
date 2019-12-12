@@ -28,40 +28,8 @@
 #include "CommandBase.h"
 
 /*
- * Also see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
- *
- streaming service configuration for RVR:
- | Id     | Processor          | Token | Service            | Attributes                 |
- | ------ | ------------- -----| ----- | ------------------ | -------------------------- |
- | 0x0003 | Nordic (1)         | 1     | ColorDetection     | R, G, B, Index, Confidence |
- | 0x000A | Nordic (1)         | 2     | AmbientLight       | Light                      |
- -----------------------------------------------------------------------------------------
- | 0x0000 | ST (2)             | 1     | Quaternion         | W, X, Y, Z                 |
- | 0x0001 | ST (2)             | 1     | IMU                | Pitch, Roll, Yaw           |
- | 0x0002 | ST (2)             | 1     | Accelerometer      | X, Y, Z                    |
- | 0x0004 | ST (2)             | 1     | Gyroscope          | X, Y, Z                    |
- | 0x0006 | ST (2)             | 2     | Locator            | X, Y                       |
- | 0x0007 | ST (2)             | 2     | Velocity           | X, Y                       |
- | 0x0008 | ST (2)             | 2     | Speed              | Speed                      |
- -----------------------------------------------------------------------------------------
- | 0x0009 | Nordic (1), ST (2) | 3     | CoreTime           | TimeUpper, TimeLower       |
- -----------------------------------------------------------------------------------------
- Quaternion -1.0 - 1.0
- IMU -180 - 180
- Accelerometer -16.0 - 16.0
- Gyroscope -2000.0 - 2000.0
-
- Normalize: (value) / Max * (rangeMax - rangeMin) + rangeMin
-
- Accelerometer returns X = 7F B5 AF 00 = 2142613248
- Normalize = 2142613248/4294967295 * (16 - -16) + -16
- Normalize = .498866 * 32 - 16
- Normalize = -0.036288
-
- Thermal Protection
- 0x00 = OK
- 0x01 = WARN
- 0x02 = CRITICAL_FORCED_COOL_DOWN
+ * For sensor ranges see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
+ *                      https://sdk.sphero.com/docs/general_documentation/sensors/
  */
 
 namespace rvr {
@@ -71,16 +39,17 @@ namespace rvr {
 
     public:
         enum Sensor : uint8_t {
-            quaternion = 0, //
-            imu = 1, //
-            accel = 2, //
-            color = 3, //
-            gyro = 4, //
-            locator = 6, //
-            velocity = 7, //
-            speed_sense = 8, //
-            core_time = 9, //
-            ambient_sense = 10,
+            quaternion_token = 0, //
+            imu_token = 1, //
+            accel_token = 2, //
+            color_token = 3, //
+            gyro_token = 4, //
+            core_time_lower_token = 5, //
+            locator_token = 6, //
+            velocity_token = 7, //
+            speed_token = 8, //
+            core_time_upper_token = 9, //
+            ambient_token = 10,
         };
 
         SensorsStream(Request& req) :
@@ -129,15 +98,18 @@ namespace rvr {
             }
         }
 
-//        using a = streamConfig<bluetoothSOC, accel>;
+        void x(CommandResponse const want_resp) {
+            streamConfig<rvr::CommandBase::bluetoothSOC, Sensor::accel_token>(want_resp);
+        }
 
         //======================================================================================================================
         // data access methods
-        template <typename T, typename M>
-        float normalize(T const value, M const min, float const out_min, float const out_max);
+        float normalize(uint32_t const value, uint32_t const min, float const out_min, float const out_max);
+
         float ambient();
         float speed();
-//        auto velocity();
+        std::tuple<float, float> velocity();
+        std::tuple<float, float> locator();
 
     private:
 
@@ -201,76 +173,76 @@ namespace rvr {
             motor_thermal_protection_status_notify = 0x4D,
         };
 
-        using NormalizeFactor = std::pair<float, float>;
-        std::array<NormalizeFactor, 11> SensorFactors { //
-        NormalizeFactor { -1.0, 1.0 },          // 0 - quat
-        NormalizeFactor { -180.0, 180.0 },      // 1 - imu  -90/+90 roll
-        NormalizeFactor { -16.0, 16.0 },        // 2 - accel
-        NormalizeFactor { 0.0, std::numeric_limits<uint8_t>::max() }, // 3 - color
-        NormalizeFactor { -2000.0, 2000.0 },    // 4 - gyro
+        using NormalizeFactor = std::tuple<uint32_t, float, float>;
+        std::array<NormalizeFactor, 12> SensorFactors { //
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -1.0, 1.0 },         // 0 - quat
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -180.0, 180.0 },     // 1 - imu  -90/+90 roll
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -16.0, 16.0 },       // 2 - accel
+        NormalizeFactor { 0, 0.0, std::numeric_limits<uint8_t>::max() },            // 3 - color
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -2000.0, 2000.0 },   // 4 - gyro
 //
-        NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },  // 5 - core lower
-        NormalizeFactor { -16000.0, 16000.0 },  // 6 - locator
-        NormalizeFactor { -5.0, 5.0 },          // 7 - velocity
-        NormalizeFactor { 0.0, 5.0 },           // 8 - speed
-        NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },  // 9 - core upper
+        NormalizeFactor { 0, 0.0, std::numeric_limits<uint32_t>::max() },           // 5 - core lower
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -16000.0, 16000.0 }, // 6 - locator
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -5.0, 5.0 },         // 7 - velocity
+        NormalizeFactor { 0, 0.0, 5.0 },                                            // 8 - speed
+        NormalizeFactor { 0, 0.0, std::numeric_limits<uint32_t>::max() },           // 9 - core upper
 //
-        NormalizeFactor { 0.0, 1200000.0 },     // 10- ambient
+        NormalizeFactor { 0, 0.0, 1200000.0 },                                      // 10- ambient
+        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -1.0, 1.0, },        // 11 - quat
         };
-    };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::accelerometerConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 2, 0x00, 0x02, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+    ;
+//----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::accelerometerConfig(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { accel_token, 0x00, accel_token, 0x02 }, want_resp);
+    }
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::ambientConfig(CommandResponse const want_resp) {
         configureStreamingNordic(rvr::RvrMsg { 10, 0x00, 10, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::colorConfig(CommandResponse const want_resp) {
         configureStreamingNordic(rvr::RvrMsg { 0x03, 0x00, 0x3, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::coreNordicConfig(CommandResponse const want_resp) {
         configureStreamingNordic(rvr::RvrMsg { 9, 0x00, 0x09, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::coreBTConfig(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { 9, 0x00, 0x09, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::gyroConfig(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { 4, 0x00, 0x04, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::imuConfig(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { 1, 0x00, 0x01, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::locatorConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 6, 0x00, 0x06, 0x02 }, want_resp);
+        configureStreamingBT(rvr::RvrMsg { locator_token, 0x00, locator_token, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::quaternionConfig(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { 11, 0x00, 0x00, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::speedConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 8, 0x00, 0x08, 0x02 }, want_resp);
+        configureStreamingBT(rvr::RvrMsg { speed_token, 0x00, speed_token, 0x02 }, want_resp);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::velocityConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 7, 0x00, 0x07, 0x02 }, want_resp);
+        configureStreamingBT(rvr::RvrMsg { velocity_token, 0x00, velocity_token, 0x02 }, want_resp);
     }
 //======================================================================================================================
-    template <typename T, typename M>
-    inline float SensorsStream::normalize(T const value, M const min, float const out_min, float const out_max) {
-        T max { std::numeric_limits<T>::max() };
-        return (((float(value) - min) / (max - min)) * (out_max - out_min)) + out_min;
-    }
+    inline float SensorsStream::normalize(uint32_t const value, uint32_t const min, float const out_min, float const out_max) {
+        auto max { std::numeric_limits<uint32_t>::max() };
+//        terr << code_loc << value << mys::sp << min << mys::sp << max << mys::sp << out_min << mys::sp << out_max;
 
-//----------------------------------------------------------------------------------------------------------------------
-//    inline a    sen_s.speedConfig();
+        return (((value - min) / float(max - min)) * (out_max - out_min)) + out_min;
+    }
 
 } /* namespace rvr */
 

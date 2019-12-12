@@ -52,7 +52,7 @@ namespace rvr {
     std::tuple<unsigned char, unsigned char> const Drive::speed_mode(double const& speed) const {
         uint8_t s { static_cast<uint8_t>(abs(speed) / 100.0 * 256) };
         uint8_t m { static_cast<uint8_t>((speed > 0) ? forward : ((speed < 0) ? reverse : off)) };
-        return std::tie(s, m);
+        return std::tuple(s, m);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::drive(double const& left, double const& right, CommandResponse const want_resp) const {

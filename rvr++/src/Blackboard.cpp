@@ -313,12 +313,16 @@ namespace rvr {
         return static_cast<int16_t>(uintValue(target, dev, cmd));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint32_t Blackboard::uint32Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
+    uint32_t Blackboard::uint32Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos,
+        uint8_t const id) {
         RvrMsg const& msg { bb::entryValue(target, dev, cmd, id) };
         uint32_t res { };
 
+        auto begin { msg.begin() + 2 };
+        begin += (pos * sizeof(uint32_t));
+
         if (msg.size() >= sizeof(uint32_t)) {
-            res = uintConvert(msg.begin() + 2, sizeof(uint32_t));
+            res = uintConvert(begin, sizeof(uint32_t));
         }
         return res;
     }
@@ -338,7 +342,7 @@ namespace rvr {
         RvrMsg const& msg { entryValue(target, dev, cmd, id) };
 
         auto begin { msg.begin() + 2 };
-        begin += (pos * 4);
+        begin += (pos * sizeof(float));
 
         float result { };
         {
