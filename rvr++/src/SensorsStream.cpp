@@ -77,37 +77,76 @@ namespace rvr {
         clearStreamingBT(want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
+    AccelData SensorsStream::accelerometer() {
+        uint32_t x { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, accel_token) };
+        uint32_t y { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, accel_token) };
+        uint32_t z { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, accel_token) };
+
+        auto [out_min, out_max] { SensorFactors[accel_token] };
+        return { //
+            normalize(x, out_min, out_max),//
+            normalize(y, out_min, out_max),//
+            normalize(z, out_min, out_max),//
+        };
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     float SensorsStream::ambient() {
         uint32_t value { bb::uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, ambient_token) };
-        auto [in_min, out_min, out_max] { SensorFactors[ambient_token] };
-        return normalize(static_cast<int32_t>(value), in_min, out_min, out_max);
+        auto [out_min, out_max] { SensorFactors[ambient_token] };
+        return normalize(static_cast<int32_t>(value), out_min, out_max);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    GyroData SensorsStream::gyroscope() {
+        uint32_t x { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, gyro_token) };
+        uint32_t y { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, gyro_token) };
+        uint32_t z { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, gyro_token) };
+
+        auto [out_min, out_max] { SensorFactors[gyro_token] };
+        return { //
+            normalize(x, out_min, out_max),//
+            normalize(y, out_min, out_max),//
+            normalize(z, out_min, out_max),//
+        };
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    ImuData SensorsStream::imu() {
+        uint32_t x { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, imu_token) };
+        uint32_t y { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, imu_token) };
+        uint32_t z { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_token) };
+
+        auto [out_min, out_max] { SensorFactors[imu_token] };
+        return { //
+            normalize(x, out_min, out_max),//
+            normalize(y, out_min/2, out_max/2),//
+            normalize(z, out_min, out_max),//
+        };
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    LocatorData SensorsStream::locator() {
+        uint32_t x { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, locator_token) };
+        uint32_t y { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, locator_token) };
+
+        auto [out_min, out_max] { SensorFactors[locator_token] };
+        return { //
+            normalize(x, out_min, out_max),//
+            normalize(y, out_min, out_max),//
+        };
     }
     //----------------------------------------------------------------------------------------------------------------------
     float SensorsStream::speed() {
         uint32_t value { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, speed_token) };
-        auto [in_min, out_min, out_max] { SensorFactors[speed_token] };
-        return normalize(static_cast<int32_t>(value), in_min, out_min, out_max);
+        auto [out_min, out_max] { SensorFactors[speed_token] };
+        return normalize(static_cast<int32_t>(value), out_min, out_max);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::tuple<float, float> SensorsStream::velocity() {
+    VelocityData SensorsStream::velocity() {
         uint32_t x { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, velocity_token) };
         uint32_t y { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, velocity_token) };
 
-        auto [in_min, out_min, out_max] { SensorFactors[velocity_token] };
+        auto [out_min, out_max] { SensorFactors[velocity_token] };
         return { //
-            normalize(x, in_min, out_min, out_max),//
-            normalize(y, in_min, out_min, out_max),//
-        };
-    }
-
-    std::tuple<float, float> SensorsStream::locator() {
-        uint32_t x { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, locator_token) };
-        uint32_t y { bb::uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, locator_token) };
-
-        auto [in_min, out_min, out_max] { SensorFactors[locator_token] };
-        return { //
-            normalize(x, in_min, out_min, out_max),//
-            normalize(y, in_min, out_min, out_max),//
+            normalize(x, out_min, out_max),//
+            normalize(y, out_min, out_max),//
         };
     }
 

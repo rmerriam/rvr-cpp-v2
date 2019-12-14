@@ -40,8 +40,10 @@ MainForm::MainForm(rvr::Request& req) :
 void MainForm::runWindows() {
 
     power_form.onceData();
-    status_form.onceData();
+    stream_form.onceData();
     sysinfo_form.onceData();
+
+    status_form.onceData();
 
     bool run { true };
     while (run) {
@@ -62,8 +64,10 @@ void MainForm::runWindows() {
         }
 
         power_form.updateScreen();
-        status_form.updateScreen();
+        stream_form.updateScreen();
         sysinfo_form.updateScreen();
+
+        status_form.updateScreen();
         refresh();
 
         updateRequests();
@@ -78,17 +82,19 @@ void MainForm::updateRequests() {
 
     // data needed every update
     power_form.fastData();
-    status_form.fastData();
     sysinfo_form.fastData();
 
+    status_form.fastData();
     // limit requests for data while letting streaming updates occur
     ++passes;
     passes %= 10;
     if ( !passes) {
         //            pose_form.requestData();
         power_form.requestData();
-        status_form.requestData();
         sysinfo_form.requestData();
+        stream_form.requestData();
+
+        status_form.requestData();
     }
 
 }

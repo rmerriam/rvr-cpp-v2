@@ -26,6 +26,7 @@
 
 #include "PowerForm.h"
 #include "StatusForm.h"
+#include "StreamForm.h"
 #include "SystemInfoForm.h"
 //--------------------------------------------------------------------------------------------------------------------------
 
@@ -34,9 +35,9 @@ public:
     MainForm();
     MainForm(rvr::Request& req);
 
-    MainForm(const MainForm& other) = delete;
+    MainForm(MainForm const& other) = delete;
     MainForm(MainForm&& other) = delete;
-    MainForm& operator=(const MainForm& other) = delete;
+    MainForm& operator=(MainForm const& other) = delete;
     virtual ~MainForm() = default;
 
     void runWindows();
@@ -49,7 +50,9 @@ private:
     static constexpr int row { 0 };
 
     PowerForm power_form { row, 0, mRequest };
-    SystemInfoForm sysinfo_form { row, power_form.getX() + 2, mRequest };
+    SystemInfoForm sysinfo_form { row, power_form.getX() + 1, mRequest };
+    StreamForm stream_form { row, sysinfo_form.getX() + 1, mRequest };
+
     StatusForm status_form { LINES - 8, 0 };
 };
 #endif

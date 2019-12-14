@@ -1,9 +1,9 @@
 #include "LabelField.h"
 namespace scr {
     //--------------------------------------------------------------------------------------------------------------------------
-    LabelField::LabelField(const char* text, const int height, const int width, const int row, const int col, const int nmem,
-            const int nbuf) :
-            NField { height, width, row, col, nmem, nbuf } {
+    LabelField::LabelField(char const* text, uint8_t const height, uint8_t const width, uint8_t const row, uint8_t const col,
+        uint8_t const nmem, uint8_t const nbuf) :
+        NField { height, width, row, col, nmem, nbuf } {
         optionsOff(O_ACTIVE | O_EDIT);
         justify(JUSTIFY_RIGHT);
         write(text);

@@ -34,6 +34,43 @@
 
 namespace rvr {
 
+    // creating these outside the class so they are easier out
+    struct AccelData {
+        float x;
+        float y;
+        float z;
+    };
+    struct ColorData {
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+        float confidence;
+    };
+    struct GyroData {
+        float x;
+        float y;
+        float z;
+    };
+    struct ImuData {
+        float pitch;
+        float roll;
+        float yaw;
+    };
+    struct LocatorData {
+        float x;
+        float y;
+    };
+    struct QuatData {
+        float w;
+        float x;
+        float y;
+        float z;
+    };
+    struct VelocityData {
+        float x;
+        float y;
+    };
+
     class SensorsStream : protected CommandBase {
         using bb = Blackboard;
 
@@ -60,7 +97,7 @@ namespace rvr {
         SensorsStream(SensorsStream&& other) = delete;
         SensorsStream& operator=(SensorsStream const& other) = delete;
 
-        void accelerometerConfig(CommandResponse const want_resp = resp_on_error);
+        void accelConfig(CommandResponse const want_resp = resp_on_error);
         void ambientConfig(CommandResponse const want_resp = resp_on_error);
         void colorConfig(CommandResponse const want_resp = resp_on_error);
         void coreNordicConfig(CommandResponse const want_resp = resp_on_error);
@@ -104,12 +141,15 @@ namespace rvr {
 
         //======================================================================================================================
         // data access methods
-        float normalize(uint32_t const value, uint32_t const min, float const out_min, float const out_max);
+        float normalize(uint32_t const value, float const out_min, float const out_max);
 
+        AccelData accelerometer();
         float ambient();
+        GyroData gyroscope();
+        ImuData imu();
         float speed();
-        std::tuple<float, float> velocity();
-        std::tuple<float, float> locator();
+        VelocityData velocity();
+        LocatorData locator();
 
     private:
 
@@ -173,27 +213,27 @@ namespace rvr {
             motor_thermal_protection_status_notify = 0x4D,
         };
 
-        using NormalizeFactor = std::tuple<uint32_t, float, float>;
+        using NormalizeFactor = std::tuple<float, float>;
         std::array<NormalizeFactor, 12> SensorFactors { //
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -1.0, 1.0 },         // 0 - quat
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -180.0, 180.0 },     // 1 - imu  -90/+90 roll
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -16.0, 16.0 },       // 2 - accel
-        NormalizeFactor { 0, 0.0, std::numeric_limits<uint8_t>::max() },            // 3 - color
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -2000.0, 2000.0 },   // 4 - gyro
+        NormalizeFactor { -1.0, 1.0 },         // 0 - quat
+        NormalizeFactor { -180.0, 180.0 },     // 1 - imu  -90/+90 roll
+        NormalizeFactor { -16.0, 16.0 },       // 2 - accel
+        NormalizeFactor { 0.0, std::numeric_limits<uint8_t>::max() },            // 3 - color
+        NormalizeFactor { -2000.0, 2000.0 },   // 4 - gyro
 //
-        NormalizeFactor { 0, 0.0, std::numeric_limits<uint32_t>::max() },           // 5 - core lower
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -16000.0, 16000.0 }, // 6 - locator
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -5.0, 5.0 },         // 7 - velocity
-        NormalizeFactor { 0, 0.0, 5.0 },                                            // 8 - speed
-        NormalizeFactor { 0, 0.0, std::numeric_limits<uint32_t>::max() },           // 9 - core upper
+        NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },           // 5 - core lower
+        NormalizeFactor { -16000.0, 16000.0 }, // 6 - locator
+        NormalizeFactor { -5.0, 5.0 },         // 7 - velocity
+        NormalizeFactor { 0.0, 5.0 },                                            // 8 - speed
+        NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },           // 9 - core upper
 //
-        NormalizeFactor { 0, 0.0, 1200000.0 },                                      // 10- ambient
-        NormalizeFactor { std::numeric_limits<uint32_t>::min(), -1.0, 1.0, },        // 11 - quat
+        NormalizeFactor { 0.0, 1200000.0 },                                      // 10- ambient
+        NormalizeFactor { -1.0, 1.0, },        // 11 - quat
         };
     }
     ;
 //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::accelerometerConfig(CommandResponse const want_resp) {
+    inline void SensorsStream::accelConfig(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { accel_token, 0x00, accel_token, 0x02 }, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -214,7 +254,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::gyroConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 4, 0x00, 0x04, 0x02 }, want_resp);
+        configureStreamingBT(rvr::RvrMsg { gyro_token, 0x00, gyro_token, 0x02 }, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::imuConfig(CommandResponse const want_resp) {
@@ -237,11 +277,11 @@ namespace rvr {
         configureStreamingBT(rvr::RvrMsg { velocity_token, 0x00, velocity_token, 0x02 }, want_resp);
     }
 //======================================================================================================================
-    inline float SensorsStream::normalize(uint32_t const value, uint32_t const min, float const out_min, float const out_max) {
+    inline float SensorsStream::normalize(uint32_t const value, float const out_min, float const out_max) {
         auto max { std::numeric_limits<uint32_t>::max() };
-//        terr << code_loc << value << mys::sp << min << mys::sp << max << mys::sp << out_min << mys::sp << out_max;
-
-        return (((value - min) / float(max - min)) * (out_max - out_min)) + out_min;
+        float res { };
+        if (value != 0) res = (value / float(max) * (out_max - out_min)) + out_min;
+        return res;
     }
 
 } /* namespace rvr */

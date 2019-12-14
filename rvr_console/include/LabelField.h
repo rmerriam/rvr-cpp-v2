@@ -13,8 +13,8 @@ namespace scr {
     //--------------------------------------------------------------------------------------------------------------------------
     class LabelField : public NField {
     public:
-        LabelField(const char* text, const int height, const int width, const int row, const int col, const int nmem = 0,
-                const int nbuf = 0);
+        LabelField(char const* text, uint8_t const height, uint8_t const width, uint8_t const row, uint8_t const col,
+            uint8_t const nmem = 0, uint8_t const nbuf = 0);
 
     };
 

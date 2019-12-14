@@ -37,7 +37,9 @@ private:
     DataFieldPtr mBoardVer;
     DataFieldPtr mBootVer;
     DataFieldPtr mBootVer2;
-    DataFieldPtr mMacAddr;
+    DataFieldPtr mMacAddr1;
+    DataFieldPtr mMacAddr2;
+    DataFieldPtr mMacAddr3;
     DataFieldPtr mAppVer;
     DataFieldPtr mAppVer2;
     DataFieldPtr mProcName;

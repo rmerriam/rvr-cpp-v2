@@ -172,31 +172,30 @@ int main(int argc, char* argv[]) {
     rvr::SensorsStream sen_s(req);
     rvr::Drive drive(req);
 
-//    drive.resetYaw();
-    drive.driveWithHeading(0, 270);
-    std::this_thread::sleep_for(500ms);
-    drive.drive(25, 25);
-    std::this_thread::sleep_for(2000ms);
-    drive.drive( -25, 25);
-    std::this_thread::sleep_for(2000ms);
+    drive.resetYaw();
+//    drive.driveWithHeading(0, 270);
+//    std::this_thread::sleep_for(500ms);
+//    drive.drive( -25, -25);
+//    std::this_thread::sleep_for(1000ms);
+//    drive.drive(25, 25);
+//    std::this_thread::sleep_for(1000ms);
 
     rvr::SensorsDirect sen_d(req);
-    sen_d.enableColorDetection();   // must preceed color detection to turn on bottom LEDs
+    sen_d.enableColorDetection();   // must precede color detection to turn on bottom LEDs
 
     sen_s.clearStreaming(RespYes);
 
-//    sen_s.streamConfig<rvr::CommandBase::bluetoothSOC, sen_s.accel>(RespYes);
-//    sen_s.configAccel(RespYes);
+    sen_s.accelConfig(RespYes);
 
-//    sen_s.ambientConfig();
+    sen_s.ambientConfig();
 //    sen_s.colorConfig(RespYes);
 //    sen_s.coreNordicConfig();
 //    sen_s.coreBTConfig();
-//    sen_s.gyroConfig();
-//    sen_s.imuConfig();
+    sen_s.gyroConfig();
+    sen_s.imuConfig();
     sen_s.locatorConfig();
-//    sen_s.quaternionConfig();
-//    sen_s.speedConfig();
+    sen_s.quaternionConfig();
+    sen_s.speedConfig();
 //    sen_s.velocityConfig();
 
     sen_s.enableStreamingBT(50, RespYes);
@@ -210,14 +209,23 @@ int main(int argc, char* argv[]) {
     //    sen_s.disableStreamingBT(RespYes);
     //    sen_s.clearStreamingBT(RespYes);
 
-    sen_s.disableStreaming(RespYes);
-    sen_s.clearStreaming(RespYes);
-    drive.stop(0);
+//    sen_s.disableStreaming(RespYes);
+//    sen_s.clearStreaming(RespYes);
+//    drive.stop(0);
 
     terr << code_loc << mys::nl;
     terr << code_loc << "Streaming";
 
+    auto [a_x, a_y, a_z] = sen_s.accelerometer();
+    terr << code_loc << "accelerometer: " << a_x << mys::sp << a_y << mys::sp << a_z;
+
     terr << code_loc << "Ambient: " << sen_s.ambient();
+
+    auto [g_x, g_y, g_z] = sen_s.gyroscope();
+    terr << code_loc << "gyroscope: " << g_x << mys::sp << g_y << mys::sp << g_z;
+
+    auto [i_x, i_y, i_z] = sen_s.imu();
+    terr << code_loc << "imu: " << i_x << mys::sp << i_y << mys::sp << i_z;
 
     auto [l_x, l_y] = sen_s.locator();
     terr << code_loc << "locator: " << l_x << mys::sp << l_y;
@@ -291,47 +299,54 @@ int main(int argc, char* argv[]) {
 #endif
 
 #endif
-#if 0
+#if 1
     // DRIVE
-    rvr::Drive drive(req);
+//    rvr::Drive drive(req);
 
     drive.resetYaw(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//
+//    drive.stop(90, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(100000));
 
-    drive.stop(90, RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    drive.driveWithHeading(0, 90);
+    std::this_thread::sleep_for(1s);
 
-    drive.drive(25, 25, RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    for (auto i { 0 }; i < 100; ++i) {
+        drive.drive(75, 25);
+        std::this_thread::sleep_for(1s);
+        auto [l_x, l_y] = sen_s.locator();
+        terr << code_loc << "locator: " << l_x << mys::sp << l_y;
+    }
 
-    drive.driveWithHeading(0, 20, RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    drive.resetYaw(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-
-    drive.enableMotorStallNotify(RespYes);
-    drive.enableMotorFaultNotify(RespYes);
-
-    drive.disableMotorStallNotify(RespYes);
-    drive.disableMotorFaultNotify(RespYes);
-
-    drive.getMotorFault(RespYes);
-
-    std::this_thread::sleep_for(100ms);
-
-    terr << code_loc;
-    terr << code_loc;
-    terr << code_loc << "drive";
-
-    terr << code_loc << "Fault Notify State: " << drive.motorFaultState();
-    terr << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
-
-    terr << code_loc << "Stall Notify State: " << drive.motorFaultState();
-    terr << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
-
-    terr << code_loc;
-    terr << code_loc;
+//    drive.driveWithHeading(0, 20, RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+//
+//    drive.resetYaw(RespYes);
+//    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//
+//    drive.enableMotorStallNotify(RespYes);
+//    drive.enableMotorFaultNotify(RespYes);
+//
+//    drive.disableMotorStallNotify(RespYes);
+//    drive.disableMotorFaultNotify(RespYes);
+//
+//    drive.getMotorFault(RespYes);
+//
+//    std::this_thread::sleep_for(100ms);
+//
+//    terr << code_loc;
+//    terr << code_loc;
+//    terr << code_loc << "drive";
+//
+//    terr << code_loc << "Fault Notify State: " << drive.motorFaultState();
+//    terr << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
+//
+//    terr << code_loc << "Stall Notify State: " << drive.motorFaultState();
+//    terr << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
+//
+//    terr << code_loc;
+//    terr << code_loc;
 
 #endif
 #if 0

@@ -19,7 +19,7 @@ SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Request& req) :
     FormBase(y, x), mSys { req }, mConn { req }, mApi { req } {
 
     uint8_t item_row { 2 };
-    int width { 15 };
+    int width { 12 };
     NField::build_header(mFields, "System Information", 1, width + 20);
 
     ++item_row;
@@ -34,7 +34,11 @@ SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Request& req) :
     mAppVer2 = NField::build_data_item(mFields, "App Ver2:", item_row++, width);
     mProcName = NField::build_data_item(mFields, "Proc Name:", item_row++, width);
     mProcName2 = NField::build_data_item(mFields, "Proc Name2:", item_row++, width);
-    mMacAddr = NField::build_wide_data_item(mFields, "BT MAC Addr:", item_row++, width, 17);
+
+    mMacAddr1 = NField::build_data_item(mFields, "BT MAC Addr:", item_row++);
+    mMacAddr2 = NField::build_data_item(mFields, "", item_row++);
+    mMacAddr3 = NField::build_data_item(mFields, "", item_row++);
+
     mStatsId = NField::build_data_item(mFields, "Stats Id:", item_row++, width);
     mSku = NField::build_data_item(mFields, "SKU:", item_row++, width);
 
@@ -73,14 +77,19 @@ void SystemInfoForm::updateScreen() {
     mBoardVer->setData(mSys.boardVersion());
     mBootVer->setData(mSys.bootVersion());
     mBootVer2->setData(mSys.bootVersion2());
-    mMacAddr->setData(mSys.macAddress());
+
+    std::string m { mSys.macAddress() };
+    mMacAddr1->setData(m.substr(0, 6));
+    mMacAddr2->setData(m.substr(6, 6));
+    mMacAddr3->setData(m.substr(12, 6));
+
     mAppVer->setData(mSys.mainAppVersion());
     mAppVer2->setData(mSys.mainAppVersion2());
     mProcName->setData(mSys.processorName());
     mProcName2->setData(mSys.processorName2());
     mStatsId->setData(mSys.statsId());
     mSku->setData(mSys.sku());
-    mUpTime->setData(mSys.upTime());
+    mUpTime->setData(mSys.coreUpTime());
 
     mRvrName->setData(mConn.name());
 

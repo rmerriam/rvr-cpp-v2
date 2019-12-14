@@ -35,7 +35,7 @@ namespace scr {
     constexpr uint8_t label_pad { 1 };
     constexpr uint8_t label_col { 1 };
     constexpr uint8_t label_width { 10 };
-    constexpr uint8_t data_width { 8 };
+    constexpr uint8_t data_width { 7 };
     constexpr uint8_t data_col { label_col + label_width + label_pad };
 //--------------------------------------------------------------------------------------------------------------------------
     class NField {

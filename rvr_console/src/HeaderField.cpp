@@ -8,8 +8,8 @@
 namespace scr {
 
     //--------------------------------------------------------------------------------------------------------------------------
-    HeaderField::HeaderField(const char* text, const int height, const int width, const int row, const int col, const int nmem,
-        const int nbuf) :
+    HeaderField::HeaderField(char const* text, uint8_t const height, uint8_t const width, uint8_t const row, uint8_t const col,
+        uint8_t const nmem, uint8_t const nbuf) :
         NField { height, width, row, col, nmem, nbuf } {
 
         justify(JUSTIFY_CENTER);
