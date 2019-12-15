@@ -47,8 +47,8 @@ namespace rvr {
             target_unavailable = 0x0A,
         };
 
-        Response(SerialPort& s, std::shared_future<void> end) :
-            ReadPacket { s }, mEnd { end } {
+        Response(SerialPort& s, Blackboard& bb, std::shared_future<void> end) :
+            ReadPacket { s }, mBlackboard { bb }, mEnd { end } {
         }
         Response(Response const& other) = delete;
         Response(Response&& other) = default;
@@ -56,13 +56,15 @@ namespace rvr {
 
         bool operator ()();
 
-        static void decode(RvrMsg packet);
+        void decode(RvrMsg packet);
 
     private:
-        static void decode_flags(uint8_t const f);
-        static void decode_error(auto err_byte);
+        Blackboard& mBlackboard;
 
-        static Blackboard::key_t msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
+        void decode_flags(uint8_t const f);
+        void decode_error(auto err_byte);
+
+        Blackboard::key_t msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
 
         std::shared_future<void> mEnd;
     };

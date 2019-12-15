@@ -24,7 +24,7 @@
 //======================================================================================================================
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
     class IoLed;
 }
@@ -32,6 +32,7 @@ using Led = rvr::IoLed;
 // defined to make it easier to access LedMask enum, i.e. Led::right_headlight_red
 
 namespace rvr {
+    class Blackboard;
 
     class IoLed : protected CommandBase {
 
@@ -126,8 +127,8 @@ namespace rvr {
             undercarriage = undercarriage_white
         };
         //----------------------------------------------------------------------------------------------------------------------
-        IoLed(Request& req) :
-            CommandBase { Devices::io_led, req, nordic } {
+        IoLed(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::io_led, req, nordic } {
         }
 
         IoLed(IoLed const& other) = delete;

@@ -26,15 +26,15 @@
 #include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
+    class Blackboard;
 
     class Power : protected CommandBase {
-        using bb = Blackboard;
 
     public:
-        Power(Request& req) :
-            CommandBase { Devices::power, req, nordic } {
+        Power(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::power, req, nordic } {
         }
         enum VoltageType : uint8_t {
             CalibratedFiltered = 0, //

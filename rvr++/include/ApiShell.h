@@ -24,13 +24,14 @@
 //======================================================================================================================
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
+    class Blackboard;
 
     class ApiShell : public CommandBase {
     public:
-        ApiShell(Request& req) :
-            CommandBase { Devices::api_and_shell, req, bluetoothSOC } {
+        ApiShell(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::api_and_shell, req, bluetoothSOC } {
         }
         ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;

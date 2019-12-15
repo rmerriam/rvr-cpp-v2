@@ -25,15 +25,16 @@
 //#include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 using namespace std::literals;
 
 namespace rvr {
+    class Blackboard;
 
     class SystemInfo : protected CommandBase {
     public:
-        SystemInfo(Request& req) :
-            CommandBase { Devices::system, req, bluetoothSOC } {
+        SystemInfo(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::system, req, bluetoothSOC } {
         }
         SystemInfo(SystemInfo const& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;

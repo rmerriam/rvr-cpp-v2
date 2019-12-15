@@ -22,9 +22,10 @@
 //     Created: Oct 27, 2019
 //
 //======================================================================================================================
-
 #include "Request.h"
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
+    class Blackboard;
 
     class CommandBase {
     public:
@@ -46,7 +47,7 @@ namespace rvr {
         enum SpecialSeq : uint8_t {
             enable = 0x20, disable,
         };
-        explicit CommandBase(Devices const device, Request& request, TargetPort const target);
+        explicit CommandBase(Blackboard& bb, Devices const device, Request& request, TargetPort const target);
 
         uint8_t buildFlags(CommandResponse const want_resp) const;
 
@@ -91,6 +92,7 @@ namespace rvr {
             return ++mSeq | 0x80;
         }
 
+        Blackboard& mBlackboard;
         Devices const mDevice;
         Request& mRequest;
         TargetPort const mTarget;

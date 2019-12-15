@@ -25,29 +25,15 @@
 #include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 /*
- streaming service configuration for RVR:
- | Id     | Processor          | Token | Service            | Attributes                 |
- | ------ | ------------- -----| ----- | ------------------ | -------------------------- |
- | 0x0003 | Nordic (1)         | 1     | ColorDetection     | R, G, B, Index, Confidence |
- | 0x000A | Nordic (1)         | 2     | AmbientLight       | Light                      |
- -----------------------------------------------------------------------------------------
- | 0x0000 | ST (2)             | 1     | Quaternion         | W, X, Y, Z                 |
- | 0x0001 | ST (2)             | 1     | IMU                | Pitch, Roll, Yaw           |
- | 0x0002 | ST (2)             | 1     | Accelerometer      | X, Y, Z                    |
- | 0x0004 | ST (2)             | 1     | Gyroscope          | X, Y, Z                    |
- | 0x0006 | ST (2)             | 2     | Locator            | X, Y                       |
- | 0x0007 | ST (2)             | 2     | Velocity           | X, Y                       |
- | 0x0008 | ST (2)             | 2     | Speed              | Speed                      |
- -----------------------------------------------------------------------------------------
- | 0x0009 | Nordic (1), ST (2) | 3     | CoreTime           | TimeUpper, TimeLower       |
- -----------------------------------------------------------------------------------------
-
+ * For sensor ranges see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
+ *                      https://sdk.sphero.com/docs/general_documentation/sensors/
  */
-
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
-    using bb = Blackboard;
+
+    class Blackboard;
 
     class SensorsDirect : protected CommandBase {
 
@@ -59,8 +45,8 @@ namespace rvr {
             okay, warn, critical
         };
 
-        SensorsDirect(Request& req) :
-            CommandBase { Devices::sensors, req, bluetoothSOC } {
+        SensorsDirect(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::sensors, req, bluetoothSOC } {
         }
 
         SensorsDirect(SensorsDirect const& other) = delete;
@@ -253,53 +239,53 @@ namespace rvr {
     }
 
     inline bool SensorsDirect::isGyroMaxNotifyEnabled() const {
-        return bb::getNotify(mTarget, mDevice, enable_gyro_max_notify);
+        return mBlackboard.getNotify(mTarget, mDevice, enable_gyro_max_notify);
     }
 
     inline bool SensorsDirect::isThermalProtectionNotifyEnabled() const {
-        return bb::getNotify(mAltTarget, mDevice, enable_motor_thermal_protection_status_notify);
+        return mBlackboard.getNotify(mAltTarget, mDevice, enable_motor_thermal_protection_status_notify);
     }
 
     inline bool SensorsDirect::isColorDetectionEnabled() const {
-        return bb::getNotify(mAltTarget, mDevice, enable_color_detection);
+        return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection);
     }
 
     inline bool SensorsDirect::isColorDetectionNotifyEnabled() const {
-        return bb::getNotify(mAltTarget, mDevice, enable_color_detection_notify);
+        return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection_notify);
     }
 
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::ambient() const {
-        return bb::floatValue(mTarget, mDevice, get_ambient_light_sensor_value);
+        return mBlackboard.floatValue(mTarget, mDevice, get_ambient_light_sensor_value);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::leftMotorTemp() const {
-        return bb::floatValue(mAltTarget, mDevice, get_temperature, 0, 4);
+        return mBlackboard.floatValue(mAltTarget, mDevice, get_temperature, 0, 4);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::rightMotorTemp() const {
-        return bb::floatValue(mAltTarget, mDevice, get_temperature, 0, 5);
+        return mBlackboard.floatValue(mAltTarget, mDevice, get_temperature, 0, 5);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetMaxGyroNotify() const {
-        bb::resetNotify(mAltTarget, mDevice, gyro_max_notify);
+        mBlackboard.resetNotify(mAltTarget, mDevice, gyro_max_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetColorDetectionNotify() const {
-        bb::resetNotify(mTarget, mDevice, color_detection_notify);
+        mBlackboard.resetNotify(mTarget, mDevice, color_detection_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline auto SensorsDirect::currentRGBValues() {
         return std::tuple(    //
-            bb::uintValue(mTarget, mDevice, get_rgbc_sensor_values, 0),    //
-            bb::uintValue(mTarget, mDevice, get_rgbc_sensor_values, 1),    //
-            bb::uintValue(mTarget, mDevice, get_rgbc_sensor_values, 2),    //
-            bb::uintValue(mTarget, mDevice, get_rgbc_sensor_values, 3)    //
+            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 0),    //
+            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 1),    //
+            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 2),    //
+            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 3)    //
                           );
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline auto SensorsDirect::colorDetectionValues() {
-        rvr::RvrMsg const msg { bb::msgValue(mTarget, mDevice, color_detection_notify) };
+        rvr::RvrMsg const msg { mBlackboard.msgValue(mTarget, mDevice, color_detection_notify) };
         return std::tuple(    //
             static_cast<uint16_t>(msg[1]),  //
             static_cast<uint16_t>(msg[2]),  //
@@ -310,11 +296,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline auto SensorsDirect::thermalProtectionValues() {
-        rvr::RvrMsg const& msg { bb::msgValue(mAltTarget, mDevice, get_motor_thermal_protection_status) };
+        rvr::RvrMsg const& msg { mBlackboard.msgValue(mAltTarget, mDevice, get_motor_thermal_protection_status) };
         auto begin { msg.begin() + 2 };
         return std::tuple(    //
-            bb::floatConvert(begin), *(begin + 4),    //
-            bb::floatConvert(begin + 5), *(begin + 9)
+            mBlackboard.floatConvert(begin), *(begin + 4),    //
+            mBlackboard.floatConvert(begin + 5), *(begin + 9)
             //
             );
     }

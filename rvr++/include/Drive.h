@@ -31,11 +31,10 @@
 namespace rvr {
 
     class Drive : protected CommandBase {
-        using bb = Blackboard;
 
     public:
-        Drive(Request& req) :
-            CommandBase { Devices::drive, req, bluetoothSOC } {
+        Drive(Blackboard& bb, Request& req) :
+            CommandBase { bb, Devices::drive, req, bluetoothSOC } {
         }
         Drive(Drive&& other) = delete;
         Drive(Drive const& other) = delete;
@@ -58,15 +57,15 @@ namespace rvr {
         //======================================================================================================================
         // Access data
         bool motorFaultState() const {
-            return bb::boolValue(mTarget, mDevice, get_motor_fault_state);
+            return mBlackboard.boolValue(mTarget, mDevice, get_motor_fault_state);
         }
         //----------------------------------------------------------------------------------------------------------------------
         bool motorFaultNotifySet() const {
-            return bb::notifyState(mTarget, mDevice, enable_motor_fault_notify);
+            return mBlackboard.notifyState(mTarget, mDevice, enable_motor_fault_notify);
         }
         //----------------------------------------------------------------------------------------------------------------------
         bool motorStallNotifySet() const {
-            return bb::notifyState(mTarget, mDevice, enable_motor_stall_notify);
+            return mBlackboard.notifyState(mTarget, mDevice, enable_motor_stall_notify);
         }
 
     private:

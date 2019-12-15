@@ -26,13 +26,14 @@
 #include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 /*
  * For sensor ranges see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
  *                      https://sdk.sphero.com/docs/general_documentation/sensors/
  */
-
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
+    class Blackboard;
 
     // creating these outside the class so they are easier out
     struct AccelData {
@@ -72,7 +73,6 @@ namespace rvr {
     };
 
     class SensorsStream : protected CommandBase {
-        using bb = Blackboard;
 
     public:
         enum Sensor : uint8_t {
@@ -89,8 +89,8 @@ namespace rvr {
             ambient_token = 10,
         };
 
-        SensorsStream(Request& req) :
-            CommandBase { Devices::sensors, req, nordic } {
+        SensorsStream(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::sensors, req, nordic } {
         }
 
         SensorsStream(SensorsStream const& other) = delete;

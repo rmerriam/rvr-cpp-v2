@@ -24,11 +24,11 @@
 #include "Blackboard.h"
 #include "SystemInfo.h"
 namespace rvr {
-    using bb = Blackboard;
+    
 
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { bb::msgValue(target, mDevice, cmd) };
+        RvrMsg const& msg { mBlackboard.msgValue(target, mDevice, cmd) };
 
         std::string ver { };
         if (msg.size() >= 6) {
@@ -40,15 +40,15 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::processorName() {
-        return bb::stringValue(mTarget, mDevice, get_processor_name);
+        return mBlackboard.stringValue(mTarget, mDevice, get_processor_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::processorName2() {
-        return bb::stringValue(mAltTarget, mDevice, get_processor_name);
+        return mBlackboard.stringValue(mAltTarget, mDevice, get_processor_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::sku() {
-        return bb::stringValue(mAltTarget, mDevice, get_sku);
+        return mBlackboard.stringValue(mAltTarget, mDevice, get_sku);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::mainAppVersion() {
@@ -68,11 +68,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::boardVersion() {
-        return bb::byteValue(mAltTarget, mDevice, get_board_revision);
+        return mBlackboard.byteValue(mAltTarget, mDevice, get_board_revision);
     }
 //----------------------------------------------------------------------------------------------------------------------
     std::string SystemInfo::macAddress() {
-        RvrMsg msg { bb::msgValue(mAltTarget, mDevice, get_mac_address) };
+        RvrMsg msg { mBlackboard.msgValue(mAltTarget, mDevice, get_mac_address) };
         std::string mac { msg.begin(), msg.end() };
         if (mac.size() == 12) {
             static char const* colon { ":" };
@@ -86,11 +86,11 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     int16_t SystemInfo::statsId() {
-        return bb::intValue(mAltTarget, mDevice, get_stats_id);
+        return mBlackboard.intValue(mAltTarget, mDevice, get_stats_id);
     }
 //----------------------------------------------------------------------------------------------------------------------
     int64_t SystemInfo::coreUpTime() {
-        return bb::uint64Value(mTarget, mDevice, get_core_up_time_in_milliseconds);
+        return mBlackboard.uint64Value(mTarget, mDevice, get_core_up_time_in_milliseconds);
     }
 
 }

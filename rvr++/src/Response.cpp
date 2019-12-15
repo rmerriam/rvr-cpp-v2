@@ -137,19 +137,17 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     rvr::Blackboard::key_t Response::msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq) {
-        using bb = rvr::Blackboard;
-        bb::key_t key;
+        Blackboard::key_t key;
         if (seq >= 0x80) {
-            key = bb::entryKey(src, dev, cmd);
+            key = Blackboard::entryKey(src, dev, cmd);
         }
         else {
-            key = bb::entryKey(src, dev, cmd, seq);
+            key = Blackboard::entryKey(src, dev, cmd, seq);
         }
         return key;
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
-        using bb = rvr::Blackboard;
 
         // typeical positions of header bytes when target not present, the usual case
         uint8_t flags { 0x00 };   //
@@ -173,10 +171,11 @@ namespace rvr {
         }
 
         decode_flags(packet[flags]);
-        bb::key_t key { msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
+
+        Blackboard::key_t key { msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
 
         std::string device = device_names[packet[dev]];
-        std::string command { bb::entryName(key) };
+        std::string command { mBlackboard.entryName(key) };
 
         if (command.empty()) {
             terr << code_loc << "Command not in decode table " << device //
@@ -192,7 +191,7 @@ namespace rvr {
                 decode_error(err_byte);
             }
             else {
-                bb::msgArray(key, packet.begin() + seq, packet.end());
+                mBlackboard.msgArray(key, packet.begin() + seq, packet.end());
             }
         }
         terr << __func__ << " **************";

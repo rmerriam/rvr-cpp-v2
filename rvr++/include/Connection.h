@@ -24,13 +24,14 @@
 //======================================================================================================================
 #include "Request.h"
 #include "CommandBase.h"
-
+//----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
+    class Blackboard;
 
     class Connection : protected CommandBase {
     public:
-        Connection(Request& req) :
-            CommandBase { Devices::connection, req, nordic } {
+        Connection(Blackboard& bb, Request& req) :
+            CommandBase {  bb,  Devices::connection, req, nordic } {
         }
         Connection(Connection const& other) = delete;
         Connection(Connection&& other) = delete;

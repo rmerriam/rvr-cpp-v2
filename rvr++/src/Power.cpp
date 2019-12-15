@@ -27,60 +27,60 @@ namespace rvr {
     // data access methods
     //----------------------------------------------------------------------------------------------------------------------
     int Power::batteryPercent() {
-        return bb::byteValue(mTarget, mDevice, get_battery_percentage);
+        return mBlackboard.byteValue(mTarget, mDevice, get_battery_percentage);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::motorCurrent(MotorSide const ms) {
-        return bb::floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, ms);
+        return mBlackboard.floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, ms);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedFiltered() {
-        return bb::floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedFiltered);
+        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedFiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedUnfiltered() {
-        return bb::floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedUnfiltered);
+        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedUnfiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsUncalibratedUnfiltered() {
-        return bb::floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, UncalibratedUnfiltered);
+        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, UncalibratedUnfiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
     Power::BatteryVoltState Power::voltState() {
-        return static_cast<BatteryVoltState>(bb::byteValue(mTarget, mDevice, get_battery_voltage_state));
+        return static_cast<BatteryVoltState>(mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state));
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::string Power::voltStateText() {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        return state[bb::byteValue(mTarget, mDevice, get_battery_voltage_state)];
+        return state[mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state)];
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltThresholdCritical() {
-        return bb::floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds);
+        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltThresholdLow() {
-        return bb::floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 1);
+        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 1);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltThresholdHysteresis() {
-        return bb::floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 2);
+        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 2);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isBatteryStateChangeEnabled() {
-        return bb::getNotify(mTarget, mDevice, enable_battery_voltage_state_change_notify);
+        return mBlackboard.getNotify(mTarget, mDevice, enable_battery_voltage_state_change_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isDidSleepNotify() {
-        return bb::notifyState(mTarget, mDevice, did_sleep_notify);
+        return mBlackboard.notifyState(mTarget, mDevice, did_sleep_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     bool Power::isWakeNotify() {
-        return bb::notifyState(mTarget, mDevice, system_awake_notify);
+        return mBlackboard.notifyState(mTarget, mDevice, system_awake_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Power::resetWakeNotify() {
-        bb::resetNotify(mTarget, mDevice, system_awake_notify);
+        mBlackboard.resetNotify(mTarget, mDevice, system_awake_notify);
     }
 }
 

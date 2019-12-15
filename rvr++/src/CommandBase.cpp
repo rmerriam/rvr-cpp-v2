@@ -1,9 +1,32 @@
+//======================================================================================================================
+// 2019 Copyright Mystic Lake Software
+//
+// This is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 3 of the License, or
+// (at your option) any later version.
+//
+// This is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//======================================================================================================================
+//
+//     Author: rmerriam
+//
+//     Created: Oct 27, 2019
+//
+//======================================================================================================================
+#include "Blackboard.h"
 #include "CommandBase.h"
-namespace rvr {
 
+namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    CommandBase::CommandBase(Devices const device, Request& request, TargetPort const target) :
-        mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
+    CommandBase::CommandBase(Blackboard& bb, Devices const device, Request& request, TargetPort const target) :
+        mBlackboard { bb }, mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint8_t CommandBase::buildFlags(CommandResponse const want_resp) const {
