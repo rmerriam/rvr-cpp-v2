@@ -352,7 +352,7 @@ int main(int argc, char* argv[]) {
 //    terr << code_loc;
 
 #endif
-#if 1
+#if 0
     // Connection, SysInfo, APIShell
     rvr::Connection cmd(bb, req);
     cmd.bluetoothName(RespYes);    //
@@ -456,7 +456,7 @@ int main(int argc, char* argv[]) {
     end_tasks.set_value();
     resp_future.get();
 
-    bb.m_to_v();
+//    bb.m_to_v();
 
     return 0;
 }
