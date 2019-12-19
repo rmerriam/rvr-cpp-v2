@@ -127,6 +127,10 @@ namespace rvr {
     { bb::entryKey(btc, dev::sensors, 0x3D, 11), bb::BlackboardEntry { "quat stream" } }, //
     { bb::entryKey(btc, dev::sensors, 0x3D, 8), bb::BlackboardEntry { "speed stream" } }, //
     { bb::entryKey(btc, dev::sensors, 0x3D, 7), bb::BlackboardEntry { "velocity stream" } }, //
+
+    { bb::entryKey(btc, dev::sensors, 0x3D, 12), bb::BlackboardEntry { "imu accel gyro stream" } }, //
+    { bb::entryKey(btc, dev::sensors, 0x3D, 13), bb::BlackboardEntry { "speed velocity locator token" } },  //
+
     //
     { bb::entryKey(btc, dev::sensors, 0x3E), bb::BlackboardEntry { "enable_robot_infrared_message_notify" } }, //
     { bb::entryKey(btc, dev::sensors, 0x3F), bb::BlackboardEntry { "send_infrared_message" } }, //
@@ -176,6 +180,17 @@ namespace rvr {
         return static_cast<key_t>(key_s(proc, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------
+    rvr::Blackboard::key_t Blackboard::msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq) {
+        Blackboard::key_t key;
+        if (seq >= 0x80) {
+            key = Blackboard::entryKey(src, dev, cmd);
+        }
+        else {
+            key = Blackboard::entryKey(src, dev, cmd, seq);
+        }
+        return key;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::entryName(key_t key) {
         std::string s;
 
@@ -191,11 +206,15 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     RvrMsg& Blackboard::entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id) {
-        return entryValue(entryKey(proc, dev, cmd, id));
+        RvrMsg& msg { entryValue(entryKey(proc, dev, cmd, id)) };
+//        if (msg.empty()) throw std::range_error("No value for entry");
+        return msg;
     }
 //----------------------------------------------------------------------------------------------------------------------
     RvrMsg& Blackboard::entryValue(key_t const key) {
         RvrMsg& msg { mDictionary[key].value };
+//        auto it = mDictionary.find(key);
+//        RvrMsg& msg { it->second.value };
         return msg;
     }
 //======================================================================================================================

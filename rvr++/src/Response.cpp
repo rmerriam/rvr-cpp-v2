@@ -136,17 +136,6 @@ namespace rvr {
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
-    rvr::Blackboard::key_t Response::msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq) {
-        Blackboard::key_t key;
-        if (seq >= 0x80) {
-            key = Blackboard::entryKey(src, dev, cmd);
-        }
-        else {
-            key = Blackboard::entryKey(src, dev, cmd, seq);
-        }
-        return key;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
 
         // typeical positions of header bytes when target not present, the usual case
@@ -172,7 +161,7 @@ namespace rvr {
 
         decode_flags(packet[flags]);
 
-        Blackboard::key_t key { msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
+        Blackboard::key_t key { mBlackboard.msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
 
         std::string device = device_names[packet[dev]];
         std::string command { mBlackboard.entryName(key) };

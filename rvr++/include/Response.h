@@ -64,8 +64,6 @@ namespace rvr {
         void decode_flags(uint8_t const f);
         void decode_error(auto err_byte);
 
-        Blackboard::key_t msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
-
         std::shared_future<void> mEnd;
     };
 

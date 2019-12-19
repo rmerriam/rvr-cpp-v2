@@ -14,7 +14,7 @@ using namespace scr;
 #include "StatusForm.h"
 extern std::string n;
 //--------------------------------------------------------------------------------------------------------------------------
-StatusForm::StatusForm(const int y, const int x) :
+StatusForm::StatusForm(int const y, int const x) :
     FormBase(y, x) {
 
     uint8_t item_row { 2 };
@@ -44,7 +44,7 @@ void StatusForm::wall_time() {
     mWallTime->setData(s.str());
 }
 //--------------------------------------------------------------------------------------------------------------------------
-extern const float version { 0.1 };
+extern float const version { 0.1 };
 extern std::string serial_port;
 extern int moused;
 //--------------------------------------------------------------------------------------------------------------------------

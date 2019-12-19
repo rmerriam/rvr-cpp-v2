@@ -38,17 +38,17 @@ namespace rvr {
         configureStreamingBT(cfg, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::enableStreamingNordic(uint16_t const millis, CommandResponse const want_resp) {
+    void SensorsStream::startStreamingNordic(uint16_t const millis, CommandResponse const want_resp) {
         cmdInt(start_streaming_service, millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::enableStreamingBT(uint16_t const millis, CommandResponse const want_resp) {
+    void SensorsStream::startStreamingBT(uint16_t const millis, CommandResponse const want_resp) {
         cmdIntAlt(start_streaming_service, millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::enableStreaming(uint16_t const millis, CommandResponse const want_resp) {
-        enableStreamingNordic(millis, want_resp);
-        enableStreamingBT(millis, want_resp);
+        startStreamingNordic(millis, want_resp);
+        startStreamingBT(millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::disableStreamingNordic(CommandResponse const want_resp) {
@@ -78,9 +78,9 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     AccelData SensorsStream::accelerometer() {
-        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, accel_token) };
-        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, accel_token) };
-        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, accel_token) };
+        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, imu_accel_gyro_token) };
+        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4, imu_accel_gyro_token) };
+        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 5, imu_accel_gyro_token) };
 
         auto [out_min, out_max] { SensorFactors[accel_token] };
         return { //
@@ -97,9 +97,9 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     GyroData SensorsStream::gyroscope() {
-        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, gyro_token) };
-        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, gyro_token) };
-        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, gyro_token) };
+        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 6, imu_accel_gyro_token) };
+        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 7, imu_accel_gyro_token) };
+        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 8, imu_accel_gyro_token) };
 
         auto [out_min, out_max] { SensorFactors[gyro_token] };
         return { //
@@ -110,9 +110,9 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     ImuData SensorsStream::imu() {
-        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, imu_token) };
-        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, imu_token) };
-        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_token) };
+        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, imu_accel_gyro_token) };
+        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, imu_accel_gyro_token) };
+        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_accel_gyro_token) };
 
         auto [out_min, out_max] { SensorFactors[imu_token] };
         return { //
@@ -122,9 +122,24 @@ namespace rvr {
         };
     }
     //----------------------------------------------------------------------------------------------------------------------
+    QuatData SensorsStream::quaternion() {
+        uint32_t w { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, quaternion_token) };
+        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, quaternion_token) };
+        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, quaternion_token) };
+        uint32_t z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, quaternion_token) };
+
+        auto [out_min, out_max] { SensorFactors[quaternion_token] };
+        return { //
+            normalize(w, out_min, out_max),//
+            normalize(x, out_min, out_max),//
+            normalize(y, out_min/2, out_max/2),//
+            normalize(z, out_min, out_max),//
+        };
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     LocatorData SensorsStream::locator() {
-        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, locator_token) };
-        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, locator_token) };
+        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, speed_velocity_locator_token) };
+        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4, speed_velocity_locator_token) };
 
         auto [out_min, out_max] { SensorFactors[locator_token] };
         return { //
@@ -134,14 +149,14 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     float SensorsStream::speed() {
-        uint32_t value { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, speed_token) };
+        uint32_t value { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, speed_velocity_locator_token) };
         auto [out_min, out_max] { SensorFactors[speed_token] };
         return normalize(static_cast<int32_t>(value), out_min, out_max);
     }
     //----------------------------------------------------------------------------------------------------------------------
     VelocityData SensorsStream::velocity() {
-        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, velocity_token) };
-        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, velocity_token) };
+        uint32_t x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, speed_velocity_locator_token) };
+        uint32_t y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, speed_velocity_locator_token) };
 
         auto [out_min, out_max] { SensorFactors[velocity_token] };
         return { //

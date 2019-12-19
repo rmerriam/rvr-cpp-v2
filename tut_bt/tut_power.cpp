@@ -38,7 +38,8 @@ using Pow = rvr::Power;
 extern rvr::Request* request;
 
 struct pow_test_data {
-    rvr::Power pow { *request };
+    rvr::Blackboard* bb;
+    rvr::Power pow { *bb, *request };
 };
 //=====================================================================================================================
 namespace tut {

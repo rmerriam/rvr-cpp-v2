@@ -38,7 +38,8 @@ using Sense = rvr::SensorsDirect;
 extern rvr::Request* request;
 
 struct sense_test_data {
-    rvr::SensorsDirect sense { *request };
+    rvr::Blackboard* bb;
+    rvr::SensorsDirect sense { *bb, *request };
 };
 //=====================================================================================================================
 namespace tut {

@@ -24,6 +24,7 @@
 #include <tut/tut_reporter.hpp>
 
 #include <future>
+#include <iomanip>
 #include <string>
 
 #include "Trace.h"
@@ -34,6 +35,7 @@ namespace tut {
     test_runner_singleton runner;
 }
 //---------------------------------------------------------------------------------------------------------------------
+rvr::Blackboard* blackboard;
 rvr::Request* request;
 mys::TraceStart terr { std::cerr };
 //---------------------------------------------------------------------------------------------------------------------
@@ -46,16 +48,21 @@ int main(int argc, char* argv[]) {
     std::string serial_port_name = argv[1];
     terr << code_loc << " Starting Tests using Serial Port" << serial_port_name << std::setprecision(4) << std::fixed << std::boolalpha;
     mys::TraceOff t_off(terr);
+    std::cout << std::setprecision(5) << std::fixed;
+    std::cerr << std::setprecision(5) << std::fixed;
+    std::clog << std::setprecision(5) << std::fixed;
 
     SerialPort serial { serial_port_name.c_str(), 115200 };
     rvr::Request req { serial };
     request = &req;
 
+    rvr::Blackboard bb;
+    blackboard = &bb;
     //---------------------------------------------------------------------------------------------------------------------
     //  Setup the thread to read responses
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
-    rvr::Response resp { serial, end_future };
+    rvr::Response resp { serial, bb, end_future };
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
     //---------------------------------------------------------------------------------------------------------------------
@@ -64,18 +71,21 @@ int main(int argc, char* argv[]) {
     tut::runner.get().set_callback( &reporter);
 
     tut::test_result tr;
-    tut::runner.get().run_tests("Api and Connection Test");
-    tut::runner.get().run_tests("Sensors Direct Test");
-//    tut::runner.get().run_tests("Sensors Stream Test");
+//    tut::runner.get().run_tests("Api and Connection Test");
+//    tut::runner.get().run_tests("Sensors Direct Test");
+    tut::runner.get().run_tests("Sensors Stream Test");
     tut::runner.get().run_tests("System Info Test");
 
     // last because it the sleep / awake has time delays
-    tut::runner.get().run_tests("Power Test");
+//    tut::runner.get().run_tests("Power Test");
 
     //---------------------------------------------------------------------------------------------------------------------
     // close response thread
     end_tasks.set_value();
     resp_future.get();
+
+    mys::TraceOn t_on(terr);
+    bb.m_to_v();
 
     return !reporter.all_ok();
 }

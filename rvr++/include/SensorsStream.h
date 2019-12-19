@@ -76,46 +76,48 @@ namespace rvr {
 
     public:
         enum Sensor : uint8_t {
-            quaternion_token = 0, //
+            ambient_token = 10, //
+            color_token = 3, //
+
+            quaternion_id = 0, //
+            quaternion_token = 11, //
             imu_token = 1, //
             accel_token = 2, //
-            color_token = 3, //
             gyro_token = 4, //
-            core_time_lower_token = 5, //
             locator_token = 6, //
             velocity_token = 7, //
             speed_token = 8, //
+            core_time_lower_token = 5, //
             core_time_upper_token = 9, //
-            ambient_token = 10,
+
+            imu_accel_gyro_token = 12, //
+            speed_velocity_locator_token = 13, //
         };
 
         SensorsStream(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::sensors, req, nordic } {
+            CommandBase { bb, Devices::sensors, req, nordic } {
         }
 
         SensorsStream(SensorsStream const& other) = delete;
         SensorsStream(SensorsStream&& other) = delete;
         SensorsStream& operator=(SensorsStream const& other) = delete;
 
-        void accelConfig(CommandResponse const want_resp = resp_on_error);
-        void ambientConfig(CommandResponse const want_resp = resp_on_error);
-        void colorConfig(CommandResponse const want_resp = resp_on_error);
-        void coreNordicConfig(CommandResponse const want_resp = resp_on_error);
-        void coreBTConfig(CommandResponse const want_resp = resp_on_error);
-        void gyroConfig(CommandResponse const want_resp = resp_on_error);
-        void imuConfig(CommandResponse const want_resp = resp_on_error);
-        void locatorConfig(CommandResponse const want_resp = resp_on_error);
-        void quaternionConfig(CommandResponse const want_resp = resp_on_error);
-        void speedConfig(CommandResponse const want_resp = resp_on_error);
-        void velocityConfig(CommandResponse const want_resp = resp_on_error);
+        void streamAmbient(CommandResponse const want_resp = resp_on_error);
+        void streamColor(CommandResponse const want_resp = resp_on_error);
+        void streamNordicTime(CommandResponse const want_resp = resp_on_error);
+
+        void streamImuAccelGyro(CommandResponse const want_resp = resp_on_error);
+        void streamSpeedVelocityLocator(CommandResponse const want_resp = resp_on_error);
+        void streamBTTime(CommandResponse const want_resp = resp_on_error);
+        void streamQuaternion(CommandResponse const want_resp = resp_on_error);
 
         void configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
         void configureStreamingBT(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
         void configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
 
         void enableStreaming(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
-        void enableStreamingNordic(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
-        void enableStreamingBT(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+        void startStreamingNordic(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+        void startStreamingBT(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
 
         void disableStreaming(CommandResponse const want_resp = resp_on_error);
         void disableStreamingNordic(CommandResponse const want_resp = resp_on_error);
@@ -124,21 +126,6 @@ namespace rvr {
         void clearStreaming(CommandResponse const want_resp = resp_on_error);
         void clearStreamingNordic(CommandResponse const want_resp = resp_on_error);
         void clearStreamingBT(CommandResponse const want_resp = resp_on_error);
-
-        template <TargetPort TP, Sensor ID>
-        void streamConfig(CommandResponse const want_resp) {
-            if constexpr (TP == nordic) {
-                configureStreamingNordic(rvr::RvrMsg { ID, 0x00, ID, 0x02 }, want_resp);
-            }
-            else {
-                configureStreamingBT(rvr::RvrMsg { ID, 0x00, ID, 0x02 }, want_resp);
-            }
-        }
-
-        void x(CommandResponse const want_resp) {
-            streamConfig<rvr::CommandBase::bluetoothSOC, Sensor::accel_token>(want_resp);
-        }
-
         //======================================================================================================================
         // data access methods
         float normalize(uint32_t const value, float const out_min, float const out_max);
@@ -147,6 +134,7 @@ namespace rvr {
         float ambient();
         GyroData gyroscope();
         ImuData imu();
+        QuatData quaternion();
         float speed();
         VelocityData velocity();
         LocatorData locator();
@@ -227,54 +215,55 @@ namespace rvr {
         NormalizeFactor { 0.0, 5.0 },                                            // 8 - speed
         NormalizeFactor { 0.0, std::numeric_limits<uint32_t>::max() },           // 9 - core upper
 //
-        NormalizeFactor { 0.0, 1200000.0 },                                      // 10- ambient
+        NormalizeFactor { 0.0, 120000.0 },                                      // 10- ambient
         NormalizeFactor { -1.0, 1.0, },        // 11 - quat
         };
+
+        template <TargetPort TP, Sensor ID>
+        void streamConfig(CommandResponse const want_resp) {
+            if constexpr (TP == nordic) {
+                configureStreamingNordic(rvr::RvrMsg { ID, 0x00, ID, 0x02 }, want_resp);
+            }
+            else {
+                configureStreamingBT(rvr::RvrMsg { ID, 0x00, ID, 0x02 }, want_resp);
+            }
+        }
+    };
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::streamImuAccelGyro(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { imu_accel_gyro_token, //
+        0x00, imu_token, 0x02, //
+        0x00, accel_token, 0x02, //
+        0x00, gyro_token, 0x02, //
+            }, want_resp);
     }
-    ;
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::accelConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { accel_token, 0x00, accel_token, 0x02 }, want_resp);
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::streamSpeedVelocityLocator(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { speed_velocity_locator_token, //
+        0x00, speed_token, 0x02, //
+        0x00, velocity_token, 0x02, //
+        0x00, locator_token, 0x02, //
+            }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::streamAmbient(CommandResponse const want_resp) {
+        configureStreamingNordic(rvr::RvrMsg { ambient_token, 0x00, ambient_token, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::streamColor(CommandResponse const want_resp) {
+        configureStreamingNordic(rvr::RvrMsg { color_token, 0x00, color_token, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::streamNordicTime(CommandResponse const want_resp) {
+        configureStreamingNordic(rvr::RvrMsg { core_time_upper_token, 0x00, core_time_upper_token, 0x02 }, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsStream::streamBTTime(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { core_time_upper_token, 0x00, core_time_upper_token, 0x02 }, want_resp);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::ambientConfig(CommandResponse const want_resp) {
-        configureStreamingNordic(rvr::RvrMsg { 10, 0x00, 10, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::colorConfig(CommandResponse const want_resp) {
-        configureStreamingNordic(rvr::RvrMsg { 0x03, 0x00, 0x3, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::coreNordicConfig(CommandResponse const want_resp) {
-        configureStreamingNordic(rvr::RvrMsg { 9, 0x00, 0x09, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::coreBTConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 9, 0x00, 0x09, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::gyroConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { gyro_token, 0x00, gyro_token, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::imuConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 1, 0x00, 0x01, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::locatorConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { locator_token, 0x00, locator_token, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::quaternionConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { 11, 0x00, 0x00, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::speedConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { speed_token, 0x00, speed_token, 0x02 }, want_resp);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsStream::velocityConfig(CommandResponse const want_resp) {
-        configureStreamingBT(rvr::RvrMsg { velocity_token, 0x00, velocity_token, 0x02 }, want_resp);
+    inline void SensorsStream::streamQuaternion(CommandResponse const want_resp) {
+        configureStreamingBT(rvr::RvrMsg { quaternion_token, 0x00, quaternion_id, 0x02 }, want_resp);
     }
 //======================================================================================================================
     inline float SensorsStream::normalize(uint32_t const value, float const out_min, float const out_max) {

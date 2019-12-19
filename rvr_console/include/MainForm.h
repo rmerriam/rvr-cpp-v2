@@ -22,23 +22,23 @@
 //     Created: Nov 18, 2019
 //
 //======================================================================================================================
-#include "NCurses.h"
+#include <Blackboard.h>
 
+#include "NCurses.h"
+#include "DirectForm.h"
 #include "PowerForm.h"
 #include "StatusForm.h"
 #include "StreamForm.h"
 #include "SystemInfoForm.h"
 //--------------------------------------------------------------------------------------------------------------------------
-
 class MainForm {
 public:
     MainForm();
-    MainForm(rvr::Request& req);
+    MainForm(rvr::Blackboard& bb, rvr::Request& req);
 
     MainForm(MainForm const& other) = delete;
     MainForm(MainForm&& other) = delete;
     MainForm& operator=(MainForm const& other) = delete;
-    virtual ~MainForm() = default;
 
     void runWindows();
 
@@ -49,9 +49,10 @@ private:
 
     static constexpr int row { 0 };
 
-    PowerForm power_form { row, 0, mRequest };
-    SystemInfoForm sysinfo_form { row, power_form.getX() + 1, mRequest };
-    StreamForm stream_form { row, sysinfo_form.getX() + 1, mRequest };
+    SystemInfoForm sysinfo_form;
+    PowerForm power_form;
+    DirectForm direct_form;
+    StreamForm stream_form;
 
     StatusForm status_form { LINES - 8, 0 };
 };

@@ -15,8 +15,8 @@ using namespace scr;
 extern std::string n;
 
 //--------------------------------------------------------------------------------------------------------------------------
-SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Request& req) :
-    FormBase(y, x), mSys { req }, mConn { req }, mApi { req } {
+SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
+    FormBase(y, x), mSys { bb, req }, mConn { bb, req }, mApi { bb, req } {
 
     uint8_t item_row { 2 };
     int width { 12 };

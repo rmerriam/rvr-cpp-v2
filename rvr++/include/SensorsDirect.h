@@ -46,7 +46,7 @@ namespace rvr {
         };
 
         SensorsDirect(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::sensors, req, bluetoothSOC } {
+            CommandBase { bb, Devices::sensors, req, bluetoothSOC } {
         }
 
         SensorsDirect(SensorsDirect const& other) = delete;
@@ -190,15 +190,15 @@ namespace rvr {
         cmdDisable(enable_gyro_max_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getRightMotorTemp(CommandResponse const want_resp) const {
-        cmdByteAltId(get_temperature, 0x05, want_resp);
-    }
-    inline void SensorsDirect::getRgbcSensorValue(CommandResponse const want_resp) const {
-        cmdBasic(get_rgbc_sensor_values, want_resp);
+    inline void SensorsDirect::getLeftMotorTemp(CommandResponse const want_resp) const {
+        cmdByteId(get_temperature, 0x04, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getLeftMotorTemp(CommandResponse const want_resp) const {
-        cmdByteAltId(get_temperature, 0x04, want_resp);
+    inline void SensorsDirect::getRightMotorTemp(CommandResponse const want_resp) const {
+        cmdByteId(get_temperature, 0x05, want_resp);
+    }
+    inline void SensorsDirect::getRgbcSensorValue(CommandResponse const want_resp) const {
+        cmdBasicAlt(get_rgbc_sensor_values, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getThermalProtectionStatus(CommandResponse const want_resp) const {
@@ -214,11 +214,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getAmbienLightSensorValue(CommandResponse const want_resp) const {
-        cmdBasic(get_ambient_light_sensor_value, want_resp);
+        cmdBasicAlt(get_ambient_light_sensor_value, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getCurrentDectectedColor(CommandResponse const want_resp) const {
-        cmdBasic(get_current_detected_color_reading, want_resp);
+        cmdBasicAlt(get_current_detected_color_reading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetection(CommandResponse const want_resp) const {
@@ -226,7 +226,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::disableColorDetection(CommandResponse const want_resp) const {
-        cmdDisableAlt(enable_color_detection, want_resp);
+        cmdDisable(enable_color_detection, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
@@ -256,15 +256,15 @@ namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::ambient() const {
-        return mBlackboard.floatValue(mTarget, mDevice, get_ambient_light_sensor_value);
+        return mBlackboard.floatValue(mAltTarget, mDevice, get_ambient_light_sensor_value);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::leftMotorTemp() const {
-        return mBlackboard.floatValue(mAltTarget, mDevice, get_temperature, 0, 4);
+        return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 4);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::rightMotorTemp() const {
-        return mBlackboard.floatValue(mAltTarget, mDevice, get_temperature, 0, 5);
+        return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 5);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetMaxGyroNotify() const {
@@ -277,11 +277,11 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline auto SensorsDirect::currentRGBValues() {
         return std::tuple(    //
-            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 0),    //
-            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 1),    //
-            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 2),    //
-            mBlackboard.uintValue(mTarget, mDevice, get_rgbc_sensor_values, 3)    //
-                          );
+            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 0),    //
+            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 1),    //
+            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 2),    //
+            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 3)    //
+                                  );
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline auto SensorsDirect::colorDetectionValues() {

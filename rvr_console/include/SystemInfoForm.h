@@ -24,7 +24,7 @@ class SystemInfoForm : public FormBase {
     rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 
 public:
-    SystemInfoForm(int const y, int const x, rvr::Request& req);
+    SystemInfoForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
 
     virtual void fastData() override;
     virtual void onceData() override;

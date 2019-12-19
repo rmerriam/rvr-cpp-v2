@@ -51,7 +51,8 @@ std::string proc2 { "Nordic" };
 extern rvr::Request* request;
 
 struct sys_test_data {
-    rvr::SystemInfo sys { *request };
+    rvr::Blackboard* bb;
+    rvr::SystemInfo sys { *bb, *request };
 };
 //=====================================================================================================================
 namespace tut {

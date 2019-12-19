@@ -16,8 +16,8 @@ using namespace scr;
 
 extern std::string n;
 //--------------------------------------------------------------------------------------------------------------------------
-StreamForm::StreamForm(int const y, int const x, rvr::Request& req) :
-    FormBase(y, x), mStream { req } {
+StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
+    FormBase(y, x), mStream { bb, req } {
 
     uint8_t item_row { 2 };
     int width { 10 };
@@ -50,25 +50,18 @@ StreamForm::StreamForm(int const y, int const x, rvr::Request& req) :
 
     mForm.init();
 
-    rvr::SensorsDirect sd(req);
-    sd.enableColorDetection();
-
     mStream.clearStreaming();
 
-    mStream.accelConfig();
-    mStream.ambientConfig();
+    mStream.streamAmbient();
 //    mStream.colorConfig();
 //    mStream.coreNordicConfig();
 ////    mStream.coreBTConfig();
-    mStream.gyroConfig();
-    mStream.imuConfig();
-    mStream.locatorConfig();
-//    mStream.quaternionConfig();
-    mStream.speedConfig();
-//    mStream.velocityConfig();
 
-    mStream.enableStreamingBT(50);
-    mStream.enableStreamingNordic(50);
+    mStream.streamImuAccelGyro();
+    mStream.streamSpeedVelocityLocator();
+
+    mStream.startStreamingBT(50);
+    mStream.startStreamingNordic(50);
 
 }
 //--------------------------------------------------------------------------------------------------------------------------

@@ -33,15 +33,19 @@
 
 int moused { };
 //---------------------------------------------------------------------------------------------------------------------
-MainForm::MainForm(rvr::Request& req) :
-    mRequest { req } {
+MainForm::MainForm(rvr::Blackboard& bb, rvr::Request& req) :    //
+    mRequest { req }, //
+        sysinfo_form { row, 0, bb, mRequest }, //
+        power_form { row, sysinfo_form.getX() + 2, bb, mRequest }, //
+        direct_form { row, power_form.getX() + 2, bb, mRequest }, //
+        stream_form { row, direct_form.getX() + 2, bb, mRequest } {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MainForm::runWindows() {
 
     power_form.onceData();
-    stream_form.onceData();
     sysinfo_form.onceData();
+    stream_form.onceData();
 
     status_form.onceData();
 
@@ -64,8 +68,9 @@ void MainForm::runWindows() {
         }
 
         power_form.updateScreen();
-        stream_form.updateScreen();
         sysinfo_form.updateScreen();
+        direct_form.updateScreen();
+        stream_form.updateScreen();
 
         status_form.updateScreen();
         refresh();
@@ -92,6 +97,7 @@ void MainForm::updateRequests() {
         //            pose_form.requestData();
         power_form.requestData();
         sysinfo_form.requestData();
+        direct_form.requestData();
         stream_form.requestData();
 
         status_form.requestData();

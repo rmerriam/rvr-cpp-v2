@@ -38,8 +38,9 @@ using namespace std::literals;
 extern rvr::Request* request;
 
 struct api_test_data {
-    rvr::ApiShell api { *request };
-    rvr::Connection cmd { *request };
+    rvr::Blackboard* bb;
+    rvr::ApiShell api { *bb, *request };
+    rvr::Connection cmd { *bb, *request };
 };
 //=====================================================================================================================
 namespace tut {

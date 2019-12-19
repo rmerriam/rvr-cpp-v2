@@ -32,7 +32,7 @@ namespace scr {
     class DataField;
     using DataFieldPtr = DataField*;
     //--------------------------------------------------------------------------------------------------------------------------
-    constexpr uint8_t label_pad { 1 };
+    constexpr uint8_t label_pad { 2 };
     constexpr uint8_t label_col { 1 };
     constexpr uint8_t label_width { 10 };
     constexpr uint8_t data_width { 7 };

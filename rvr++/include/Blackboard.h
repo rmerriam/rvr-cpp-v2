@@ -31,9 +31,12 @@
 namespace rvr {
 
     class Blackboard {
-        friend class Response;
+//        friend class Response;
 
     public:
+
+        using key_t = uint32_t;
+
         Blackboard();
         Blackboard(Blackboard const& other) = delete;
         Blackboard(Blackboard&& other) = delete;
@@ -59,6 +62,10 @@ namespace rvr {
 
         float floatConvert(RvrMsg::const_iterator begin);
 
+        std::string entryName(key_t key);
+        void msgArray(key_t key, RvrMsg::iterator begin, RvrMsg::iterator end);
+        Blackboard::key_t msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
+
         void m_to_v();
 
     private:
@@ -75,8 +82,6 @@ namespace rvr {
          *  actual sequence numbers are limited to > 0x80h so anything less is an Id.
          *
          */
-
-        using key_t = uint32_t;
 
         struct key_s {
             key_s() {
@@ -99,14 +104,10 @@ namespace rvr {
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
         static BBDictionary mDictionary;
 
-        std::string entryName(key_t key);
         RvrMsg& entryValue(key_t const key);
         RvrMsg& entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
-
         static key_t entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
-
         // methods for processing received responses
-        void msgArray(key_t key, RvrMsg::iterator begin, RvrMsg::iterator end);
 
         // methods for calculating values from dictionary entry
         uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
