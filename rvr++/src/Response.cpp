@@ -161,9 +161,10 @@ namespace rvr {
 
         decode_flags(packet[flags]);
 
+        std::string device = device_names[packet[dev]];
+
         Blackboard::key_t key { mBlackboard.msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
 
-        std::string device = device_names[packet[dev]];
         std::string command { mBlackboard.entryName(key) };
 
         if (command.empty()) {

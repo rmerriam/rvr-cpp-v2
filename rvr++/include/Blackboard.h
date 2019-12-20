@@ -49,7 +49,7 @@ namespace rvr {
         uint32_t uint32Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
             uint8_t const id = 0);
         uint64_t uint64Value(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
-        float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
+        float floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, float const = 0.0,
             uint8_t const id = 0);
 
         bool notifyState(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
@@ -60,15 +60,15 @@ namespace rvr {
         std::string stringValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
         RvrMsg const msgValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
-        float floatConvert(RvrMsg::const_iterator begin);
+        void m_to_v();
 
         std::string entryName(key_t key);
         void msgArray(key_t key, RvrMsg::iterator begin, RvrMsg::iterator end);
         Blackboard::key_t msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
 
-        void m_to_v();
-
     private:
+        float floatConvert(RvrMsg::const_iterator begin);
+
         inline static float const NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
 
         /*  =============================================================================================================
@@ -104,15 +104,20 @@ namespace rvr {
         using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
         static BBDictionary mDictionary;
 
-        RvrMsg& entryValue(key_t const key);
-        RvrMsg& entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
-        static key_t entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
+        void addMsgValue(key_t const key, RvrMsg& value);
+
+        RvrMsg const& entryValue(key_t const key) const;
+        RvrMsg const& entryValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
+        static key_t entryKey(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
         // methods for processing received responses
 
         // methods for calculating values from dictionary entry
         uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
 
+        static inline RvrMsg fake_msg { 3, 0 };
+
         friend std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
+
     };
     //----------------------------------------------------------------------------------------------------------------------
     std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);

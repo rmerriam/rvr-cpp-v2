@@ -176,8 +176,8 @@ namespace rvr {
     //======================================================================================================================
     //  Methods to get dictionary entries
     //----------------------------------------------------------------------------------------------------------------------
-    Blackboard::key_t Blackboard::entryKey(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id) {
-        return static_cast<key_t>(key_s(proc, dev, cmd, id));
+    Blackboard::key_t Blackboard::entryKey(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
+        return static_cast<key_t>(key_s(target, dev, cmd, id));
     }
     //----------------------------------------------------------------------------------------------------------------------
     rvr::Blackboard::key_t Blackboard::msgKey(CommandBase::TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq) {
@@ -205,17 +205,23 @@ namespace rvr {
         return s;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg& Blackboard::entryValue(CommandBase::TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id) {
-        RvrMsg& msg { entryValue(entryKey(proc, dev, cmd, id)) };
-//        if (msg.empty()) throw std::range_error("No value for entry");
+    RvrMsg const& Blackboard::entryValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd,
+        uint8_t const id) const {
+        RvrMsg const& msg { entryValue(entryKey(target, dev, cmd, id)) };
         return msg;
     }
-//----------------------------------------------------------------------------------------------------------------------
-    RvrMsg& Blackboard::entryValue(key_t const key) {
-        RvrMsg& msg { mDictionary[key].value };
-//        auto it = mDictionary.find(key);
-//        RvrMsg& msg { it->second.value };
-        return msg;
+    //----------------------------------------------------------------------------------------------------------------------
+    void Blackboard::addMsgValue(key_t const key, RvrMsg& value) {
+        mDictionary[key].value = value;
+
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    RvrMsg const& Blackboard::entryValue(key_t const key) const {
+
+        if (auto it = mDictionary.find(key); it != mDictionary.end()) {
+            return it->second.value;
+        }
+        return fake_msg;
     }
 //======================================================================================================================
 //  Method to put RvrMsg data into dictionary
@@ -255,7 +261,8 @@ namespace rvr {
             }
 
         }
-        entryValue(key) = msg;
+        addMsgValue(key, msg);
+//        entryValue(key) = msg;
         terr << code_loc << std::setfill('0') << std::hex << key << mys::sp << msg;
     }
 //======================================================================================================================
@@ -282,8 +289,6 @@ namespace rvr {
         }
         return res;
     }
-
-    RvrMsg fake_msg(3, 0);
 //----------------------------------------------------------------------------------------------------------------------
     bool Blackboard::boolValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
         return (byteValue(target, dev, cmd) != 0);
@@ -310,8 +315,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg& msg { entryValue(target, dev, cmd) };
-        msg = fake_msg;
+        addMsgValue(entryKey(target, dev, cmd, 0), fake_msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
     uint16_t Blackboard::uintValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
@@ -357,7 +361,7 @@ namespace rvr {
         return res;
     }
 //----------------------------------------------------------------------------------------------------------------------
-    float Blackboard::floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t pos,
+    float Blackboard::floatValue(CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd, float const pos,
         uint8_t const id) {
         RvrMsg const& msg { entryValue(target, dev, cmd, id) };
 
@@ -365,9 +369,9 @@ namespace rvr {
         begin += (pos * sizeof(float));
 
         float result { };
-        {
-            result = floatConvert(begin);
-        }
+
+        result = floatConvert(begin);
+
         return result;
     }
 //----------------------------------------------------------------------------------------------------------------------

@@ -22,6 +22,7 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
+#include "enum.h"
 #include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
@@ -111,19 +112,12 @@ namespace rvr {
         float ambient() const;
         float leftMotorTemp() const;
         float rightMotorTemp() const;
-        auto currentRGBValues();
-        auto colorDetectionValues();
-        auto thermalProtectionValues();
+        ColorData currentRGBValues();
+        ColorDetection colorDetectionValues();
+        ThermalProtection thermalProtectionValues();
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
-        struct color_note {
-            uint8_t red;
-            uint8_t green;
-            uint8_t blue;
-            uint8_t confidence;
-            uint8_t classification;
-        };
 
         enum struct LocatorFlagsBitmask : uint8_t {
             none = 0, auto_calibrate = 1,
@@ -175,11 +169,11 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::setLocatorFlags(bool const flag, CommandResponse const want_resp) const {
-        cmdByteAlt(set_locator_flags, flag, want_resp);
+        cmdByte(set_locator_flags, flag, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetLocatorXY(CommandResponse const want_resp) const {
-        cmdBasicAlt(reset_locator_x_and_y, want_resp);
+        cmdBasic(reset_locator_x_and_y, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableGyroMaxNotify(CommandResponse const want_resp) const {
@@ -202,15 +196,15 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getThermalProtectionStatus(CommandResponse const want_resp) const {
-        cmdBasicAlt(get_motor_thermal_protection_status, want_resp);
+        cmdBasic(get_motor_thermal_protection_status, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableThermalProtectionNotify(CommandResponse const want_resp) const {
-        cmdEnableAlt(enable_motor_thermal_protection_status_notify, want_resp);
+        cmdEnable(enable_motor_thermal_protection_status_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::disableThermalProtectionNotify(CommandResponse const want_resp) const {
-        cmdDisableAlt(enable_motor_thermal_protection_status_notify, want_resp);
+        cmdDisable(enable_motor_thermal_protection_status_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getAmbienLightSensorValue(CommandResponse const want_resp) const {
@@ -226,7 +220,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::disableColorDetection(CommandResponse const want_resp) const {
-        cmdDisable(enable_color_detection, want_resp);
+        cmdDisableAlt(enable_color_detection, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
@@ -243,7 +237,7 @@ namespace rvr {
     }
 
     inline bool SensorsDirect::isThermalProtectionNotifyEnabled() const {
-        return mBlackboard.getNotify(mAltTarget, mDevice, enable_motor_thermal_protection_status_notify);
+        return mBlackboard.getNotify(mTarget, mDevice, enable_motor_thermal_protection_status_notify);
     }
 
     inline bool SensorsDirect::isColorDetectionEnabled() const {
@@ -253,7 +247,6 @@ namespace rvr {
     inline bool SensorsDirect::isColorDetectionNotifyEnabled() const {
         return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection_notify);
     }
-
     //----------------------------------------------------------------------------------------------------------------------
     inline float SensorsDirect::ambient() const {
         return mBlackboard.floatValue(mAltTarget, mDevice, get_ambient_light_sensor_value);
@@ -273,36 +266,6 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetColorDetectionNotify() const {
         mBlackboard.resetNotify(mTarget, mDevice, color_detection_notify);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline auto SensorsDirect::currentRGBValues() {
-        return std::tuple(    //
-            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 0),    //
-            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 1),    //
-            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 2),    //
-            mBlackboard.uintValue(mAltTarget, mDevice, get_rgbc_sensor_values, 3)    //
-                                  );
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline auto SensorsDirect::colorDetectionValues() {
-        rvr::RvrMsg const msg { mBlackboard.msgValue(mTarget, mDevice, color_detection_notify) };
-        return std::tuple(    //
-            static_cast<uint16_t>(msg[1]),  //
-            static_cast<uint16_t>(msg[2]),  //
-            static_cast<uint16_t>(msg[3]),  //
-            static_cast<uint16_t>(msg[4]),  //
-            static_cast<uint16_t>(msg[5])   //
-            );
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline auto SensorsDirect::thermalProtectionValues() {
-        rvr::RvrMsg const& msg { mBlackboard.msgValue(mAltTarget, mDevice, get_motor_thermal_protection_status) };
-        auto begin { msg.begin() + 2 };
-        return std::tuple(    //
-            mBlackboard.floatConvert(begin), *(begin + 4),    //
-            mBlackboard.floatConvert(begin + 5), *(begin + 9)
-            //
-            );
     }
 }
 

@@ -103,10 +103,10 @@ int main(int argc, char* argv[]) {
         // Direct reading of sensors
         rvr::SensorsDirect sen_d(bb, req);
 
-//        sen_d.enableGyroMaxNotify(RespYes);
-//
-//        sen_d.resetLocatorXY(RespYes);
-//        sen_d.setLocatorFlags(true, RespYes);   // set/reset? special id flags
+        sen_d.enableGyroMaxNotify(RespYes);
+
+        sen_d.resetLocatorXY(RespYes);
+        sen_d.setLocatorFlags(true, RespYes);   // set/reset? special id flags
 
         sen_d.enableColorDetection();   // must preceed color detection to turn on bottom LEDs
         std::this_thread::sleep_for(50ms);
@@ -114,55 +114,53 @@ int main(int argc, char* argv[]) {
         sen_d.getRgbcSensorValue();
         sen_d.getAmbienLightSensorValue();
 
-//        sen_d.enableColorDetectionNotify(true, 100, 0);
-//        std::this_thread::sleep_for(500ms);
+        sen_d.enableColorDetectionNotify(true, 100, 0);
+        std::this_thread::sleep_for(500ms);
         sen_d.getCurrentDectectedColor();
 
         sen_d.getLeftMotorTemp();
         sen_d.getRightMotorTemp();
 
-//        sen_d.getThermalProtectionStatus();
-//        sen_d.enableThermalProtectionNotify();
+        sen_d.getThermalProtectionStatus();
+        sen_d.enableThermalProtectionNotify();  // responds when status changes
 
         std::this_thread::sleep_for(50ms);
 
         terr << code_loc << mys::nl;
         terr << code_loc << "sense direct";
 
-//        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
-//        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
-//        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
-//        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
+        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
+        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
+        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
+        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
 
-        {   // allow reuse of rgb
-            auto [r, g, b, c] = sen_d.currentRGBValues();
-            terr << code_loc << "currentRGBValues: " << r << mys::sp << g << mys::sp << b << mys::sp << c << mys::sp;
-        }
-//        {
-//            auto [r, g, b, conf, classification] = sen_d.colorDetectionValues();
-//            terr << code_loc << "colorDetectionValues: " << r << mys::sp << g << mys::sp << b << mys::sp  //
-//                << conf << mys::sp << classification << mys::sp;
-//        }
-//        auto [left_temp, left_status, right_temp, right_status] = sen_d.thermalProtectionValues();
-//        terr << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
-//            << mys::sp << right_temp << mys::sp << (int)right_status;
+        auto [c_r, c_g, c_b, c_c] = sen_d.currentRGBValues();
+        terr << code_loc << "currentRGBValues: " << c_r << mys::sp << c_g << mys::sp << c_b << mys::sp << c_c << mys::sp;
+
+        auto [d_r, d_g, d_b, conf, classification] = sen_d.colorDetectionValues();
+        terr << code_loc << "colorDetectionValues: " << (int)d_r << mys::sp << (int)d_g << mys::sp << (int)d_b << mys::sp  //
+             << (int)conf << mys::sp << (int)classification << mys::sp;
+
+        auto [left_temp, left_status, right_temp, right_status] = sen_d.thermalProtectionValues();
+        terr << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
+             << mys::sp << right_temp << mys::sp << (int)right_status;
 
         terr << code_loc << "Ambient: " << sen_d.ambient();
         terr << code_loc << "Left Temp: " << sen_d.leftMotorTemp();
         terr << code_loc << "Right Temp: " << sen_d.rightMotorTemp();
         terr << code_loc << mys::nl;
 
-//        sen_d.enableColorDetectionNotify(false, 500, 0);
-//        sen_d.disableColorDetection(); // turns off LEDs
-//        sen_d.disableGyroMaxNotify();
-//    sen_d.disableThermalProtectionNotify();
-        std::this_thread::sleep_for(5000ms);
+        sen_d.enableColorDetectionNotify(false, 500, 0);
+        sen_d.disableColorDetection(); // turns off bottom LEDs
+        sen_d.disableGyroMaxNotify();
+        sen_d.disableThermalProtectionNotify();
+        std::this_thread::sleep_for(50ms);
 
         terr << code_loc << mys::nl;
-//        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
-//        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
-//        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
-//        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
+        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
+        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
+        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
+        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
 
         terr << code_loc << mys::nl;
 

@@ -34,10 +34,21 @@ private:
     DataFieldPtr mRgbSensorBlue;
     DataFieldPtr mRgbConfidence;
 
+    DataFieldPtr mRgbDetectRed;
+    DataFieldPtr mRgbDetectGrn;
+    DataFieldPtr mRgbDetectBlue;
+    DataFieldPtr mRgbDetectConfidence;
+    DataFieldPtr mRgbClass;
+
     DataFieldPtr mAmbient;
 
     DataFieldPtr mLeftMotorTemp;
     DataFieldPtr mRightMotorTemp;
+
+    DataFieldPtr mLeftMotorThermal;
+    DataFieldPtr mLeftMotorStatus;
+    DataFieldPtr mRightMotorThermal;
+    DataFieldPtr mRightMotorStatus;
 
     rvr::SensorsDirect mSensors;
 

@@ -66,6 +66,8 @@ void MainForm::runWindows() {
                 }
                 break;
         }
+        updateRequests();
+        std::this_thread::sleep_for(100ms);
 
         power_form.updateScreen();
         sysinfo_form.updateScreen();
@@ -75,9 +77,6 @@ void MainForm::runWindows() {
         status_form.updateScreen();
         refresh();
 
-        updateRequests();
-
-        std::this_thread::sleep_for(50ms);
     }
     power_form.done();
 }

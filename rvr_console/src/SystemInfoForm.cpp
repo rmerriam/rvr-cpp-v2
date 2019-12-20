@@ -53,20 +53,20 @@ void SystemInfoForm::requestData() {
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void SystemInfoForm::fastData() {
-    mSys.getCoreUpTime(RespYes);
+    mSys.getCoreUpTime();
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void SystemInfoForm::onceData() {
 
-    mSys.getBoardRevision(RespYes);
-    mSys.getBootloaderVersion(RespYes);
-    mSys.getMacId(RespYes);
-    mSys.getMainAppVersion(RespYes);
-    mSys.getProcessorName(RespYes);
-    mSys.getSku(RespYes);
-    mSys.getStatsId(RespYes);
+    mSys.getBoardRevision();
+    mSys.getBootloaderVersion();
+    mSys.getMacId();
+    mSys.getMainAppVersion();
+    mSys.getProcessorName();
+    mSys.getSku();
+    mSys.getStatsId();
 
-    mConn.bluetoothName(RespYes);
+    mConn.bluetoothName();
 
     rvr::RvrMsg dead { 'P', 'i', 'n', 'g' };
     mApi.echo(dead);

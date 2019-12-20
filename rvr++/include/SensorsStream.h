@@ -23,6 +23,7 @@
 //
 //======================================================================================================================
 #include <limits>
+#include "enum.h"
 #include "Blackboard.h"
 #include "Request.h"
 #include "CommandBase.h"
@@ -36,41 +37,6 @@ namespace rvr {
     class Blackboard;
 
     // creating these outside the class so they are easier out
-    struct AccelData {
-        float x;
-        float y;
-        float z;
-    };
-    struct ColorData {
-        uint8_t red;
-        uint8_t green;
-        uint8_t blue;
-        float confidence;
-    };
-    struct GyroData {
-        float x;
-        float y;
-        float z;
-    };
-    struct ImuData {
-        float pitch;
-        float roll;
-        float yaw;
-    };
-    struct LocatorData {
-        float x;
-        float y;
-    };
-    struct QuatData {
-        float w;
-        float x;
-        float y;
-        float z;
-    };
-    struct VelocityData {
-        float x;
-        float y;
-    };
 
     class SensorsStream : protected CommandBase {
 
