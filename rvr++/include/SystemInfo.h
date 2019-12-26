@@ -22,8 +22,6 @@
 //     Created: Oct 29, 2019
 //
 //======================================================================================================================
-//#include "Blackboard.h"
-#include "Request.h"
 #include "CommandBase.h"
 //----------------------------------------------------------------------------------------------------------------------
 using namespace std::literals;
@@ -34,7 +32,7 @@ namespace rvr {
     class SystemInfo : protected CommandBase {
     public:
         SystemInfo(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::system, req, bluetoothSOC } {
+            CommandBase { bb, Devices::system, req, bluetoothSOC } {
         }
         SystemInfo(SystemInfo const& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;

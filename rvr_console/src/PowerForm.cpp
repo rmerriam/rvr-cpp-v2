@@ -56,17 +56,17 @@ void PowerForm::onceData() {
 //--------------------------------------------------------------------------------------------------------------------------
 void PowerForm::requestData() {
 
-    mPow.batteryVoltageState(RespYes);
-    mPow.batteryPercentage(RespYes);
+    mPow.batteryVoltageState();
+    mPow.batteryPercentage();
 
-    mPow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered, RespYes);
-    mPow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered, RespYes);
-    mPow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered, RespYes);
+    mPow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
+    mPow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
+    mPow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
 
-    mPow.batteryVoltThresholds(RespYes);
+    mPow.batteryVoltThresholds();
 
-    mPow.batteryMotorCurrent(rvr::Power::left, RespYes);
-    mPow.batteryMotorCurrent(rvr::Power::right, RespYes);
+    mPow.batteryMotorCurrent(rvr::Power::left);
+    mPow.batteryMotorCurrent(rvr::Power::right);
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void PowerForm::updateScreen() {
@@ -94,12 +94,12 @@ void PowerForm::disableBatt() {
     static bool set { false };
 
     if (set) {
-        mPow.disableBatteryStateChange(RespYes);
+        mPow.disableBatteryStateChange();
         set = false;
         moused = set;
     }
     else {
-        mPow.enableBatteryStateChange(RespYes);
+        mPow.enableBatteryStateChange();
         set = true;
         moused = set;
     }

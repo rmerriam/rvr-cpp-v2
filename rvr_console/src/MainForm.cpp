@@ -30,7 +30,22 @@
 #include "LabelField.h"
 
 #include "MainForm.h"
+//---------------------------------------------------------------------------------------------------------------------
+uint32_t led32 {    //
+Led::battery_door_rear | Led::power_button_rear |    //
+    Led::brakelight_left | Led::brakelight_right };
 
+rvr::RvrMsg colors[] { //
+{ 0x00, 0x00, 0xFF, //
+  0xFF, 0x00, 0x00, //
+  0x00, 0x00, 0xFF, //
+  0xFF, 0x00, 0x00, }, //
+{ 0xFF, 0x00, 0x00, //
+  0x00, 0x00, 0xFF, //
+  0xFF, 0x00, 0x00, //
+  0x00, 0x00, 0xFF, }, //
+};
+//---------------------------------------------------------------------------------------------------------------------
 int moused { };
 //---------------------------------------------------------------------------------------------------------------------
 MainForm::MainForm(rvr::Blackboard& bb, rvr::Request& req) :    //
@@ -38,7 +53,20 @@ MainForm::MainForm(rvr::Blackboard& bb, rvr::Request& req) :    //
         sysinfo_form { row, 0, bb, mRequest }, //
         power_form { row, sysinfo_form.getX() + 2, bb, mRequest }, //
         direct_form { row, power_form.getX() + 2, bb, mRequest }, //
-        stream_form { row, direct_form.getX() + 2, bb, mRequest } {
+        stream_form { row, direct_form.getX() + 2, bb, mRequest }, //
+        mLeds { bb, mRequest }, //
+        mDrive { bb, mRequest } {
+    mDrive.resetYaw();
+    mLeds.ledsOff();
+}
+//---------------------------------------------------------------------------------------------------------------------
+void MainForm::mouseEvent() {
+    MEVENT mevent;
+    getmouse( &mevent);
+    moused = mevent.x;
+    if ((mevent.y == 17) && ((mevent.x >= 55) & (mevent.x <= 60))) {
+        power_form.disableBatt();
+    }
 }
 //---------------------------------------------------------------------------------------------------------------------
 void MainForm::runWindows() {
@@ -53,21 +81,41 @@ void MainForm::runWindows() {
     while (run) {
 
         switch (NCurses::check_input()) {
+            case KEY_UP:
+                mLSpeed += 5;
+                mRSpeed += 5;
+                break;
+
+            case KEY_DOWN:
+                mLSpeed -= 5;
+                mRSpeed -= 5;
+                break;
+
+            case KEY_LEFT:
+                mLSpeed += 5;
+                mRSpeed -= 5;
+                break;
+
+            case KEY_RIGHT:
+                mLSpeed -= 5;
+                mRSpeed += 5;
+                break;
+
+            case KEY_END:
+                mLSpeed = 0;
+                mRSpeed = 0;
+                break;
+
             case KEY_F(2):
                 run = false;
                 break;
 
             case KEY_MOUSE:
-                MEVENT mevent;
-                getmouse( &mevent);
-                moused = mevent.x;
-                if ((mevent.y == 17) && (mevent.x < 31)) {
-                    power_form.disableBatt();
-                }
+                mouseEvent();
                 break;
         }
         updateRequests();
-        std::this_thread::sleep_for(100ms);
+        std::this_thread::sleep_for(250ms);
 
         power_form.updateScreen();
         sysinfo_form.updateScreen();
@@ -77,6 +125,8 @@ void MainForm::runWindows() {
         status_form.updateScreen();
         refresh();
 
+        mDrive.drive(mLSpeed, mRSpeed);
+
     }
     power_form.done();
 }
@@ -84,12 +134,13 @@ void MainForm::runWindows() {
 void MainForm::updateRequests() {
     static int8_t passes { -1 };
 
-    // data needed every update
+// data needed every update
     power_form.fastData();
     sysinfo_form.fastData();
+    direct_form.fastData();
 
     status_form.fastData();
-    // limit requests for data while letting streaming updates occur
+// limit requests for data while letting streaming updates occur
     ++passes;
     passes %= 10;
     if ( !passes) {
@@ -101,5 +152,5 @@ void MainForm::updateRequests() {
 
         status_form.requestData();
     }
-
+    mLeds.allLed(led32, colors[passes % 2]);
 }

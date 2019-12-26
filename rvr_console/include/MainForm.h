@@ -23,6 +23,8 @@
 //
 //======================================================================================================================
 #include <Blackboard.h>
+#include <Drive.h>
+#include <IoLed.h>
 
 #include "NCurses.h"
 #include "DirectForm.h"
@@ -33,7 +35,6 @@
 //--------------------------------------------------------------------------------------------------------------------------
 class MainForm {
 public:
-    MainForm();
     MainForm(rvr::Blackboard& bb, rvr::Request& req);
 
     MainForm(MainForm const& other) = delete;
@@ -44,6 +45,7 @@ public:
 
 private:
     void updateRequests();
+    void mouseEvent();
 
     rvr::Request& mRequest;
 
@@ -55,5 +57,11 @@ private:
     StreamForm stream_form;
 
     StatusForm status_form { LINES - 8, 0 };
+
+    rvr::IoLed mLeds;
+
+    rvr::Drive mDrive;
+    double mLSpeed { };
+    double mRSpeed { };
 };
 #endif

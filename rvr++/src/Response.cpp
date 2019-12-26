@@ -21,7 +21,7 @@
 //
 //======================================================================================================================
 
-#include "Packet.h"
+#include "enum.h"
 #include "Blackboard.h"
 #include "ReadPacket.h"
 #include "Response.h"

@@ -22,6 +22,7 @@
 //     Created: Oct 27, 2019
 //
 //======================================================================================================================
+#include "enum.h"
 #include "Request.h"
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
@@ -30,16 +31,6 @@ namespace rvr {
     class CommandBase {
     public:
 
-        enum CommandResponse : uint8_t {
-            resp_no = no_response, //
-            resp_yes = request_response, //
-            resp_on_error = request_error_response,
-        };
-
-        enum SourcePort : uint8_t {
-            serial = 0x01, //
-            bluetooth = 0x02,
-        };
         enum TargetPort : uint8_t {
             nordic = 0x01,  //
             bluetoothSOC = 0x02, //

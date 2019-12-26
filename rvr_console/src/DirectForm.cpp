@@ -19,15 +19,22 @@ extern std::string n;
 DirectForm::DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
     FormBase(y, x), mSensors { bb, req } {
 
-    uint8_t item_row { 2 };
-    int width { 14 };
-    NField::build_header(mFields, "Direct Sensor", 1, 1.25 * width);
+    mSensors.resetColorDetectionNotify();
+    mSensors.resetLocatorXY();
 
-    ++item_row;
+    uint8_t item_row { 2 };
+    int width { 15 };
+    NField::build_header(mFields, "Direct Sensor", 1, width + 8);
+
     mAmbient = NField::build_wide_data_item(mFields, "Ambient:", item_row++, width, 5);
 
-    mColorDetection = NField::build_wide_data_item(mFields, "Color Enabled:", item_row++, width, 5);
     NField::build_subhead(mFields, "ColorSensor", item_row++);
+    mColorDetection = NField::build_wide_data_item(mFields, "Enabled:", item_row++, width, 5);
+    mColorDetection->invertText();
+
+    mColorDetectionNotify = NField::build_wide_data_item(mFields, "Notify:", item_row++, width, 5);
+    mColorDetectionNotify->invertText();
+
     mRgbSensorRed = NField::build_wide_data_item(mFields, "Red:", item_row++, width, 5);
     mRgbSensorGrn = NField::build_wide_data_item(mFields, "Green:", item_row++, width, 5);
     mRgbSensorBlue = NField::build_wide_data_item(mFields, "Blue:", item_row++, width, 5);
@@ -45,12 +52,18 @@ DirectForm::DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::Reque
     mRightMotorTemp = NField::build_wide_data_item(mFields, "Right:", item_row++, width, 5);
 
     NField::build_subhead(mFields, "Thermal Protection", item_row++);
+    mThermalProtectionNotify = NField::build_wide_data_item(mFields, "Notify:", item_row++, width, 5);
+    mThermalProtectionNotify->invertText();
     mLeftMotorThermal = NField::build_wide_data_item(mFields, "Left:", item_row++, width, 5);
     mLeftMotorStatus = NField::build_wide_data_item(mFields, "Status:", item_row++, width, 5);
     mRightMotorThermal = NField::build_wide_data_item(mFields, "Right:", item_row++, width, 5);
     mRightMotorStatus = NField::build_wide_data_item(mFields, "Status:", item_row++, width, 5);
 
     mForm.init();
+}
+//--------------------------------------------------------------------------------------------------------------------------
+DirectForm::~DirectForm() {
+    mSensors.resetColorDetectionNotify();
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void DirectForm::requestData() {
@@ -62,16 +75,26 @@ void DirectForm::requestData() {
     mSensors.getAmbienLightSensorValue();
 
     mSensors.getCurrentDectectedColor();
+
+    mSensors.enableThermalProtectionNotify();
     mSensors.getThermalProtectionStatus();
 
     mSensors.getLeftMotorTemp();
     mSensors.getRightMotorTemp();
 }
 //--------------------------------------------------------------------------------------------------------------------------
+void DirectForm::fastData() {
+    mSensors.getRgbcSensorValue();
+    mSensors.getAmbienLightSensorValue();
+
+    mSensors.getCurrentDectectedColor();
+}
+//--------------------------------------------------------------------------------------------------------------------------
 void DirectForm::updateScreen() {
     mAmbient->setData(mSensors.ambient());
 
     mColorDetection->setData(mSensors.isColorDetectionEnabled());
+    mColorDetectionNotify->setData(mSensors.isColorDetectionNotifyEnabled());
 
     auto [r, g, b, c] = mSensors.currentRGBValues();
     mRgbSensorRed->setData(r);
@@ -92,6 +115,7 @@ void DirectForm::updateScreen() {
 
     auto [left_temp, left_status, right_temp, right_status] = mSensors.thermalProtectionValues();
 //
+    mThermalProtectionNotify->setData(mSensors.isThermalProtectionNotifyEnabled());
     static std::string const thermal_status[] { "okay", "warn", "critical" };
     mLeftMotorThermal->setData(left_temp);
     mLeftMotorStatus->setData(thermal_status[left_status]);

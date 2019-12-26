@@ -31,7 +31,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::motorCurrent(MotorSide const ms) {
-        return mBlackboard.floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, ms);
+        return mBlackboard.floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, 0, ms);
     }
     //----------------------------------------------------------------------------------------------------------------------
     float Power::voltsCalibratedFiltered() {

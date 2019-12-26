@@ -23,8 +23,16 @@
 //
 //======================================================================================================================
 #include <cstdint>
+#include "Packet.h"
 
 namespace rvr {
+    enum VoltageType : uint8_t {
+        CalibratedFiltered = 0, CalibratedUnfiltered = 1, UncalibratedUnfiltered = 2,
+    };
+    enum ThermalStatus : uint8_t {
+        okay, warn, critical
+    };
+
     struct TripleFloat {
         float x;
         float y;
@@ -74,6 +82,13 @@ namespace rvr {
         float rightMotorTemp;
         uint8_t rightStatus;
     };
+
+    enum CommandResponse : uint8_t {
+        resp_no = no_response, //
+        resp_yes = request_response, //
+        resp_on_error = request_error_response,
+    };
+
 } // namespace rvr
 
 #endif /* ENUM_H_ */

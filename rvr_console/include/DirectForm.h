@@ -22,13 +22,16 @@ using namespace scr;
 class DirectForm : public FormBase {
 public:
     DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
+    ~DirectForm();
 
+    virtual void fastData() override;
     virtual void requestData() override;
     virtual void updateScreen() override;
 
 private:
 
     DataFieldPtr mColorDetection;
+    DataFieldPtr mColorDetectionNotify;
     DataFieldPtr mRgbSensorRed;
     DataFieldPtr mRgbSensorGrn;
     DataFieldPtr mRgbSensorBlue;
@@ -45,6 +48,7 @@ private:
     DataFieldPtr mLeftMotorTemp;
     DataFieldPtr mRightMotorTemp;
 
+    DataFieldPtr mThermalProtectionNotify;
     DataFieldPtr mLeftMotorThermal;
     DataFieldPtr mLeftMotorStatus;
     DataFieldPtr mRightMotorThermal;

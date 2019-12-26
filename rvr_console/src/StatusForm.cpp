@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "DataField.h"
+#include "LabelField.h"
 using namespace scr;
 
 #include "StatusForm.h"
@@ -27,6 +28,12 @@ StatusForm::StatusForm(int const y, int const x) :
     mVersion = NField::build_data_item(mFields, "Version:", item_row, width, 2 * (COLS - 3) / 3);
 
     mMouse = NField::build_data_item(mFields, "Mouse:", item_row + 1, width, 2 * (COLS - 3) / 3);
+
+    std::string const key_text { "Keys: F2->quit, Up->Forward, Down->Back, Left->Left, Right->Right, End->Stop" };
+    mKeys = NField::build_label_item(mFields, key_text, item_row + 2, key_text.size() + 2, 2);
+    mKeys->justify(JUSTIFY_LEFT);
+    mKeys->invertText();
+
     mForm.init();
 }
 //---------------------------------------------------------------------------------------------------------------------

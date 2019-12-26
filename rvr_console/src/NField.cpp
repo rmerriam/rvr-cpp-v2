@@ -25,8 +25,8 @@ namespace scr {
         if (width < lb.size()) {
             width = lb.size();
         }
-        LabelField* l { new LabelField(lb.c_str(), 1, width * 1.5, row, col) };
-        l->justify(JUSTIFY_LEFT);
+        LabelField* l { new LabelField(lb.c_str(), 1, width, row, col) };
+        l->justify(JUSTIFY_CENTER);
 
         l->fore(A_BOLD | A_UNDERLINE);
         vec.push_back(( *l)());
@@ -37,7 +37,7 @@ namespace scr {
         if (width < lb.size()) {
             width = lb.size();
         }
-        LabelField* l { new LabelField(lb.c_str(), 1, width * 2, row, col) };
+        LabelField* l { new LabelField(lb.c_str(), 1, width, row, col) };
         vec.push_back(( *l)());
         return l;
     }

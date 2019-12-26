@@ -16,12 +16,14 @@ using namespace std;
 using namespace scr;
 
 #include "FormBase.h"
+#include <SensorsDirect.h>
 #include <SensorsStream.h>
 
 //--------------------------------------------------------------------------------------------------------------------------
 class StreamForm : public FormBase {
 public:
     StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
+    ~StreamForm();
 
     virtual void updateScreen() override;
 
@@ -37,6 +39,8 @@ private:
     DataFieldPtr mGyroX;
     DataFieldPtr mGyroY;
     DataFieldPtr mGyroZ;
+    DataFieldPtr mGyroMaxNotify;
+
     //  IMU
     DataFieldPtr mRoll;
     DataFieldPtr mPitch;
@@ -48,7 +52,12 @@ private:
 
     DataFieldPtr mSpeed;
 
+    //  Locator
+    DataFieldPtr mVelocityX;
+    DataFieldPtr mVelocityY;
+
     rvr::SensorsStream mStream;
+    rvr::SensorsDirect mSensors;
 
 };
 #endif /* GeneralStreamForm_H_ */

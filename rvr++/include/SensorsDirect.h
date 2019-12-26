@@ -39,13 +39,6 @@ namespace rvr {
     class SensorsDirect : protected CommandBase {
 
     public:
-        enum VoltageType : uint8_t {
-            CalibratedFiltered = 0, CalibratedUnfiltered = 1, UncalibratedUnfiltered = 2,
-        };
-        enum ThermalStatus : uint8_t {
-            okay, warn, critical
-        };
-
         SensorsDirect(Blackboard& bb, Request& req) :
             CommandBase { bb, Devices::sensors, req, bluetoothSOC } {
         }

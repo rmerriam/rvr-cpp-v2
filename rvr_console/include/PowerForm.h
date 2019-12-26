@@ -20,7 +20,6 @@ using namespace scr;
 #include "FormBase.h"
 //--------------------------------------------------------------------------------------------------------------------------
 class PowerForm : public FormBase {
-    rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 
 public:
     PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);

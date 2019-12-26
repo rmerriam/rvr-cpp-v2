@@ -22,8 +22,14 @@
 //     Created: Nov 8, 2019
 //
 //======================================================================================================================
+#include "enum.h"
+#include "Blackboard.h"
 
 #include "ApiShell.h"
-#include "CommandBase.h"
+#include "Drive.h"
+#include "Power.h"
+#include "SensorsDirect.h"
+#include "SensorsStream.h"
+#include "SystemInfo.h"
 
 #endif /* RVR___H_ */

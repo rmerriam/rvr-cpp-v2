@@ -20,6 +20,7 @@
 //     Created: Oct 22, 2019
 //
 //======================================================================================================================
+#include "enum.h"
 #include "IoLed.h"
 namespace rvr {
 
@@ -27,9 +28,9 @@ namespace rvr {
 
         RvrMsg leds { //
         static_cast<uint8_t>(led_bits >> 24), //
-            static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
-            static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
-            static_cast<uint8_t>(led_bits & 0xFF) //
+        static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
+        static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
+        static_cast<uint8_t>(led_bits & 0xFF) //
         };
         leds.insert(leds.end(), colors.begin(), colors.end());
 

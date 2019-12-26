@@ -20,9 +20,8 @@ SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Blackboard& bb, rv
 
     uint8_t item_row { 2 };
     int width { 12 };
-    NField::build_header(mFields, "System Information", 1, width + 20);
+    NField::build_header(mFields, "System Information", 1, width + 9);
 
-    ++item_row;
     mRvrName = NField::build_data_item(mFields, "BT Name", item_row++, width);
     ++item_row;
 

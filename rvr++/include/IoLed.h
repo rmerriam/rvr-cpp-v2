@@ -128,7 +128,7 @@ namespace rvr {
         };
         //----------------------------------------------------------------------------------------------------------------------
         IoLed(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::io_led, req, nordic } {
+            CommandBase { bb, Devices::io_led, req, nordic } {
         }
 
         IoLed(IoLed const& other) = delete;
@@ -140,6 +140,7 @@ namespace rvr {
         void getActiveColorPalette(CommandResponse const want_resp = resp_on_error) const;
         void getColorId(CommandResponse const want_resp = resp_on_error) const;
         void idleLeds(CommandResponse const want_resp = resp_on_error) const;
+        void ledsOff(CommandResponse const want_resp = resp_on_error) const;
 
         enum Cmd : uint8_t {
             set_all_leds = 0x1A, //
@@ -155,13 +156,28 @@ namespace rvr {
     inline void IoLed::idleLeds(CommandResponse const want_resp) const {
         cmdBasic(release_led_requests, want_resp);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getActiveColorPalette(CommandResponse const want_resp) const {
         cmdBasic(get_active_color_palette, want_resp);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getColorId(CommandResponse const want_resp) const {
         cmdBasic(get_color_identification_report, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void IoLed::ledsOff(CommandResponse const want_resp) const {
+        static rvr::RvrMsg off = { 0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+                                   0x00, 0x00, 0x00, //
+        };
+        allLed(all_lights, off, want_resp);
     }
 
 } /* namespace rvr */

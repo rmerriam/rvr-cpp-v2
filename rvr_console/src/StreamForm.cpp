@@ -10,18 +10,21 @@
 
 #include "DataField.h"
 using namespace scr;
-
+#include "enum.h"
 #include "StreamForm.h"
 #include <SensorsDirect.h>
 
 extern std::string n;
 //--------------------------------------------------------------------------------------------------------------------------
 StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
-    FormBase(y, x), mStream { bb, req } {
+    FormBase(y, x), mStream { bb, req }, mSensors { bb, req } {
+
+    mStream.disableStreaming();
+    mStream.clearStreaming();
 
     uint8_t item_row { 2 };
     int width { 10 };
-    NField::build_header(mFields, "Stream Data", 1, 1.5 * width);
+    NField::build_header(mFields, "Stream Data", 1, width + 7);
 
     NField::build_subhead(mFields, "Accelerometer", item_row++);
     mAccelX = NField::build_wide_data_item(mFields, "X:", item_row++, width, 5);
@@ -32,6 +35,9 @@ StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Reque
     mAmbient = NField::build_wide_data_item(mFields, "Ambient:", item_row++, width, 5);
 
     NField::build_subhead(mFields, "Gyroscope", item_row++);
+    mGyroMaxNotify = NField::build_wide_data_item(mFields, "Max Notify:", item_row++, width, 5);
+    mGyroMaxNotify->invertText();
+
     mGyroX = NField::build_wide_data_item(mFields, "X:", item_row++, width, 5);
     mGyroY = NField::build_wide_data_item(mFields, "Y:", item_row++, width, 5);
     mGyroZ = NField::build_wide_data_item(mFields, "Z:", item_row++, width, 5);
@@ -48,21 +54,28 @@ StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Reque
     ++item_row;
     mSpeed = NField::build_wide_data_item(mFields, "Speed:", item_row++, width, 5);
 
-    mForm.init();
+    NField::build_subhead(mFields, "Velocity", item_row++);
+    mVelocityX = NField::build_wide_data_item(mFields, "X:", item_row++, width, 5);
+    mVelocityY = NField::build_wide_data_item(mFields, "Y:", item_row++, width, 5);
 
-    mStream.clearStreaming();
+    mForm.init();
 
     mStream.streamAmbient();
 //    mStream.colorConfig();
 //    mStream.coreNordicConfig();
 ////    mStream.coreBTConfig();
-
+    mSensors.enableGyroMaxNotify();
     mStream.streamImuAccelGyro();
     mStream.streamSpeedVelocityLocator();
 
     mStream.startStreamingBT(50);
     mStream.startStreamingNordic(50);
 
+}
+//--------------------------------------------------------------------------------------------------------------------------
+StreamForm::~StreamForm() {
+    mStream.disableStreaming();
+    mStream.clearStreaming();
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void StreamForm::updateScreen() {
@@ -73,6 +86,7 @@ void StreamForm::updateScreen() {
     mAccelY->setData(a_y);
     mAccelZ->setData(a_z);
 
+    mGyroMaxNotify->setData(mSensors.isGyroMaxNotifyEnabled());
     auto [g_x, g_y, g_z] = mStream.gyroscope();
     mGyroX->setData(g_x);
     mGyroY->setData(g_y);
@@ -88,7 +102,10 @@ void StreamForm::updateScreen() {
     mLocatorY->setData(l_y);
 
     mSpeed->setData(mStream.speed());
-//    auto [v_x, v_y] = mStream.velocity();
+
+    auto [v_x, v_y] = mStream.velocity();
+    mVelocityX->setData(v_x);
+    mVelocityY->setData(v_y);
 
     wrefresh(mForm.win());
 }

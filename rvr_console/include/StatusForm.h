@@ -19,7 +19,7 @@ using namespace scr;
 //--------------------------------------------------------------------------------------------------------------------------
 class StatusForm : public FormBase {
 public:
-    StatusForm(const int y, const int x);
+    StatusForm(int const y, int const x);
 
     virtual void updateScreen() override;
 
@@ -31,6 +31,8 @@ private:
     DataFieldPtr mVersion;
 
     DataFieldPtr mMouse;
+
+    LabelFieldPtr mKeys;
 
 };
 #endif /* GeneralStatusForm_H_ */

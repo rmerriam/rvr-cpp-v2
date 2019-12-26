@@ -43,7 +43,7 @@ using namespace std::literals;
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
 mys::TraceStart tout { std::cout };
-rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
+//rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
@@ -63,43 +63,44 @@ int main(int argc, char* argv[]) {
 
     rvr::Power pow(bb, req);
 
-//    rvr::Blackboard::dump();
-    pow.awake(RespYes);
+    pow.awake();
     std::this_thread::sleep_for(500ms);
     //---------------------------------------------------------------------------------------------------------------------
     try {
-#if 0
-    //---------------------------------------------------------------------------------------------------------------------
-    //  Setup the LED handling
-    rvr::IoLed led(bb, req);
-    led.idleLeds(RespYes);
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+#if 1
+        //---------------------------------------------------------------------------------------------------------------------
+        //  Setup the LED handling
+        rvr::IoLed led(bb, req);
+        led.ledsOff();
 
-    uint32_t led32 {    //
-    Led::status_indication_left | Led::status_indication_right |    //
-        Led::headlight_left | Led::headlight_right };
-
-    rvr::RvrMsg colors[] { //
-    { 0x00, 0x00, 0xFF, //
-      0xFF, 0x00, 0x00, //
-      0x00, 0x00, 0xFF, //
-      0xFF, 0x00, 0x00, }, //
-    { 0xFF, 0x00, 0x00, //
-      0x00, 0x00, 0xFF, //
-      0xFF, 0x00, 0x00, //
-      0x00, 0x00, 0xFF, }, //
-    };
-
-    for (auto i { 0 }; i < 10; ++i) {
-        led.allLed(led32, colors[i % 2], RespYes);
-        terr << "blink";
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    }
 
-//    led.idleLeds(RespYes);
+        uint32_t led32 {    //
+        Led::status_indication_left | Led::status_indication_right |    //
+            Led::headlight_left | Led::headlight_right };
+
+        rvr::RvrMsg colors[] { //
+        { 0x00, 0x00, 0xFF, //
+          0xFF, 0x00, 0x00, //
+          0x00, 0x00, 0xFF, //
+          0xFF, 0x00, 0x00, }, //
+        { 0xFF, 0x00, 0x00, //
+          0x00, 0x00, 0xFF, //
+          0xFF, 0x00, 0x00, //
+          0x00, 0x00, 0xFF, }, //
+        };
+
+        for (auto i { 0 }; i < 10; ++i) {
+            led.allLed(led32, colors[i % 2]);
+            terr << "blink";
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+
+        led.idleLeds();
+        std::this_thread::sleep_for(5000ms);
 
 #endif
-#if 1
+#if 0
         // Direct reading of sensors
         rvr::SensorsDirect sen_d(bb, req);
 
@@ -240,57 +241,57 @@ int main(int argc, char* argv[]) {
 
 #endif
 #if 0
-    // POWER
+        // POWER
 
-    pow.batteryPercentage();
-    pow.batteryVoltageState();
+        pow.batteryPercentage();
+        pow.batteryVoltageState();
 
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
-    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
+        pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
+        pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
+        pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
 
-    pow.enableBatteryStateChange(RespYes);
+        pow.enableBatteryStateChange(RespYes);
 
-    pow.batteryVoltThresholds();
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
+        pow.batteryVoltThresholds();
+        pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
+        pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
 
-    std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(1s);
 
-    terr << code_loc << mys::nl;
-    terr << code_loc << "Power";
+        terr << code_loc << mys::nl;
+        terr << code_loc << "Power";
 
-    terr << code_loc << "VPercent: " << pow.batteryPercent();
+        terr << code_loc << "VPercent: " << pow.batteryPercent();
 
-    terr << code_loc << "Sleep Notify: " << pow.isDidSleepNotify();
-    terr << code_loc << "State: " << pow.voltState();
+        terr << code_loc << "Sleep Notify: " << pow.isDidSleepNotify();
+        terr << code_loc << "State: " << pow.voltState();
 
-    terr << code_loc << "Wake Notify: " << pow.isWakeNotify();
+        terr << code_loc << "Wake Notify: " << pow.isWakeNotify();
 
-    terr << code_loc << "VoltageCF: " << pow.voltsCalibratedFiltered();
-    terr << code_loc << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
-    terr << code_loc << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
-    terr << code_loc << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
-    terr << code_loc << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
-    terr << code_loc << "Critical Threshold: " << pow.voltThresholdCritical();
-    terr << code_loc << "Low Threshold: " << pow.voltThresholdLow();
-    terr << code_loc << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
+        terr << code_loc << "VoltageCF: " << pow.voltsCalibratedFiltered();
+        terr << code_loc << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
+        terr << code_loc << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
+        terr << code_loc << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
+        terr << code_loc << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
+        terr << code_loc << "Critical Threshold: " << pow.voltThresholdCritical();
+        terr << code_loc << "Low Threshold: " << pow.voltThresholdLow();
+        terr << code_loc << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
 
-    terr << code_loc << "Wake Notify Set?: " << pow.isWakeNotify();
-    terr << code_loc << "resetWakeNotify ";
-    pow.resetWakeNotify();
-    terr << code_loc << "Wake Notify Cleared?: " << pow.isWakeNotify();
+        terr << code_loc << "Wake Notify Set?: " << pow.isWakeNotify();
+        terr << code_loc << "resetWakeNotify ";
+        pow.resetWakeNotify();
+        terr << code_loc << "Wake Notify Cleared?: " << pow.isWakeNotify();
 
-    terr << code_loc << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+        terr << code_loc << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
 
-    terr << code_loc << mys::nl;
-    terr << code_loc << "disableBatteryStateChange";
-    pow.disableBatteryStateChange();
-    std::this_thread::sleep_for(50ms);
+        terr << code_loc << mys::nl;
+        terr << code_loc << "disableBatteryStateChange";
+        pow.disableBatteryStateChange();
+        std::this_thread::sleep_for(50ms);
 
-    terr << code_loc << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+        terr << code_loc << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
 
-    terr << code_loc << mys::nl;
+        terr << code_loc << mys::nl;
 #if 0
     pow.sleep();
 
@@ -352,46 +353,46 @@ int main(int argc, char* argv[]) {
 
 #endif
 #if 0
-    // Connection, SysInfo, APIShell
-    rvr::Connection cmd(bb, req);
-    cmd.bluetoothName(RespYes);    //
+        // Connection, SysInfo, APIShell
+        rvr::Connection cmd(bb, req);
+        cmd.bluetoothName();    //
 
-    rvr::SystemInfo sys(bb, req);
-    sys.getMainAppVersion(RespYes);    // alt
-    sys.getBootloaderVersion(RespYes);    //
-    sys.getBoardRevision(RespYes);  // ??
-    sys.getMacId(RespYes);  // ??
-    sys.getStatsId(RespYes);
-    sys.getProcessorName(RespYes);  // alt
-    sys.getSku(RespYes);    // ??
-    sys.getCoreUpTime(RespYes); //
+        rvr::SystemInfo sys(bb, req);
+        sys.getMainAppVersion();    // alt
+        sys.getBootloaderVersion();    //
+        sys.getBoardRevision();  // ??
+        sys.getMacId();  // ??
+        sys.getStatsId();
+        sys.getProcessorName();  // alt
+        sys.getSku();    // ??
+        sys.getCoreUpTime(); //
 //
-    rvr::ApiShell api(bb, req);
-    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
-    api.echo(dead);    // alt
+        rvr::ApiShell api(bb, req);
+        rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
+        api.echo(dead);    // alt
 
-    std::this_thread::sleep_for(100ms);
-    terr << code_loc << mys::nl;
-    terr << code_loc << mys::nl;
-    terr << code_loc << mys::nl << "Connection, SysInfo, APIShell";
-    terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
-    terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion2();
-    terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
-    terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion2();
-    terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
-    terr << code_loc << "MAC Addr: " << sys.macAddress();
-    terr << code_loc << "Stats Id: " << sys.statsId();
-    terr << code_loc << "Processor: " << sys.processorName();
-    terr << code_loc << "Processor: " << sys.processorName2();
-    terr << code_loc << "SKU: " << sys.sku();
-    terr << code_loc << "Up Time: " << sys.coreUpTime();
+        std::this_thread::sleep_for(100ms);
+        terr << code_loc << mys::nl;
+        terr << code_loc << mys::nl;
+        terr << code_loc << mys::nl << "Connection, SysInfo, APIShell";
+        terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
+        terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion2();
+        terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
+        terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion2();
+        terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
+        terr << code_loc << "MAC Addr: " << sys.macAddress();
+        terr << code_loc << "Stats Id: " << sys.statsId();
+        terr << code_loc << "Processor: " << sys.processorName();
+        terr << code_loc << "Processor: " << sys.processorName2();
+        terr << code_loc << "SKU: " << sys.sku();
+        terr << code_loc << "Up Time: " << sys.coreUpTime();
 
-    terr << code_loc << "BT Name: " << cmd.name();
+        terr << code_loc << "BT Name: " << cmd.name();
 
-    terr << code_loc << "Echo: " << std::hex << api.echo();
-    terr << code_loc << "Echo Alt: " << std::hex << api.echoAlt();
+        terr << code_loc << "Echo: " << std::hex << api.echo();
+        terr << code_loc << "Echo Alt: " << std::hex << api.echoAlt();
 
-    terr << code_loc << mys::nl;
+        terr << code_loc << mys::nl;
 
 #endif
 #if 0
@@ -451,7 +452,7 @@ int main(int argc, char* argv[]) {
     catch (std::exception& e) {
         terr << code_loc << e.what() << "=================================";
     }
-    pow.sleep(RespYes);
+    pow.sleep();
     terr << code_loc << "----------------" << mys::nl;
 
     std::this_thread::sleep_for(1s);
