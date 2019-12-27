@@ -17,8 +17,8 @@
 #include <Trace.h>
 #include <SerialPort.h>
 #include <Blackboard.h>
-#include <Request.h>
 #include <Response.h>
+#include <SendPacket.h>
 
 #include "MainForm.h"
 
@@ -32,17 +32,18 @@ int main(int argc, char** argv) {
     try {
         serial_port = argv[1];
         SerialPort serial { argv[1], 115200 };
-
+        rvr::ReadPacket in_packet { serial };
         rvr::Blackboard bb;
+
         //---------------------------------------------------------------------------------------------------------------------
         //  Setup the window updating
-        rvr::Request req { serial };
+        rvr::SendPacket req { serial };
 
         //---------------------------------------------------------------------------------------------------------------------
         //  Setup the thread to read responses
         std::promise<void> end_tasks;
         std::shared_future<void> end_future(end_tasks.get_future());
-        rvr::Response resp { serial, bb, end_future };
+        rvr::Response resp { in_packet, bb, end_future };
         auto resp_future = std::async(std::launch::async, std::ref(resp));
 
         NCurses nc;

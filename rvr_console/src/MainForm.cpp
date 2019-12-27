@@ -48,7 +48,7 @@ rvr::RvrMsg colors[] { //
 //---------------------------------------------------------------------------------------------------------------------
 int moused { };
 //---------------------------------------------------------------------------------------------------------------------
-MainForm::MainForm(rvr::Blackboard& bb, rvr::Request& req) :    //
+MainForm::MainForm(rvr::Blackboard& bb, rvr::SendPacket& req) :    //
     mRequest { req }, //
         sysinfo_form { row, 0, bb, mRequest }, //
         power_form { row, sysinfo_form.getX() + 2, bb, mRequest }, //
@@ -56,6 +56,7 @@ MainForm::MainForm(rvr::Blackboard& bb, rvr::Request& req) :    //
         stream_form { row, direct_form.getX() + 2, bb, mRequest }, //
         mLeds { bb, mRequest }, //
         mDrive { bb, mRequest } {
+    std::this_thread::sleep_for(200ms);
     mDrive.resetYaw();
     mLeds.ledsOff();
 }

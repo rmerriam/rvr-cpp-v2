@@ -22,16 +22,16 @@
 //     Created: Oct 29, 2019
 //
 //======================================================================================================================
-#include "Request.h"
-#include "CommandBase.h"
+#include <Request.h>
+#include <SendPacket.h>
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
     class Blackboard;
 
-    class Connection : protected CommandBase {
+    class Connection : protected Request {
     public:
-        Connection(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::connection, req, nordic } {
+        Connection(Blackboard& bb, SendPacket& req) :
+            Request {  bb,  Devices::connection, req, nordic } {
         }
         Connection(Connection const& other) = delete;
         Connection(Connection&& other) = delete;
@@ -49,7 +49,7 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void Connection::bluetoothName(CommandResponse const want_resp) const {
-        cmdBasic(get_bluetooth_advertising_name, want_resp);
+        basic(get_bluetooth_advertising_name, want_resp);
     }
 
 } /* namespace rvr */

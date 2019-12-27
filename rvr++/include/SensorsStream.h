@@ -22,11 +22,11 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
+#include <Request.h>
+#include <SendPacket.h>
 #include <limits>
 #include "enum.h"
 #include "Blackboard.h"
-#include "Request.h"
-#include "CommandBase.h"
 //----------------------------------------------------------------------------------------------------------------------
 /*
  * For sensor ranges see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
@@ -38,7 +38,7 @@ namespace rvr {
 
     // creating these outside the class so they are easier out
 
-    class SensorsStream : protected CommandBase {
+    class SensorsStream : protected Request {
 
     public:
         enum Sensor : uint8_t {
@@ -60,8 +60,8 @@ namespace rvr {
             speed_velocity_locator_token = 13, //
         };
 
-        SensorsStream(Blackboard& bb, Request& req) :
-            CommandBase { bb, Devices::sensors, req, nordic } {
+        SensorsStream(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::sensors, req, nordic } {
         }
 
         SensorsStream(SensorsStream const& other) = delete;

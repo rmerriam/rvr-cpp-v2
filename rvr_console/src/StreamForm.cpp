@@ -16,7 +16,7 @@ using namespace scr;
 
 extern std::string n;
 //--------------------------------------------------------------------------------------------------------------------------
-StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
+StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req) :
     FormBase(y, x), mStream { bb, req }, mSensors { bb, req } {
 
     mStream.disableStreaming();

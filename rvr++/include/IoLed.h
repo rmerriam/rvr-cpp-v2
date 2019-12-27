@@ -22,8 +22,8 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
-#include "Request.h"
-#include "CommandBase.h"
+#include <Request.h>
+#include <SendPacket.h>
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
     class IoLed;
@@ -34,7 +34,7 @@ using Led = rvr::IoLed;
 namespace rvr {
     class Blackboard;
 
-    class IoLed : protected CommandBase {
+    class IoLed : protected Request {
 
     public:
         //----------------------------------------------------------------------------------------------------------------------
@@ -127,8 +127,8 @@ namespace rvr {
             undercarriage = undercarriage_white
         };
         //----------------------------------------------------------------------------------------------------------------------
-        IoLed(Blackboard& bb, Request& req) :
-            CommandBase { bb, Devices::io_led, req, nordic } {
+        IoLed(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::io_led, req, nordic } {
         }
 
         IoLed(IoLed const& other) = delete;
@@ -154,15 +154,15 @@ namespace rvr {
     };
     //---------------------------------------------------------------------------------------------------------------------
     inline void IoLed::idleLeds(CommandResponse const want_resp) const {
-        cmdBasic(release_led_requests, want_resp);
+        basic(release_led_requests, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getActiveColorPalette(CommandResponse const want_resp) const {
-        cmdBasic(get_active_color_palette, want_resp);
+        basic(get_active_color_palette, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::getColorId(CommandResponse const want_resp) const {
-        cmdBasic(get_color_identification_report, want_resp);
+        basic(get_color_identification_report, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::ledsOff(CommandResponse const want_resp) const {

@@ -17,76 +17,120 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 25, 2019
+//     Created: Oct 27, 2019
 //
 //======================================================================================================================
-#include <algorithm>
-#include <numeric>
-
-#include "Trace.h"
-#include "Request.h"
+#include <Request.h>
+#include "Blackboard.h"
 
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::send(RvrMsg const& p) {
-        RvrMsg payload { p };
-        RvrMsg mMsg;
-        mMsg.clear();
-        mMsg.push_back(SOP);
-
-        // calculate checksum, add to end of payload, then escape payload & checksum
-        uint8_t sum { checksum(payload) };
-        payload.push_back(sum);
-
-        escape_msg(payload);
-
-        std::copy(payload.begin(), payload.end(), std::back_insert_iterator(mMsg));
-
-        mMsg.push_back(EOP);
-
-        mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
-
-        terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
+    Request::Request(Blackboard& bb, Devices const device, SendPacket& request, TargetPort const target) :
+        mBlackboard { bb }, mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
     }
     //----------------------------------------------------------------------------------------------------------------------
-    auto Request::escape_char(RvrMsg::iterator& p, RvrMsg& payload) {
-
-        switch ( *p) {
-            case SOP: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_SOP);
-                break;
-            }
-            case EOP: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_EOP);
-                break;
-            }
-            case ESC: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_ESC);
-                break;
-            }
-        }
-        ++p;
-        return p;
+    uint8_t Request::buildFlags(CommandResponse const want_resp) const {
+        int flags { want_resp | activity | has_target };
+        return static_cast<uint8_t>(flags);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::checksum(RvrMsg const& payload) const {
-        unsigned int sum { };
-        sum = ~std::accumulate(payload.begin(), payload.end(), 0);
-        return sum;
+    uint8_t Request::makeAltProc() {
+        uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
+        return alt_target;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Request::isPacketChar(uint8_t const c) {
-        return (c == SOP) || (c == EOP) || (c == ESC);
+    void Request::basic(uint8_t const cmd, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
+        mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Request::escape_msg(RvrMsg& payload) {
-        for (auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end();
-            p = find_if(p, payload.end(), isPacketChar)) {
-            p = escape_char(p, payload);
-        }
+    void Request::basicAlt(uint8_t const cmd, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::reqByte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::reqByteAlt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::byteId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::byteAltId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, data, data };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::cmdData(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
+        msg.insert(msg.end(), data.begin(), data.end());
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::cmdDataAlt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
+        msg.insert(msg.end(), data.begin(), data.end());
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::reqInt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), //
+                     static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::reqIntAlt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), //
+                     static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::cmdEnable(uint8_t const cmd, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, enable, true };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, enable, true };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::cmdDisable(uint8_t const cmd, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, disable, false };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Request::cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, disable, false };
+        mRequest.send(msg);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    TargetPort const Request::altTarget() const {
+        return mAltTarget;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    TargetPort const Request::target() const {
+        return mTarget;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    Devices const Request::device() const {
+        return mDevice;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    SendPacket& Request::request() const {
+        return mRequest;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint8_t Request::seq() {
+        return mSeq;
     }
 
 }

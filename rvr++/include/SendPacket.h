@@ -1,5 +1,5 @@
-#ifndef Packet_H_
-#define Packet_H_
+#ifndef SENDPACKET_H_
+#define SENDPACKET_H_
 //======================================================================================================================
 // 2019 Copyright Mystic Lake Software
 //
@@ -22,29 +22,29 @@
 //     Created: Oct 21, 2019
 //
 //======================================================================================================================
-#include "enum.h"
+//  Build a message to send to the RVR
 
+#include "Packet.h"
 namespace rvr {
 
-    class ReadPacket {
+    class SendPacket {
     public:
-        ReadPacket(SerialPort& s) :
+
+        SendPacket(SerialPort& s) :
             mSerialPort { s } {
         }
 
-        void read(rvr::RvrMsg& in, rvr::RvrMsg& out);
+        void send(const RvrMsg& p);
 
     private:
+        uint8_t checksum(const RvrMsg& payload) const;
+        static bool isPacketChar(const uint8_t c);
 
-        void unescape_char(auto& p, RvrMsg& payload);
-        void unescape_msg(RvrMsg& payload);
-        void removeDelimiters(RvrMsg& payload);
-
-        void checkForData(rvr::RvrMsg& in);
-        void processData(rvr::RvrMsg& in, rvr::RvrMsg& out);
+        auto escape_char(RvrMsg::iterator& p, RvrMsg& payload);
+        void escape_msg(RvrMsg& payload);
 
         SerialPort& mSerialPort;
     };
-
 }
-#endif /* Packet_H_ */
+
+#endif /* SENDPACKET_H_ */

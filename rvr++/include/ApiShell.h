@@ -22,16 +22,16 @@
 //     Created: Oct 29, 2019
 //
 //======================================================================================================================
-#include "Request.h"
-#include "CommandBase.h"
+#include <Request.h>
+#include <SendPacket.h>
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
     class Blackboard;
 
-    class ApiShell : public CommandBase {
+    class ApiShell : public Request {
     public:
-        ApiShell(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::api_and_shell, req, bluetoothSOC } {
+        ApiShell(Blackboard& bb, SendPacket& req) :
+            Request {  bb,  Devices::api_and_shell, req, bluetoothSOC } {
         }
         ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;

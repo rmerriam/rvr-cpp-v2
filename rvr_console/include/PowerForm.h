@@ -22,7 +22,7 @@ using namespace scr;
 class PowerForm : public FormBase {
 
 public:
-    PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
+    PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req);
 
     virtual void onceData() override;
 

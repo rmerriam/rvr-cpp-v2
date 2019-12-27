@@ -23,18 +23,18 @@
 //
 //======================================================================================================================
 
+#include <Request.h>
+#include <SendPacket.h>
 #include "Blackboard.h"
-#include "Request.h"
-#include "CommandBase.h"
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
     class Blackboard;
 
-    class Power : protected CommandBase {
+    class Power : protected Request {
 
     public:
-        Power(Blackboard& bb, Request& req) :
-            CommandBase {  bb,  Devices::power, req, nordic } {
+        Power(Blackboard& bb, SendPacket& req) :
+            Request {  bb,  Devices::power, req, nordic } {
         }
         enum VoltageType : uint8_t {
             CalibratedFiltered = 0, //
@@ -118,35 +118,35 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::awake(CommandResponse const want_resp) const {
-        cmdBasic(wake, want_resp);
+        basic(wake, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::powerOff(uint8_t const secs, CommandResponse const want_resp) const {
-        cmdByte(power_off, secs, want_resp);
+        reqByte(power_off, secs, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::sleep(CommandResponse const want_resp) const {
-        cmdBasic(snooze, want_resp);
+        basic(snooze, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryPercentage(CommandResponse const want_resp) const {
-        cmdBasic(get_battery_percentage, want_resp);
+        basic(get_battery_percentage, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltageState(CommandResponse const want_resp) const {
-        cmdBasic(get_battery_voltage_state, want_resp);
+        basic(get_battery_voltage_state, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltage(VoltageType const vt, CommandResponse const want_resp) const {
-        cmdByteId(get_battery_voltage_in_volts, vt, want_resp);
+        byteId(get_battery_voltage_in_volts, vt, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryVoltThresholds(CommandResponse const want_resp) const {
-        cmdBasic(get_battery_voltage_state_thresholds, want_resp);
+        basic(get_battery_voltage_state_thresholds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp) const {
-        cmdByteAltId(get_current_sense_amplifier_current, ms, want_resp);
+        byteAltId(get_current_sense_amplifier_current, ms, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void Power::enableBatteryStateChange(CommandResponse const want_resp) const {

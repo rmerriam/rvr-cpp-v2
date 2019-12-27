@@ -22,10 +22,10 @@
 //     Created: Oct 26, 2019
 //
 //======================================================================================================================
+#include <Request.h>
+#include <SendPacket.h>
 #include "enum.h"
 #include "Blackboard.h"
-#include "Request.h"
-#include "CommandBase.h"
 //----------------------------------------------------------------------------------------------------------------------
 /*
  * For sensor ranges see: ~/devr/nodejs/src/modules/controls/v1.0/sensor-control.ts
@@ -36,11 +36,11 @@ namespace rvr {
 
     class Blackboard;
 
-    class SensorsDirect : protected CommandBase {
+    class SensorsDirect : protected Request {
 
     public:
-        SensorsDirect(Blackboard& bb, Request& req) :
-            CommandBase { bb, Devices::sensors, req, bluetoothSOC } {
+        SensorsDirect(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::sensors, req, bluetoothSOC } {
         }
 
         SensorsDirect(SensorsDirect const& other) = delete;
@@ -162,11 +162,11 @@ namespace rvr {
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::setLocatorFlags(bool const flag, CommandResponse const want_resp) const {
-        cmdByte(set_locator_flags, flag, want_resp);
+        reqByte(set_locator_flags, flag, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetLocatorXY(CommandResponse const want_resp) const {
-        cmdBasic(reset_locator_x_and_y, want_resp);
+        basic(reset_locator_x_and_y, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableGyroMaxNotify(CommandResponse const want_resp) const {
@@ -178,18 +178,18 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getLeftMotorTemp(CommandResponse const want_resp) const {
-        cmdByteId(get_temperature, 0x04, want_resp);
+        byteId(get_temperature, 0x04, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getRightMotorTemp(CommandResponse const want_resp) const {
-        cmdByteId(get_temperature, 0x05, want_resp);
+        byteId(get_temperature, 0x05, want_resp);
     }
     inline void SensorsDirect::getRgbcSensorValue(CommandResponse const want_resp) const {
-        cmdBasicAlt(get_rgbc_sensor_values, want_resp);
+        basicAlt(get_rgbc_sensor_values, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getThermalProtectionStatus(CommandResponse const want_resp) const {
-        cmdBasic(get_motor_thermal_protection_status, want_resp);
+        basic(get_motor_thermal_protection_status, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableThermalProtectionNotify(CommandResponse const want_resp) const {
@@ -201,11 +201,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getAmbienLightSensorValue(CommandResponse const want_resp) const {
-        cmdBasicAlt(get_ambient_light_sensor_value, want_resp);
+        basicAlt(get_ambient_light_sensor_value, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getCurrentDectectedColor(CommandResponse const want_resp) const {
-        cmdBasicAlt(get_current_detected_color_reading, want_resp);
+        basicAlt(get_current_detected_color_reading, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetection(CommandResponse const want_resp) const {

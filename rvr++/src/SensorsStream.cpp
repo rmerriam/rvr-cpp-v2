@@ -39,11 +39,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::startStreamingNordic(uint16_t const millis, CommandResponse const want_resp) {
-        cmdInt(start_streaming_service, millis, want_resp);
+        reqInt(start_streaming_service, millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::startStreamingBT(uint16_t const millis, CommandResponse const want_resp) {
-        cmdIntAlt(start_streaming_service, millis, want_resp);
+        reqIntAlt(start_streaming_service, millis, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::enableStreaming(uint16_t const millis, CommandResponse const want_resp) {
@@ -52,11 +52,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::disableStreamingNordic(CommandResponse const want_resp) {
-        cmdBasic(stop_streaming_service, want_resp);
+        basic(stop_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::disableStreamingBT(CommandResponse const want_resp) {
-        cmdBasicAlt(stop_streaming_service, want_resp);
+        basicAlt(stop_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::disableStreaming(CommandResponse const want_resp) {
@@ -65,11 +65,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::clearStreamingNordic(CommandResponse const want_resp) {
-        cmdBasic(clear_streaming_service, want_resp);
+        basic(clear_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::clearStreamingBT(CommandResponse const want_resp) {
-        cmdBasicAlt(clear_streaming_service, want_resp);
+        basicAlt(clear_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::clearStreaming(CommandResponse const want_resp) {

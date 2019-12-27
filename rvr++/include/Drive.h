@@ -1,5 +1,7 @@
 #ifndef DRIVE_H_
 #define DRIVE_H_
+#include <Request.h>
+#include <SendPacket.h>
 #include <tuple>
 
 //======================================================================================================================
@@ -25,16 +27,14 @@
 //
 //======================================================================================================================
 #include "Blackboard.h"
-#include "Request.h"
-#include "CommandBase.h"
 
 namespace rvr {
 
-    class Drive : protected CommandBase {
+    class Drive : protected Request {
 
     public:
-        Drive(Blackboard& bb, Request& req) :
-            CommandBase { bb, Devices::drive, req, bluetoothSOC } {
+        Drive(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::drive, req, bluetoothSOC } {
         }
         Drive(Drive&& other) = delete;
         Drive(Drive const& other) = delete;

@@ -27,7 +27,7 @@ namespace rvr {
     
 
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd) {
+    std::string SystemInfo::versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsg const& msg { mBlackboard.msgValue(target, mDevice, cmd) };
 
         std::string ver { };

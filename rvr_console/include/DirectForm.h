@@ -21,7 +21,7 @@ using namespace scr;
 //--------------------------------------------------------------------------------------------------------------------------
 class DirectForm : public FormBase {
 public:
-    DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
+    DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req);
     ~DirectForm();
 
     virtual void fastData() override;

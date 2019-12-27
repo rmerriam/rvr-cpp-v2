@@ -43,21 +43,21 @@ using namespace std::literals;
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
 mys::TraceStart tout { std::cout };
-//rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
     terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed << std::boolalpha;
 
     SerialPort serial { argv[1], 115200 };
-    rvr::Request req { serial };
+    rvr::SendPacket req { serial };
+    rvr::ReadPacket in_packet { serial };
     rvr::Blackboard bb;
 
     //---------------------------------------------------------------------------------------------------------------------
     //  Setup the thread to read responses
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
-    rvr::Response resp { serial, bb, end_future };
+    rvr::Response resp { in_packet, bb, end_future };
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[]) {
     std::this_thread::sleep_for(500ms);
     //---------------------------------------------------------------------------------------------------------------------
     try {
-#if 1
+#if 0
         //---------------------------------------------------------------------------------------------------------------------
         //  Setup the LED handling
         rvr::IoLed led(bb, req);
@@ -100,14 +100,14 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(5000ms);
 
 #endif
-#if 0
+#if 1
         // Direct reading of sensors
         rvr::SensorsDirect sen_d(bb, req);
 
-        sen_d.enableGyroMaxNotify(RespYes);
+        sen_d.enableGyroMaxNotify();
 
-        sen_d.resetLocatorXY(RespYes);
-        sen_d.setLocatorFlags(true, RespYes);   // set/reset? special id flags
+        sen_d.resetLocatorXY();
+        sen_d.setLocatorFlags(true);   // set/reset? special id flags
 
         sen_d.enableColorDetection();   // must preceed color detection to turn on bottom LEDs
         std::this_thread::sleep_for(50ms);
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
         sen_d.getAmbienLightSensorValue();
 
         sen_d.enableColorDetectionNotify(true, 100, 0);
-        std::this_thread::sleep_for(500ms);
+//        std::this_thread::sleep_for(500ms);
         sen_d.getCurrentDectectedColor();
 
         sen_d.getLeftMotorTemp();
@@ -170,8 +170,8 @@ int main(int argc, char* argv[]) {
 #if 0
         //  Streaming data from sensors
         rvr::SensorsStream sen_s(bb, req);
-        sen_s.disableStreaming(RespYes);
-        sen_s.clearStreaming(RespYes);
+        sen_s.disableStreaming();
+        sen_s.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
         rvr::Drive drive(bb, req);
@@ -185,14 +185,14 @@ int main(int argc, char* argv[]) {
         terr << code_loc;
         terr << code_loc;
 
-//        sen_s.ambientConfig(RespYes);
-//    sen_s.colorConfig(RespYes);
-//    sen_s.coreNordicConfig(RespYes);
-//    sen_s.coreBTConfig(RespYes);
+//        sen_s.ambientConfig();
+//    sen_s.colorConfig();
+//    sen_s.coreNordicConfig();
+//    sen_s.coreBTConfig();
 
-        sen_s.streamImuAccelGyro(RespYes);
-        sen_s.streamSpeedVelocityLocator(RespYes);
-        sen_s.streamQuaternion(RespYes);
+        sen_s.streamImuAccelGyro();
+        sen_s.streamSpeedVelocityLocator();
+        sen_s.streamQuaternion();
 
         terr << code_loc;
         terr << code_loc;
@@ -202,14 +202,14 @@ int main(int argc, char* argv[]) {
         sen_s.startStreamingNordic(50);
         std::this_thread::sleep_for(1500ms);
 
-        //    sen_s.disableStreamingNordic(RespYes);
-        //    sen_s.clearStreamingNordic(RespYes);
+        //    sen_s.disableStreamingNordic();
+        //    sen_s.clearStreamingNordic();
         //
-        //    sen_s.disableStreamingBT(RespYes);
-        //    sen_s.clearStreamingBT(RespYes);
+        //    sen_s.disableStreamingBT();
+        //    sen_s.clearStreamingBT();
 
-        sen_s.disableStreaming(RespYes);
-        sen_s.clearStreaming(RespYes);
+        sen_s.disableStreaming();
+        sen_s.clearStreaming();
 
         terr << code_loc << mys::nl;
         terr << code_loc << "Streaming";
@@ -250,7 +250,7 @@ int main(int argc, char* argv[]) {
         pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
         pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
 
-        pow.enableBatteryStateChange(RespYes);
+        pow.enableBatteryStateChange();
 
         pow.batteryVoltThresholds();
         pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
@@ -306,10 +306,10 @@ int main(int argc, char* argv[]) {
     rvr::Drive drive(bb, req);
     rvr::SensorsStream sen_s(bb, req);
 
-    drive.resetYaw(RespYes);
+    drive.resetYaw();
 //    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 //
-//    drive.stop(90, RespYes);
+//    drive.stop(90, );
 //    std::this_thread::sleep_for(std::chrono::milliseconds(100000));
 
     drive.driveWithHeading(0, 90);
@@ -322,19 +322,19 @@ int main(int argc, char* argv[]) {
         terr << code_loc << "locator: " << l_x << mys::sp << l_y;
     }
 
-//    drive.driveWithHeading(0, 20, RespYes);
+//    drive.driveWithHeading(0, 20, );
 //    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 //
-//    drive.resetYaw(RespYes);
+//    drive.resetYaw();
 //    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 //
-//    drive.enableMotorStallNotify(RespYes);
-//    drive.enableMotorFaultNotify(RespYes);
+//    drive.enableMotorStallNotify();
+//    drive.enableMotorFaultNotify();
 //
-//    drive.disableMotorStallNotify(RespYes);
-//    drive.disableMotorFaultNotify(RespYes);
+//    drive.disableMotorStallNotify();
+//    drive.disableMotorFaultNotify();
 //
-//    drive.getMotorFault(RespYes);
+//    drive.getMotorFault();
 //
 //    std::this_thread::sleep_for(100ms);
 //

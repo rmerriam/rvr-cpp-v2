@@ -26,20 +26,34 @@
 #include "Packet.h"
 
 namespace rvr {
-    enum VoltageType : uint8_t {
-        CalibratedFiltered = 0, CalibratedUnfiltered = 1, UncalibratedUnfiltered = 2,
-    };
-    enum ThermalStatus : uint8_t {
-        okay, warn, critical
-    };
-
+    // general structs used for data return
     struct TripleFloat {
         float x;
         float y;
         float z;
     };
+    struct DoubleFloat {
+        float x;
+        float y;
+    };
+
     using AccelData = TripleFloat;
     using GyroData = TripleFloat;
+    using LocatorData = DoubleFloat;
+    using VelocityData = DoubleFloat;
+
+    struct ImuData {
+        float pitch;
+        float roll;
+        float yaw;
+    };
+
+    struct QuatData {
+        float w;
+        float x;
+        float y;
+        float z;
+    };
 
     struct ColorData {
         uint16_t red;
@@ -56,24 +70,15 @@ namespace rvr {
         uint8_t classification;
     };
 
-    struct ImuData {
-        float pitch;
-        float roll;
-        float yaw;
+    enum VoltageType : uint8_t {
+        CalibratedFiltered = 0, //
+        CalibratedUnfiltered = 1,  //
+        UncalibratedUnfiltered = 2,
     };
-
-    struct DoubleFloat {
-        float x;
-        float y;
-    };
-    using LocatorData = DoubleFloat;
-    using VelocityData = DoubleFloat;
-
-    struct QuatData {
-        float w;
-        float x;
-        float y;
-        float z;
+    enum ThermalStatus : uint8_t {
+        okay,  //
+        warn,  //
+        critical
     };
 
     struct ThermalProtection {
@@ -87,6 +92,10 @@ namespace rvr {
         resp_no = no_response, //
         resp_yes = request_response, //
         resp_on_error = request_error_response,
+    };
+    enum MotorIndexes : uint8_t {
+        left_motor_index = 0, //
+        right_motor_index = 1,
     };
 
 } // namespace rvr

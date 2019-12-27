@@ -65,9 +65,12 @@ namespace rvr {
         io_led = 0x1A,   //
     };
 
-    enum MotorIndexes : uint8_t {
-        left_motor_index = 0, //
-        right_motor_index = 1,
+    enum TargetPort : uint8_t {
+        nordic = 0x01,  //
+        bluetoothSOC = 0x02, //
+    };
+    enum SpecialSeq : uint8_t {
+        enable = 0x20, disable,
     };
 }
 

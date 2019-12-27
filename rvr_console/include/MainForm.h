@@ -35,7 +35,7 @@
 //--------------------------------------------------------------------------------------------------------------------------
 class MainForm {
 public:
-    MainForm(rvr::Blackboard& bb, rvr::Request& req);
+    MainForm(rvr::Blackboard& bb, rvr::SendPacket& req);
 
     MainForm(MainForm const& other) = delete;
     MainForm(MainForm&& other) = delete;
@@ -47,7 +47,7 @@ private:
     void updateRequests();
     void mouseEvent();
 
-    rvr::Request& mRequest;
+    rvr::SendPacket& mRequest;
 
     static constexpr int row { 0 };
 

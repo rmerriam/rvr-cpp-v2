@@ -23,7 +23,7 @@ using namespace scr;
 class SystemInfoForm : public FormBase {
 
 public:
-    SystemInfoForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
+    SystemInfoForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req);
 
     virtual void fastData() override;
     virtual void onceData() override;

@@ -22,7 +22,7 @@ using namespace scr;
 //--------------------------------------------------------------------------------------------------------------------------
 class StreamForm : public FormBase {
 public:
-    StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req);
+    StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req);
     ~StreamForm();
 
     virtual void updateScreen() override;

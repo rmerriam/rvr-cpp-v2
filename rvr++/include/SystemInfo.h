@@ -22,17 +22,17 @@
 //     Created: Oct 29, 2019
 //
 //======================================================================================================================
-#include "CommandBase.h"
+#include <Request.h>
 //----------------------------------------------------------------------------------------------------------------------
 using namespace std::literals;
 
 namespace rvr {
     class Blackboard;
 
-    class SystemInfo : protected CommandBase {
+    class SystemInfo : protected Request {
     public:
-        SystemInfo(Blackboard& bb, Request& req) :
-            CommandBase { bb, Devices::system, req, bluetoothSOC } {
+        SystemInfo(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::system, req, bluetoothSOC } {
         }
         SystemInfo(SystemInfo const& other) = delete;
         SystemInfo(SystemInfo&& other) = delete;
@@ -71,42 +71,42 @@ namespace rvr {
             get_core_up_time_in_milliseconds = 0x39, //
         };
 
-        std::string versionValue(rvr::CommandBase::TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::string versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {
-        cmdBasic(get_main_application_version, want_resp);
-        cmdBasicAlt(get_main_application_version, want_resp);
+        basic(get_main_application_version, want_resp);
+        basicAlt(get_main_application_version, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getBootloaderVersion(CommandResponse const want_resp) {
-        cmdBasic(get_bootloader_version, want_resp);
-        cmdBasicAlt(get_bootloader_version, want_resp);
+        basic(get_bootloader_version, want_resp);
+        basicAlt(get_bootloader_version, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getBoardRevision(CommandResponse const want_resp) {
-        cmdBasicAlt(get_board_revision, want_resp);
+        basicAlt(get_board_revision, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMacId(CommandResponse const want_resp) {
-        cmdBasicAlt(get_mac_address, want_resp);
+        basicAlt(get_mac_address, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getStatsId(CommandResponse const want_resp) {
-        cmdBasicAlt(get_stats_id, want_resp);
+        basicAlt(get_stats_id, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getProcessorName(CommandResponse const want_resp) {
-        cmdBasic(get_processor_name, want_resp);
-        cmdBasicAlt(get_processor_name, want_resp);
+        basic(get_processor_name, want_resp);
+        basicAlt(get_processor_name, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getCoreUpTime(CommandResponse const want_resp) {
-        cmdBasic(get_core_up_time_in_milliseconds, want_resp);
+        basic(get_core_up_time_in_milliseconds, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getSku(CommandResponse const want_resp) {
-        cmdBasicAlt(get_sku, want_resp);
+        basicAlt(get_sku, want_resp);
     }
 
 } /* namespace rvr */

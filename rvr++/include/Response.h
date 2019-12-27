@@ -25,13 +25,11 @@
 #include <future>
 #include <unordered_map>
 
-#include "Blackboard.h"
-#include "ReadPacket.h"
-
 namespace rvr {
+    class ReadPacket;
     class Blackboard;
 
-    class Response : public ReadPacket {
+    class Response {
     public:
         enum ErrorCode : uint8_t {
             success = 0x00,
@@ -47,8 +45,8 @@ namespace rvr {
             target_unavailable = 0x0A,
         };
 
-        Response(SerialPort& s, Blackboard& bb, std::shared_future<void> end) :
-            ReadPacket { s }, mBlackboard { bb }, mEnd { end } {
+        Response(ReadPacket& r, Blackboard& bb, std::shared_future<void> end) :
+            mReadPacket { r }, mBlackboard { bb }, mStop { end } {
         }
         Response(Response const& other) = delete;
         Response(Response&& other) = default;
@@ -59,12 +57,13 @@ namespace rvr {
         void decode(RvrMsg packet);
 
     private:
+        ReadPacket& mReadPacket;
         Blackboard& mBlackboard;
 
         void decode_flags(uint8_t const f);
         void decode_error(auto err_byte);
 
-        std::shared_future<void> mEnd;
+        std::shared_future<void> mStop;
     };
 
 } /* namespace rvr */

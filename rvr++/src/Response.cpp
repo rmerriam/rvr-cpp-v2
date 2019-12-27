@@ -28,8 +28,9 @@
 
 namespace rvr {
 
-    using DeviceDecoder = std::unordered_map <uint8_t, std::string>;
-    DeviceDecoder device_names { //
+    using DeviceNames = std::unordered_map <uint8_t, std::string>;
+
+    DeviceNames device_names { //
     { 0x10, "api_and_shell" }, //
     { 0x11, "system" }, //
     { 0x13, "power" }, //
@@ -44,8 +45,8 @@ namespace rvr {
         rvr::RvrMsg packet;
         in.reserve(80);
 
-        while (mEnd.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
-            read(in, packet);
+        while (mStop.wait_for(std::chrono::milliseconds(0)) != std::future_status::ready) {
+            mReadPacket.read(in, packet);
 
             if ( !packet.empty()) {
                 terr << code_loc << "pkt: " << std::hex << packet;
@@ -138,7 +139,7 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
 
-        // typeical positions of header bytes when target not present, the usual case
+        // typical positions of header bytes when target not present, the usual case
         uint8_t flags { 0x00 };   //
 //        uint8_t targ { 0x01 };   // usually not present
         uint8_t src { 0x01 };     //
@@ -163,7 +164,7 @@ namespace rvr {
 
         std::string device = device_names[packet[dev]];
 
-        Blackboard::key_t key { mBlackboard.msgKey(CommandBase::TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
+        Blackboard::key_t key { mBlackboard.msgKey(TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
 
         std::string command { mBlackboard.entryName(key) };
 

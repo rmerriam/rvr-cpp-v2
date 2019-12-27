@@ -16,7 +16,7 @@ using namespace scr;
 
 extern std::string n;
 //--------------------------------------------------------------------------------------------------------------------------
-DirectForm::DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
+DirectForm::DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req) :
     FormBase(y, x), mSensors { bb, req } {
 
     mSensors.resetColorDetectionNotify();

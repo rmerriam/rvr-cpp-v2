@@ -12,8 +12,10 @@ using namespace scr;
 #include "PowerForm.h"
 
 //--------------------------------------------------------------------------------------------------------------------------
-PowerForm::PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request& req) :
+PowerForm::PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPacket& req) :
     FormBase(y, x), mPow { bb, req } {
+
+    mPow.awake();
 
     uint8_t item_row { 2 };
     constexpr int width { 17 };
@@ -48,7 +50,6 @@ PowerForm::PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::Request
     mWakeNotify->invertText();
 
     mForm.init();
-    mPow.awake();
 }
 //--------------------------------------------------------------------------------------------------------------------------
 void PowerForm::onceData() {

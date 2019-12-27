@@ -26,7 +26,7 @@
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::getMotorFault(CommandResponse const want_resp) const {
-        cmdBasic(get_motor_fault_state, want_resp);
+        basic(get_motor_fault_state, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::enableMotorFaultNotify(CommandResponse const want_resp) const {
@@ -46,7 +46,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::resetYaw(CommandResponse const want_resp) const {
-        cmdBasic(reset_yaw, want_resp);
+        basic(reset_yaw, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::tuple<unsigned char, unsigned char> const Drive::speed_mode(double const& speed) const {
