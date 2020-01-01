@@ -31,15 +31,14 @@ using namespace std::literals;
 #include "Trace.h"
 
 #include "Blackboard.h"
+#include "SendPacket.h"
 #include "SensorsDirect.h"
-
-using Sense = rvr::SensorsDirect;
 //---------------------------------------------------------------------------------------------------------------------
-extern rvr::Request* request;
+extern rvr::SendPacket* packet_send;
+extern rvr::Blackboard* blackboard;
 
 struct sense_test_data {
-    rvr::Blackboard* bb;
-    rvr::SensorsDirect sense { *bb, *request };
+    rvr::SensorsDirect sense { *blackboard, *packet_send };
 };
 //=====================================================================================================================
 namespace tut {

@@ -35,11 +35,12 @@ using namespace std::literals;
 
 using Pow = rvr::Power;
 //---------------------------------------------------------------------------------------------------------------------
-extern rvr::Request* request;
+extern rvr::SendPacket* packet_send;
+extern rvr::Blackboard* blackboard;
 
 struct pow_test_data {
     rvr::Blackboard* bb;
-    rvr::Power pow { *bb, *request };
+    rvr::Power pow { *bb, *packet_send };
 };
 //=====================================================================================================================
 namespace tut {

@@ -97,17 +97,17 @@ namespace rvr {
 
         //  Methods to access data
 
-        bool isGyroMaxNotifyEnabled() const;
-        bool isThermalProtectionNotifyEnabled() const;
-        bool isColorDetectionEnabled() const;
-        bool isColorDetectionNotifyEnabled() const;
+        std::optional<bool> isGyroMaxNotifyEnabled() const;
+        std::optional<bool> isThermalProtectionNotifyEnabled() const;
+        std::optional<bool> isColorDetectionEnabled() const;
+        std::optional<bool> isColorDetectionNotifyEnabled() const;
 
-        float ambient() const;
-        float leftMotorTemp() const;
-        float rightMotorTemp() const;
-        ColorData currentRGBValues();
-        ColorDetection colorDetectionValues();
-        ThermalProtection thermalProtectionValues();
+        std::optional<float> ambient() const;
+        std::optional<float> leftMotorTemp() const;
+        std::optional<float> rightMotorTemp() const;
+        std::optional<ColorData> currentRGBValues();
+        std::optional<ColorDetection> colorDetectionValues();
+        std::optional<ThermalProtection> thermalProtectionValues();
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
@@ -224,32 +224,32 @@ namespace rvr {
                      static_cast<uint8_t>(timer & 0xFF), confidence };
         mRequest.send(msg);
     }
-
-    inline bool SensorsDirect::isGyroMaxNotifyEnabled() const {
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::optional<bool> SensorsDirect::isGyroMaxNotifyEnabled() const {
         return mBlackboard.getNotify(mTarget, mDevice, enable_gyro_max_notify);
     }
-
-    inline bool SensorsDirect::isThermalProtectionNotifyEnabled() const {
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::optional<bool> SensorsDirect::isThermalProtectionNotifyEnabled() const {
         return mBlackboard.getNotify(mTarget, mDevice, enable_motor_thermal_protection_status_notify);
     }
-
-    inline bool SensorsDirect::isColorDetectionEnabled() const {
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::optional<bool> SensorsDirect::isColorDetectionEnabled() const {
         return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection);
     }
-
-    inline bool SensorsDirect::isColorDetectionNotifyEnabled() const {
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::optional<bool> SensorsDirect::isColorDetectionNotifyEnabled() const {
         return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline float SensorsDirect::ambient() const {
+    inline std::optional<float> SensorsDirect::ambient() const {
         return mBlackboard.floatValue(mAltTarget, mDevice, get_ambient_light_sensor_value);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline float SensorsDirect::leftMotorTemp() const {
+    inline std::optional<float> SensorsDirect::leftMotorTemp() const {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 4);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline float SensorsDirect::rightMotorTemp() const {
+    inline std::optional<float> SensorsDirect::rightMotorTemp() const {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 5);
     }
     //----------------------------------------------------------------------------------------------------------------------

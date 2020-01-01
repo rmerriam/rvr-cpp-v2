@@ -68,9 +68,9 @@ DirectForm::~DirectForm() {
 //--------------------------------------------------------------------------------------------------------------------------
 void DirectForm::requestData() {
 
+    mSensors.enableColorDetection();
     mSensors.enableColorDetectionNotify(true, 100, 0);
 
-    mSensors.enableColorDetection();
     mSensors.getRgbcSensorValue();
     mSensors.getAmbienLightSensorValue();
 
@@ -96,14 +96,13 @@ void DirectForm::updateScreen() {
     mColorDetection->setData(mSensors.isColorDetectionEnabled());
     mColorDetectionNotify->setData(mSensors.isColorDetectionNotifyEnabled());
 
-    auto [r, g, b, c] = mSensors.currentRGBValues();
+    auto [r, g, b, c] { mSensors.currentRGBValues().value_or(rvr::ColorData { }) };
     mRgbSensorRed->setData(r);
     mRgbSensorGrn->setData(g);
     mRgbSensorBlue->setData(b);
     mRgbConfidence->setData(c);
 
-    auto [d_r, d_g, d_b, conf, classification] = mSensors.colorDetectionValues();
-
+    auto [d_r, d_g, d_b, conf, classification] { mSensors.colorDetectionValues().value_or(rvr::ColorDetection { }) };
     mRgbDetectRed->setData(d_r);
     mRgbDetectGrn->setData(d_g);
     mRgbDetectBlue->setData(d_b);
@@ -113,10 +112,10 @@ void DirectForm::updateScreen() {
     mLeftMotorTemp->setData(mSensors.leftMotorTemp());
     mRightMotorTemp->setData(mSensors.rightMotorTemp());
 
-    auto [left_temp, left_status, right_temp, right_status] = mSensors.thermalProtectionValues();
-//
-    mThermalProtectionNotify->setData(mSensors.isThermalProtectionNotifyEnabled());
     static std::string const thermal_status[] { "okay", "warn", "critical" };
+
+    auto [left_temp, left_status, right_temp, right_status] { mSensors.thermalProtectionValues().value_or(rvr::ThermalProtection { }) };
+    mThermalProtectionNotify->setData(mSensors.isThermalProtectionNotifyEnabled());
     mLeftMotorThermal->setData(left_temp);
     mLeftMotorStatus->setData(thermal_status[left_status]);
     mRightMotorThermal->setData(right_temp);

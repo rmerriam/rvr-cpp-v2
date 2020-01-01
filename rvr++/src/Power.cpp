@@ -26,56 +26,56 @@ namespace rvr {
     //======================================================================================================================
     // data access methods
     //----------------------------------------------------------------------------------------------------------------------
-    int Power::batteryPercent() {
+    std::optional<int> Power::batteryPercent() {
         return mBlackboard.byteValue(mTarget, mDevice, get_battery_percentage);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::motorCurrent(MotorSide const ms) {
+    std::optional<float> Power::motorCurrent(MotorSide const ms) {
         return mBlackboard.floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, 0, ms);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltsCalibratedFiltered() {
+    std::optional<float> Power::voltsCalibratedFiltered() {
         return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedFiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltsCalibratedUnfiltered() {
+    std::optional<float> Power::voltsCalibratedUnfiltered() {
         return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedUnfiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltsUncalibratedUnfiltered() {
+    std::optional<float> Power::voltsUncalibratedUnfiltered() {
         return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, UncalibratedUnfiltered);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    Power::BatteryVoltState Power::voltState() {
-        return static_cast<BatteryVoltState>(mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state));
+    std::optional<Power::BatteryVoltState> Power::voltState() {
+        return static_cast<BatteryVoltState>(mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).value());
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string Power::voltStateText() {
+    std::optional<std::string> Power::voltStateText() {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        return state[mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state)];
+        return state[mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).value()];
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltThresholdCritical() {
+    std::optional<float> Power::voltThresholdCritical() {
         return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltThresholdLow() {
+    std::optional<float> Power::voltThresholdLow() {
         return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 1);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Power::voltThresholdHysteresis() {
+    std::optional<float> Power::voltThresholdHysteresis() {
         return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 2);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Power::isBatteryStateChangeEnabled() {
+    std::optional<bool> Power::isBatteryStateChangeEnabled() {
         return mBlackboard.getNotify(mTarget, mDevice, enable_battery_voltage_state_change_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Power::isDidSleepNotify() {
+    std::optional<bool> Power::isDidSleepNotify() {
         return mBlackboard.notifyState(mTarget, mDevice, did_sleep_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Power::isWakeNotify() {
+    std::optional<bool> Power::isWakeNotify() {
         return mBlackboard.notifyState(mTarget, mDevice, system_awake_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------

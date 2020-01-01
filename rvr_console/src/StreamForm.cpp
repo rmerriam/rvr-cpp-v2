@@ -81,29 +81,29 @@ StreamForm::~StreamForm() {
 void StreamForm::updateScreen() {
     mAmbient->setData(mStream.ambient());
 
-    auto [a_x, a_y, a_z] = mStream.accelerometer();
+    auto [a_x, a_y, a_z] { mStream.accelerometer().value_or(rvr::AccelData { }) };
     mAccelX->setData(a_x);
     mAccelY->setData(a_y);
     mAccelZ->setData(a_z);
 
+    auto [g_x, g_y, g_z] { mStream.gyroscope().value_or(rvr::GyroData { }) };
     mGyroMaxNotify->setData(mSensors.isGyroMaxNotifyEnabled());
-    auto [g_x, g_y, g_z] = mStream.gyroscope();
     mGyroX->setData(g_x);
     mGyroY->setData(g_y);
     mGyroZ->setData(g_z);
 
-    auto [i_x, i_y, i_z] = mStream.imu();
+    auto [i_x, i_y, i_z] { mStream.imu().value_or(rvr::ImuData { }) };
     mRoll->setData(i_x);
     mPitch->setData(i_y);
     mYaw->setData(i_z);
 
-    auto [l_x, l_y] = mStream.locator();
+    auto [l_x, l_y] { mStream.locator().value_or(rvr::LocatorData { }) };
     mLocatorX->setData(l_x);
     mLocatorY->setData(l_y);
 
     mSpeed->setData(mStream.speed());
 
-    auto [v_x, v_y] = mStream.velocity();
+    auto [v_x, v_y] { mStream.velocity().value_or(rvr::VelocityData { }) };
     mVelocityX->setData(v_x);
     mVelocityY->setData(v_y);
 

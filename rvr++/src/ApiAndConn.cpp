@@ -29,9 +29,8 @@
 using namespace std::literals;
 
 namespace rvr {
-    
 
-    std::string Connection::name() {
+    std::optional<std::string> Connection::name() {
         return mBlackboard.stringValue(mTarget, mDevice, get_bluetooth_advertising_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -40,11 +39,11 @@ namespace rvr {
         cmdDataAlt(echo_cmd, data, resp_yes);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg ApiShell::echo() const {
+    RvrMsgRet_t ApiShell::echo() const {
         return mBlackboard.msgValue(mTarget, mDevice, echo_cmd);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg ApiShell::echoAlt() const {
+    RvrMsgRet_t ApiShell::echoAlt() const {
         return mBlackboard.msgValue(mAltTarget, mDevice, echo_cmd);
     }
 

@@ -22,6 +22,7 @@
 //======================================================================================================================
 #include <Request.h>
 #include <limits>
+#include <optional>
 #include <string_view>
 
 #include "Trace.h"
@@ -196,21 +197,20 @@ namespace rvr {
         return s;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg const& Blackboard::entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) const {
-        RvrMsg const& msg { entryValue(entryKey(target, dev, cmd, id)) };
-        return msg;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::addMsgValue(key_t const key, RvrMsg& value) {
         mDictionary[key].value = value;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg const& Blackboard::entryValue(key_t const key) const {
-
-        if (auto it = mDictionary.find(key); it != mDictionary.end()) {
+    RvrMsgRet_t Blackboard::entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) const {
+        RvrMsgRet_t msg_opt { entryValue(entryKey(target, dev, cmd, id)) };
+        return msg_opt;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    RvrMsgRet_t Blackboard::entryValue(key_t const key) const {
+        if (auto it = mDictionary.find(key); (it != mDictionary.end()) & ( !it->second.value.empty())) {
             return it->second.value;
         }
-        return fake_msg;
+        return {};
     }
     //======================================================================================================================
     //  Method to put RvrMsg data into dictionary
@@ -278,26 +278,27 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Blackboard::boolValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+    std::optional<bool> Blackboard::boolValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
         return (byteValue(target, dev, cmd) != 0);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Blackboard::byteValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { entryValue(target, dev, cmd) };
+    std::optional<uint8_t> Blackboard::byteValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
         uint8_t res { };
-        if (msg.size() >= sizeof(uint8_t)) {
-            res = msg[2];
+
+        if (msg) {
+            res = msg.value()[2];
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     // these two methods are for notifications that return a single 0xFF
-    bool Blackboard::notifyState(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { entryValue(target, dev, cmd) };
+    std::optional<bool> Blackboard::notifyState(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
 
         bool res { };
-        if (msg.size() >= 1) {
-            res = msg[0] != 0;
+        if (msg) {
+            res = msg.value()[0] != 0;
         }
         return res;
     }
@@ -306,77 +307,90 @@ namespace rvr {
         addMsgValue(entryKey(target, dev, cmd, 0), fake_msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint16_t Blackboard::uintValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
+    std::optional<uint16_t> Blackboard::uintValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
 
-        RvrMsg const& msg { entryValue(target, dev, cmd) };
-
-        auto begin { msg.begin() + 2 };
-        begin += (pos * sizeof(uint16_t));
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
 
         uint16_t res { };
-        //                if (msg.size() >= sizeof(uint16_t))
-        {
+        if (msg) {
+
+            auto begin { msg.value().begin() + 2 };
+            begin += (pos * sizeof(uint16_t));
+
             res = uintConvert(begin, sizeof(uint16_t));
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    int16_t Blackboard::intValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        return static_cast<int16_t>(uintValue(target, dev, cmd));
+    std::optional<int16_t> Blackboard::intValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        return static_cast<std::optional<int16_t>>(uintValue(target, dev, cmd));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint32_t Blackboard::uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos, uint8_t const id) {
-        RvrMsg const& msg { entryValue(target, dev, cmd, id) };
+    std::optional<uint32_t> Blackboard::uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos,
+        uint8_t const id) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
         uint32_t res { };
 
-        auto begin { msg.begin() + 2 };
-        begin += (pos * sizeof(uint32_t));
+        if (msg) {
+            auto begin { msg.value().begin() + 2 };
+            begin += (pos * sizeof(uint32_t));
 
-        if (msg.size() >= sizeof(uint32_t)) {
             res = uintConvert(begin, sizeof(uint32_t));
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint64_t Blackboard::uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { entryValue(target, dev, cmd) };
+    std::optional<uint64_t> Blackboard::uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
         uint64_t res { };
 
-        if (msg.size() >= sizeof(uint64_t)) {
-            res = uintConvert(msg.begin() + 2, sizeof(uint64_t));
+        if (msg) {
+            res = uintConvert(msg.value().begin() + 2, sizeof(uint64_t));
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    float Blackboard::floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const pos, uint8_t const id) {
-        RvrMsg const& msg { entryValue(target, dev, cmd, id) };
-
-        auto begin { msg.begin() + 2 };
-        begin += (pos * sizeof(float));
+    std::optional<float> Blackboard::floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const pos,
+        uint8_t const id) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
 
         float result { };
+        if (msg) {
+            auto begin { msg.value().begin() + 2 };
+            begin += (pos * sizeof(float));
 
-        result = floatConvert(begin);
-
+            result = floatConvert(begin);
+        }
         return result;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    bool Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg msg { entryValue(target, dev, cmd) };
-        if (msg.empty()) {
-            msg = fake_msg;
+    std::optional<bool> Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
+
+        bool res { };
+        if (msg) {
+            res = { msg.value()[1] != 0 };
         }
-        return msg[1] != 0;
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string Blackboard::stringValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { entryValue(target, dev, cmd) };
-        return std::string { msg.begin() + 2, msg.end() - 1 };                                     // response is a zero terminated C string
+    std::optional<std::string> Blackboard::stringValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
+        if (msg) {
+            return std::string { msg.value().begin() + 2, msg.value().end() - 1 }; // response is a zero terminated C string
+        }
+        return {};
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsg const Blackboard::msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
-        RvrMsg const& msg { entryValue(target, dev, cmd, id) };
-        return RvrMsg { msg.begin() + 2, msg.end() };
+    RvrMsgRet_t const Blackboard::msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
+//        terr << code_loc << std::hex << std::setw(2) << (int)target << (int)dev << (int)cmd << (int)id;
+
+        if (msg) {
+//            terr << code_loc << msg.value() << std::hex << target;
+            return RvrMsg { msg.value().begin() + 2, msg.value().end() };
+        }
+        return {};
     }
     //======================================================================================================================
     std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k) {

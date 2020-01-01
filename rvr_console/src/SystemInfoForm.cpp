@@ -77,7 +77,7 @@ void SystemInfoForm::updateScreen() {
     mBootVer->setData(mSys.bootVersion());
     mBootVer2->setData(mSys.bootVersion2());
 
-    std::string m { mSys.macAddress() };
+    std::string m { mSys.macAddress().value_or(std::string { 18 }) };
     mMacAddr1->setData(m.substr(0, 6));
     mMacAddr2->setData(m.substr(6, 6));
     mMacAddr3->setData(m.substr(12, 6));

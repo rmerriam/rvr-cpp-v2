@@ -69,6 +69,8 @@ void PowerForm::requestData() {
     mPow.batteryMotorCurrent(rvr::Power::left);
     mPow.batteryMotorCurrent(rvr::Power::right);
 }
+
+//--------------------------------------------------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------------------------------------------------
 void PowerForm::updateScreen() {
     mVoltState->setData(mPow.voltState());

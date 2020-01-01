@@ -31,7 +31,7 @@ namespace rvr {
     class Connection : protected Request {
     public:
         Connection(Blackboard& bb, SendPacket& req) :
-            Request {  bb,  Devices::connection, req, nordic } {
+            Request { bb, Devices::connection, req, nordic } {
         }
         Connection(Connection const& other) = delete;
         Connection(Connection&& other) = delete;
@@ -39,7 +39,7 @@ namespace rvr {
 
         void bluetoothName(CommandResponse const want_resp = resp_yes) const;
 
-        std::string name();
+        std::optional<std::string> name();
 
     private:
         enum Cmd : uint8_t {

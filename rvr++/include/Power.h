@@ -34,7 +34,7 @@ namespace rvr {
 
     public:
         Power(Blackboard& bb, SendPacket& req) :
-            Request {  bb,  Devices::power, req, nordic } {
+            Request { bb, Devices::power, req, nordic } {
         }
         enum VoltageType : uint8_t {
             CalibratedFiltered = 0, //
@@ -70,32 +70,32 @@ namespace rvr {
         //----------------------------------------------------------------------------------------------------------------------
         // Data access methods
 
-        int batteryPercent();
+        std::optional<int> batteryPercent();
 
         enum BatteryVoltState : uint8_t {
             unknown, ok, low, critical,
         };
-        BatteryVoltState voltState();
-        std::string voltStateText();
+        std::optional<BatteryVoltState> voltState();
+        std::optional<std::string> voltStateText();
 
         // batteryVoltage
-        float voltsCalibratedFiltered();
-        float voltsCalibratedUnfiltered();
-        float voltsUncalibratedUnfiltered();
+        std::optional<float> voltsCalibratedFiltered();
+        std::optional<float> voltsCalibratedUnfiltered();
+        std::optional<float> voltsUncalibratedUnfiltered();
 
         // batteryVoltThresholds
-        float voltThresholdCritical();
-        float voltThresholdLow();
-        float voltThresholdHysteresis();
+        std::optional<float> voltThresholdCritical();
+        std::optional<float> voltThresholdLow();
+        std::optional<float> voltThresholdHysteresis();
 
         // batteryMotorCurrent
-        float motorCurrent(MotorSide const ms);
+        std::optional<float> motorCurrent(MotorSide const ms);
 
-        bool isWakeNotify();
+        std::optional<bool> isWakeNotify();
         void resetWakeNotify();
 
-        bool isBatteryStateChangeEnabled();
-        bool isDidSleepNotify();
+        std::optional<bool> isBatteryStateChangeEnabled();
+        std::optional<bool> isDidSleepNotify();
 
     private:
 

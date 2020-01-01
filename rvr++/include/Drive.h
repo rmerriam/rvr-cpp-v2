@@ -56,15 +56,15 @@ namespace rvr {
 
         //======================================================================================================================
         // Access data
-        bool motorFaultState() const {
+        std::optional<bool> motorFaultState() const {
             return mBlackboard.boolValue(mTarget, mDevice, get_motor_fault_state);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        bool motorFaultNotifySet() const {
+        std::optional<bool> motorFaultNotifySet() const {
             return mBlackboard.notifyState(mTarget, mDevice, enable_motor_fault_notify);
         }
         //----------------------------------------------------------------------------------------------------------------------
-        bool motorStallNotifySet() const {
+        std::optional<bool> motorStallNotifySet() const {
             return mBlackboard.notifyState(mTarget, mDevice, enable_motor_stall_notify);
         }
 

@@ -35,12 +35,13 @@ using namespace std::literals;
 #include "Connection.h"
 
 //---------------------------------------------------------------------------------------------------------------------
-extern rvr::Request* request;
+extern rvr::SendPacket* packet_send;
+extern rvr::Blackboard* blackboard;
 
 struct api_test_data {
     rvr::Blackboard* bb;
-    rvr::ApiShell api { *bb, *request };
-    rvr::Connection cmd { *bb, *request };
+    rvr::ApiShell api { *bb, *packet_send };
+    rvr::Connection cmd { *bb, *packet_send };
 };
 //=====================================================================================================================
 namespace tut {

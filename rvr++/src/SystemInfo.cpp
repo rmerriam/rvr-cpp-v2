@@ -24,72 +24,71 @@
 #include "Blackboard.h"
 #include "SystemInfo.h"
 namespace rvr {
-    
 
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsg const& msg { mBlackboard.msgValue(target, mDevice, cmd) };
-
-        std::string ver { };
-        if (msg.size() >= 6) {
-            ver = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
+    std::optional<std::string> SystemInfo::versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t const& opt_msg { mBlackboard.msgValue(target, mDevice, cmd) };
+        if (opt_msg.has_value()) {
+            RvrMsg msg { opt_msg.value() };
+            return std::string { std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
                 std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
+                std::to_string(((msg[4] << 8) | msg[5])) };
         }
-        return ver;
+        return {};
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::processorName() {
+    std::optional<std::string> SystemInfo::processorName() {
         return mBlackboard.stringValue(mTarget, mDevice, get_processor_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::processorName2() {
+    std::optional<std::string> SystemInfo::processorName2() {
         return mBlackboard.stringValue(mAltTarget, mDevice, get_processor_name);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::sku() {
+    std::optional<std::string> SystemInfo::sku() {
         return mBlackboard.stringValue(mAltTarget, mDevice, get_sku);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::mainAppVersion() {
+    std::optional<std::string> SystemInfo::mainAppVersion() {
         return versionValue(mTarget, mDevice, get_main_application_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::mainAppVersion2() {
+    std::optional<std::string> SystemInfo::mainAppVersion2() {
         return versionValue(mAltTarget, mDevice, get_main_application_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::bootVersion() {
+    std::optional<std::string> SystemInfo::bootVersion() {
         return versionValue(mTarget, mDevice, get_bootloader_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::bootVersion2() {
+    std::optional<std::string> SystemInfo::bootVersion2() {
         return versionValue(mAltTarget, mDevice, get_bootloader_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    int64_t SystemInfo::boardVersion() {
+    std::optional<int64_t> SystemInfo::boardVersion() {
         return mBlackboard.byteValue(mAltTarget, mDevice, get_board_revision);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    std::string SystemInfo::macAddress() {
-        RvrMsg msg { mBlackboard.msgValue(mAltTarget, mDevice, get_mac_address) };
-        std::string mac { msg.begin(), msg.end() };
-        if (mac.size() == 12) {
+    std::optional<std::string> SystemInfo::macAddress() {
+        RvrMsgRet_t opt_msg { mBlackboard.msgValue(mAltTarget, mDevice, get_mac_address) };
+        if (opt_msg.has_value()) {
+            std::string mac { opt_msg.value().begin(), opt_msg.value().end() };
             static char const* colon { ":" };
             mac.insert(10, colon);
             mac.insert(8, colon);
             mac.insert(6, colon);
             mac.insert(4, colon);
             mac.insert(2, colon);
+            return mac;
         }
-        return mac;
+        return {};
     }
 //----------------------------------------------------------------------------------------------------------------------
-    int16_t SystemInfo::statsId() {
+    std::optional<int16_t> SystemInfo::statsId() {
         return mBlackboard.intValue(mAltTarget, mDevice, get_stats_id);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    int64_t SystemInfo::coreUpTime() {
+    std::optional<int64_t> SystemInfo::coreUpTime() {
         return mBlackboard.uint64Value(mTarget, mDevice, get_core_up_time_in_milliseconds);
     }
 

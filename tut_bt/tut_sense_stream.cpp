@@ -34,14 +34,14 @@ using namespace std::literals;
 #include "SensorsStream.h"
 
 using stream = rvr::SensorsStream;
-rvr::CommandBase::CommandResponse RespYes = rvr::CommandBase::resp_yes;
 
 //---------------------------------------------------------------------------------------------------------------------
-extern rvr::Request* request;
+extern rvr::SendPacket* packet_send;
+extern rvr::Blackboard* blackboard;
 
 struct stream_test_data {
     rvr::Blackboard* bb;
-    rvr::SensorsStream stream { *bb, *request };
+    rvr::SensorsStream stream { *bb, *packet_send };
 };
 //=====================================================================================================================
 namespace tut {
@@ -57,15 +57,15 @@ namespace tut {
     void stream_tests::test<1>() {
         set_test_name("accelConfig");
 //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.accelConfig();
+        stream.streamImuAccelGyro();
 
-        stream.enableStreaming(50, RespYes);
+        stream.enableStreaming(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreaming(RespYes);
+        stream.disableStreaming();
 
         auto [x, y, z] = stream.accelerometer();
         ensure_distance("Value bad SensorsStream::accelConfig x", x, 0.0f, 16.0f);
@@ -78,15 +78,15 @@ namespace tut {
     void stream_tests::test<2>() {
         set_test_name("ambientConfig");
 //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.ambientConfig();
+        stream.streamAmbient();
 
-        stream.enableStreaming(50, RespYes);
+        stream.enableStreaming(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreaming(RespYes);
+        stream.disableStreaming();
 
         ensure_equals("Value bad SensorsStream::ambientConfig", stream.ambient(), 12000.0 / 2, 120000.0 / 2);
     }
@@ -96,15 +96,15 @@ namespace tut {
     void stream_tests::test<3>() {
         set_test_name("gyroConfig");
 //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.gyroConfig();
+        stream.streamImuAccelGyro();
 
-        stream.enableStreaming(50, RespYes);
+        stream.enableStreaming(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreaming(RespYes);
+        stream.disableStreaming();
 
         auto [x, y, z] = stream.gyroscope();
         ensure_distance("Value bad SensorsStream::gyroConfig x", x, 0.0f, 2000.0f);
@@ -117,15 +117,15 @@ namespace tut {
     void stream_tests::test<4>() {
         set_test_name("imuConfig");
         //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.imuConfig();
+        stream.streamImuAccelGyro();
 
-        stream.enableStreaming(50, RespYes);
+        stream.enableStreaming(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreaming(RespYes);
+        stream.disableStreaming();
 
         auto [pitch, roll, yaw] = stream.imu();
         ensure_distance("Value bad SensorsStream::imuConfig pitch", pitch, 0.0f, 180.0f);
@@ -138,15 +138,15 @@ namespace tut {
     void stream_tests::test<5>() {
         set_test_name("quaternionConfig");
         //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.quaternionConfig();
+        stream.streamQuaternion();
 
-        stream.enableStreaming(50, RespYes);
+        stream.enableStreaming(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreaming(RespYes);
+        stream.disableStreaming();
 
         auto [w, x, y, z] = stream.quaternion();
         ensure_distance("Value bad SensorsStream::quaternionConfig w", w, 0.0f, 1.0f);
@@ -160,15 +160,15 @@ namespace tut {
     void stream_tests::test<6>() {
         set_test_name("locatorConfig");
 //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.locatorConfig();
+        stream.streamSpeedVelocityLocator();
 
-        stream.enableStreaming(50, RespYes);
+        stream.enableStreaming(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreaming(RespYes);
+        stream.disableStreaming();
 
         auto [x, y] = stream.locator();
         ensure_distance("Value bad SensorsStream::locatorConfig x", x, 0.0f, 16000.0f);
@@ -180,15 +180,15 @@ namespace tut {
     void stream_tests::test<7>() {
         set_test_name("speedConfig");
 //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.speedConfig();
+        stream.streamSpeedVelocityLocator();
 
-        stream.startStreamingNordic(50, RespYes);
+        stream.startStreamingNordic(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreamingBT(RespYes);
+        stream.disableStreamingBT();
 
         ensure_distance("Value bad SensorsStream::speedConfig", stream.speed(), 5.0f / 2, 5.0f);
     }
@@ -198,15 +198,15 @@ namespace tut {
     void stream_tests::test<8>() {
         set_test_name("velocityConfig");
 //        mys::TraceOn t_on(terr);
-        stream.clearStreaming(RespYes);
+        stream.clearStreaming();
         std::this_thread::sleep_for(50ms);
 
-        stream.velocityConfig();
+        stream.streamSpeedVelocityLocator();
 
-        stream.startStreamingBT(50, RespYes);
+        stream.startStreamingBT(50);
         std::this_thread::sleep_for(100ms);
 
-        stream.disableStreamingBT(RespYes);
+        stream.disableStreamingBT();
 
         auto [x, y] = stream.velocity();
         ensure_distance("Value bad SensorsStream::velocityConfig x", x, 0.0f, 5.0f);

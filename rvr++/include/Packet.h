@@ -34,6 +34,7 @@ using char_ptr = char const *;
 namespace rvr {
 
     using RvrMsg = std::basic_string<uint8_t>;
+    using RvrMsgRet_t = std::optional<RvrMsg>;
 
     enum flags : uint8_t {
         no_response = 0x00, //

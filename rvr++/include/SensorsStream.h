@@ -96,14 +96,14 @@ namespace rvr {
         // data access methods
         float normalize(uint32_t const value, float const out_min, float const out_max);
 
-        AccelData accelerometer();
-        float ambient();
-        GyroData gyroscope();
-        ImuData imu();
-        QuatData quaternion();
-        float speed();
-        VelocityData velocity();
-        LocatorData locator();
+        std::optional<AccelData> accelerometer();
+        std::optional<float> ambient();
+        std::optional<GyroData> gyroscope();
+        std::optional<ImuData> imu();
+        std::optional<QuatData> quaternion();
+        std::optional<float> speed();
+        std::optional<VelocityData> velocity();
+        std::optional<LocatorData> locator();
 
     private:
 

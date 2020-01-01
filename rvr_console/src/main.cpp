@@ -12,8 +12,6 @@
 #include <panel.h>
 #include <form.h>
 
-//using namespace scr;
-
 #include <Trace.h>
 #include <SerialPort.h>
 #include <Blackboard.h>

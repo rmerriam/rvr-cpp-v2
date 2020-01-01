@@ -48,11 +48,12 @@ int16_t stats { 23 };
 std::string proc { "ST" };
 std::string proc2 { "Nordic" };
 //---------------------------------------------------------------------------------------------------------------------
-extern rvr::Request* request;
+extern rvr::SendPacket* packet_send;
+extern rvr::Blackboard* blackboard;
 
 struct sys_test_data {
     rvr::Blackboard* bb;
-    rvr::SystemInfo sys { *bb, *request };
+    rvr::SystemInfo sys { *bb, *packet_send };
 };
 //=====================================================================================================================
 namespace tut {

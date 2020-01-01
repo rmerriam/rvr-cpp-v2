@@ -47,17 +47,17 @@ namespace rvr {
         void getSku(CommandResponse const want_resp = resp_yes);
         void getCoreUpTime(CommandResponse const want_resp = resp_yes);
 
-        int64_t boardVersion();
-        std::string bootVersion();
-        std::string bootVersion2();
-        std::string macAddress();
-        std::string mainAppVersion();
-        std::string mainAppVersion2();
-        std::string processorName();
-        std::string processorName2();
-        int16_t statsId();
-        std::string sku();
-        int64_t coreUpTime();
+        std::optional<int64_t> boardVersion();
+        std::optional<std::string> bootVersion();
+        std::optional<std::string> bootVersion2();
+        std::optional<std::string> macAddress();
+        std::optional<std::string> mainAppVersion();
+        std::optional<std::string> mainAppVersion2();
+        std::optional<std::string> processorName();
+        std::optional<std::string> processorName2();
+        std::optional<int16_t> statsId();
+        std::optional<std::string> sku();
+        std::optional<int64_t> coreUpTime();
 
     private:
         enum Cmd : uint8_t {
@@ -71,7 +71,7 @@ namespace rvr {
             get_core_up_time_in_milliseconds = 0x39, //
         };
 
-        std::string versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<std::string> versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {

@@ -10,6 +10,7 @@
 
 #include <charconv>
 #include <iostream>
+#include <optional>
 #include <string>
 using namespace std;
 
@@ -26,6 +27,12 @@ namespace scr {
 
         template <typename T>
         void setData(T const& data);
+
+        template <typename T>
+        void setData(std::optional<T> const& data);
+        void setData(std::optional<string> const& data);
+        void setData(std::optional<RvrMsg> const& data);
+
         void setData(string const& data);
         void setData(RvrMsg const& data);
         void setData(bool const& data);
@@ -37,6 +44,33 @@ namespace scr {
         string txt { to_string(data) };
         write(txt);
     }
+    //--------------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    inline void DataField::setData(std::optional<T> const& data) {
+        string txt { to_string((data ? data.value() : T { })) };
+        write(txt);
+    }
+    //--------------------------------------------------------------------------------------------------------------------------
+    inline void DataField::setData(std::optional<string> const& data) {
+        if (data) {
+            string txt { data.value().begin(), data.value().end() };
+            write(txt);
+        }
+        else {
+            write("");
+        }
+    }
+    //--------------------------------------------------------------------------------------------------------------------------
+    inline void DataField::setData(std::optional<RvrMsg> const& data) {
+        if (data) {
+            string txt { data.value().begin(), data.value().end() };
+            write(txt);
+        }
+        else {
+            write("");
+        }
+    }
+
 } /* namespace scr */
 
 #endif /* DataField_H_ */

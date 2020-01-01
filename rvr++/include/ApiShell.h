@@ -31,7 +31,7 @@ namespace rvr {
     class ApiShell : public Request {
     public:
         ApiShell(Blackboard& bb, SendPacket& req) :
-            Request {  bb,  Devices::api_and_shell, req, bluetoothSOC } {
+            Request { bb, Devices::api_and_shell, req, bluetoothSOC } {
         }
         ApiShell(ApiShell const& other) = delete;
         ApiShell(ApiShell&& other) = delete;
@@ -39,8 +39,8 @@ namespace rvr {
 
         void echo(RvrMsg const& data) const;
 
-        RvrMsg echo() const;
-        RvrMsg echoAlt() const;
+        RvrMsgRet_t echo() const;
+        RvrMsgRet_t echoAlt() const;
 
     private:
         enum Cmd : uint8_t {

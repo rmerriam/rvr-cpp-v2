@@ -42,23 +42,23 @@ namespace rvr {
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(Blackboard const& other) = delete;
 
-        bool boolValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        uint8_t byteValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        int16_t intValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        uint16_t uintValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
-        uint32_t uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
+        std::optional<bool> boolValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<uint8_t> byteValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<int16_t> intValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<uint16_t> uintValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
+        std::optional<uint32_t> uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
             uint8_t const id = 0);
-        uint64_t uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
-        float floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const = 0.0,
+        std::optional<uint64_t> uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<float> floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const = 0.0,
             uint8_t const id = 0);
 
-        bool notifyState(TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<bool> notifyState(TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        bool getNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
+        std::optional<bool> getNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
         void resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        std::string stringValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        RvrMsg const msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
+        std::optional<std::string> stringValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+        RvrMsgRet_t const msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
 
         void m_to_v();
 
@@ -106,8 +106,8 @@ namespace rvr {
 
         void addMsgValue(key_t const key, RvrMsg& value);
 
-        RvrMsg const& entryValue(key_t const key) const;
-        RvrMsg const& entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
+        RvrMsgRet_t entryValue(key_t const key) const;
+        RvrMsgRet_t entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
         static key_t entryKey(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
         // methods for processing received responses
 

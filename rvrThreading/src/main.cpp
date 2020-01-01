@@ -44,6 +44,16 @@ using namespace std::literals;
 mys::TraceStart terr { std::cerr };
 mys::TraceStart tout { std::cout };
 //---------------------------------------------------------------------------------------------------------------------
+template <typename T>
+void opt_output(std::string const& text, std::optional<T> v) {
+    terr << code_loc << text << mys::sp << (v ? v.value() : T { });
+}
+//---------------------------------------------------------------------------------------------------------------------
+template <typename T>
+void opt_output_hex(std::string const& text, std::optional<T> v) {
+    terr << code_loc << text << mys::sp << std::hex << (v ? v.value() : T { });
+}
+//---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
     terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed << std::boolalpha;
@@ -53,8 +63,8 @@ int main(int argc, char* argv[]) {
     rvr::ReadPacket in_packet { serial };
     rvr::Blackboard bb;
 
-    //---------------------------------------------------------------------------------------------------------------------
-    //  Setup the thread to read responses
+//---------------------------------------------------------------------------------------------------------------------
+//  Setup the thread to read responses
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
     rvr::Response resp { in_packet, bb, end_future };
@@ -65,7 +75,7 @@ int main(int argc, char* argv[]) {
 
     pow.awake();
     std::this_thread::sleep_for(500ms);
-    //---------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------
     try {
 #if 0
         //---------------------------------------------------------------------------------------------------------------------
@@ -100,7 +110,7 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(5000ms);
 
 #endif
-#if 1
+#if 0
         // Direct reading of sensors
         rvr::SensorsDirect sen_d(bb, req);
 
@@ -116,7 +126,6 @@ int main(int argc, char* argv[]) {
         sen_d.getAmbienLightSensorValue();
 
         sen_d.enableColorDetectionNotify(true, 100, 0);
-//        std::this_thread::sleep_for(500ms);
         sen_d.getCurrentDectectedColor();
 
         sen_d.getLeftMotorTemp();
@@ -125,30 +134,35 @@ int main(int argc, char* argv[]) {
         sen_d.getThermalProtectionStatus();
         sen_d.enableThermalProtectionNotify();  // responds when status changes
 
-        std::this_thread::sleep_for(50ms);
+        std::this_thread::sleep_for(150ms);
 
         terr << code_loc << mys::nl;
         terr << code_loc << "sense direct";
 
-        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
-        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
-        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
-        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
+        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
+        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
+        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().value();
+        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().value();
 
-        auto [c_r, c_g, c_b, c_c] = sen_d.currentRGBValues();
+        std::this_thread::sleep_for(50ms);
+
+        auto [c_r, c_g, c_b, c_c] { sen_d.currentRGBValues().value_or(rvr::ColorData { }) };
         terr << code_loc << "currentRGBValues: " << c_r << mys::sp << c_g << mys::sp << c_b << mys::sp << c_c << mys::sp;
 
-        auto [d_r, d_g, d_b, conf, classification] = sen_d.colorDetectionValues();
+        auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().value_or(rvr::ColorDetection { }) };
         terr << code_loc << "colorDetectionValues: " << (int)d_r << mys::sp << (int)d_g << mys::sp << (int)d_b << mys::sp  //
              << (int)conf << mys::sp << (int)classification << mys::sp;
 
-        auto [left_temp, left_status, right_temp, right_status] = sen_d.thermalProtectionValues();
+        auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().value_or(rvr::ThermalProtection { }) };
         terr << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
              << mys::sp << right_temp << mys::sp << (int)right_status;
 
-        terr << code_loc << "Ambient: " << sen_d.ambient();
-        terr << code_loc << "Left Temp: " << sen_d.leftMotorTemp();
-        terr << code_loc << "Right Temp: " << sen_d.rightMotorTemp();
+        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
+        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
+        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
+
+        terr << code_loc << "Left Temp: " << sen_d.leftMotorTemp().value();
+        terr << code_loc << "Right Temp: " << sen_d.rightMotorTemp().value();
         terr << code_loc << mys::nl;
 
         sen_d.enableColorDetectionNotify(false, 500, 0);
@@ -158,10 +172,10 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(50ms);
 
         terr << code_loc << mys::nl;
-        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled();
-        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled();
-        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled();
-        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled();
+        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
+        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
+        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().value();
+        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().value();
 
         terr << code_loc << mys::nl;
 
@@ -179,13 +193,13 @@ int main(int argc, char* argv[]) {
         drive.drive(25, 25);
 
         rvr::SensorsDirect sen_d(bb, req);
-//        sen_d.enableColorDetection();   // must precede color detection to turn on bottom LEDs
+        sen_d.enableColorDetection();   // must precede color detection to turn on bottom LEDs
 
         terr << code_loc;
         terr << code_loc;
         terr << code_loc;
 
-//        sen_s.ambientConfig();
+        sen_s.streamAmbient();
 //    sen_s.colorConfig();
 //    sen_s.coreNordicConfig();
 //    sen_s.coreBTConfig();
@@ -213,31 +227,31 @@ int main(int argc, char* argv[]) {
 
         terr << code_loc << mys::nl;
         terr << code_loc << "Streaming";
-        terr << code_loc << "Ambient: " << sen_s.ambient();
+        opt_output("Ambient"s, sen_s.ambient());
         terr << code_loc;
 
-        auto [a_x, a_y, a_z] = sen_s.accelerometer();
+        auto [a_x, a_y, a_z] { sen_s.accelerometer().value_or(rvr::AccelData { }) };
         terr << code_loc << "accelerometer: " << a_x << mys::sp << a_y << mys::sp << a_z;
 
-        auto [g_x, g_y, g_z] = sen_s.gyroscope();
+        auto [g_x, g_y, g_z] { sen_s.gyroscope().value_or(rvr::GyroData { }) };
         terr << code_loc << "gyroscope: " << g_x << mys::sp << g_y << mys::sp << g_z;
 
-        auto [i_x, i_y, i_z] = sen_s.imu();
+        auto [i_x, i_y, i_z] { sen_s.imu().value_or(rvr::ImuData { }) };
         terr << code_loc << "imu: " << i_x << mys::sp << i_y << mys::sp << i_z;
 
-        auto [l_x, l_y] = sen_s.locator();
+        auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
         terr << code_loc << "locator: " << l_x << mys::sp << l_y;
 
-        terr << code_loc << "Speed: " << sen_s.speed();
+        opt_output("Speed"s, sen_s.speed());
 
-        auto [v_x, v_y] = sen_s.velocity();
+        auto [v_x, v_y] { sen_s.velocity().value_or(rvr::VelocityData { }) };
         terr << code_loc << "Velocity: " << v_x << mys::sp << v_y;
 
-        auto [q_w, q_x, q_y, q_z] = sen_s.quaternion();
+        auto [q_w, q_x, q_y, q_z] { sen_s.quaternion().value_or(rvr::QuatData { }) };
         terr << code_loc << "quaternion: " << q_w << mys::sp << q_x << mys::sp << q_y << mys::sp << q_z;
-        drive.stop(0);
 
         terr << code_loc << mys::nl;
+        drive.stop(0);
 
 #endif
 #if 0
@@ -261,35 +275,34 @@ int main(int argc, char* argv[]) {
         terr << code_loc << mys::nl;
         terr << code_loc << "Power";
 
-        terr << code_loc << "VPercent: " << pow.batteryPercent();
+        opt_output("VPercent: ", pow.batteryPercent());
 
-        terr << code_loc << "Sleep Notify: " << pow.isDidSleepNotify();
-        terr << code_loc << "State: " << pow.voltState();
+        opt_output("Sleep Notify: ", pow.isDidSleepNotify());
+        opt_output("State: ", pow.voltState());
 
-        terr << code_loc << "Wake Notify: " << pow.isWakeNotify();
+        opt_output("Wake Notify: ", pow.isWakeNotify());
 
-        terr << code_loc << "VoltageCF: " << pow.voltsCalibratedFiltered();
-        terr << code_loc << "VoltageCUf: " << pow.voltsCalibratedUnfiltered();
-        terr << code_loc << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered();
-        terr << code_loc << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left);
-        terr << code_loc << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right);
-        terr << code_loc << "Critical Threshold: " << pow.voltThresholdCritical();
-        terr << code_loc << "Low Threshold: " << pow.voltThresholdLow();
-        terr << code_loc << "Hysteresis Threshold: " << pow.voltThresholdHysteresis();
+        opt_output("VoltageCF: ", pow.voltsCalibratedFiltered());
+        opt_output("VoltageCUf: ", pow.voltsCalibratedUnfiltered());
+        opt_output("VoltageUcUf: ", pow.voltsUncalibratedUnfiltered());
+        opt_output("L Motor Current: ", pow.motorCurrent(rvr::Power::MotorSide::left));
+        opt_output("R Motor Current: ", pow.motorCurrent(rvr::Power::MotorSide::right));
+        opt_output("Critical Threshold: ", pow.voltThresholdCritical());
+        opt_output("Low Threshold: ", pow.voltThresholdLow());
+        opt_output("Hysteresis Threshold: ", pow.voltThresholdHysteresis());
 
-        terr << code_loc << "Wake Notify Set?: " << pow.isWakeNotify();
-        terr << code_loc << "resetWakeNotify ";
-        pow.resetWakeNotify();
-        terr << code_loc << "Wake Notify Cleared?: " << pow.isWakeNotify();
+        opt_output("Wake Notify Set?: ", pow.isWakeNotify());
 
-        terr << code_loc << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+        opt_output("Wake Notify Cleared?: ", pow.isWakeNotify());
+
+        opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
 
         terr << code_loc << mys::nl;
         terr << code_loc << "disableBatteryStateChange";
         pow.disableBatteryStateChange();
         std::this_thread::sleep_for(50ms);
 
-        terr << code_loc << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled();
+        opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
 
         terr << code_loc << mys::nl;
 #if 0
@@ -302,25 +315,25 @@ int main(int argc, char* argv[]) {
 
 #endif
 #if 0
-    // DRIVE
-    rvr::Drive drive(bb, req);
-    rvr::SensorsStream sen_s(bb, req);
+        // DRIVE
+        rvr::Drive drive(bb, req);
+        rvr::SensorsStream sen_s(bb, req);
 
-    drive.resetYaw();
+        drive.resetYaw();
 //    std::this_thread::sleep_for(std::chrono::milliseconds(50));
 //
 //    drive.stop(90, );
 //    std::this_thread::sleep_for(std::chrono::milliseconds(100000));
 
-    drive.driveWithHeading(0, 90);
-    std::this_thread::sleep_for(1s);
-
-    for (auto i { 0 }; i < 100; ++i) {
-        drive.drive(75, 25);
+        drive.driveWithHeading(0, 90);
         std::this_thread::sleep_for(1s);
-        auto [l_x, l_y] = sen_s.locator();
-        terr << code_loc << "locator: " << l_x << mys::sp << l_y;
-    }
+
+        for (auto i { 0 }; i < 10; ++i) {
+            drive.drive(75, 25);
+            std::this_thread::sleep_for(3s);
+            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
+            terr << code_loc << "locator: " << l_x << mys::sp << l_y;
+        }
 
 //    drive.driveWithHeading(0, 20, );
 //    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -375,22 +388,22 @@ int main(int argc, char* argv[]) {
         terr << code_loc << mys::nl;
         terr << code_loc << mys::nl;
         terr << code_loc << mys::nl << "Connection, SysInfo, APIShell";
-        terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion();
-        terr << code_loc << "App Version: " << std::hex << sys.mainAppVersion2();
-        terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion();
-        terr << code_loc << "Boot Version: " << std::hex << sys.bootVersion2();
-        terr << code_loc << "Board Version: " << std::hex << sys.boardVersion();
-        terr << code_loc << "MAC Addr: " << sys.macAddress();
-        terr << code_loc << "Stats Id: " << sys.statsId();
-        terr << code_loc << "Processor: " << sys.processorName();
-        terr << code_loc << "Processor: " << sys.processorName2();
-        terr << code_loc << "SKU: " << sys.sku();
-        terr << code_loc << "Up Time: " << sys.coreUpTime();
+        opt_output("App Version: ", sys.mainAppVersion());
+        opt_output("App Version: ", sys.mainAppVersion2());
+        opt_output("Boot Version: ", sys.bootVersion());
+        opt_output("Boot Version: ", sys.bootVersion2());
+        opt_output("Board Version: ", sys.boardVersion());
+        opt_output("MAC Addr: ", sys.macAddress());
+        opt_output("Stats Id: ", sys.statsId());
+        opt_output("Processor: ", sys.processorName());
+        opt_output("Processor: ", sys.processorName2());
+        opt_output("SKU: ", sys.sku());
+        opt_output("Up Time: ", sys.coreUpTime());
 
-        terr << code_loc << "BT Name: " << cmd.name();
+        opt_output("BT Name: ", cmd.name());
 
-        terr << code_loc << "Echo: " << std::hex << api.echo();
-        terr << code_loc << "Echo Alt: " << std::hex << api.echoAlt();
+        opt_output_hex("Echo: ", api.echo());
+        opt_output_hex("Echo Alt: ", api.echoAlt());
 
         terr << code_loc << mys::nl;
 
