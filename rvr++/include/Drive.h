@@ -75,6 +75,11 @@ namespace rvr {
             off, forward, reverse,
         };
 
+//        enum DriveFlags : uint8_t {
+//            forward = 0x00, //
+//            reverse = 0x01,
+//        };
+
         // drive commands
         enum Cmd : uint8_t {
             raw_motors = 0x01,
