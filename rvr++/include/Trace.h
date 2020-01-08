@@ -52,6 +52,7 @@ namespace mys {
     constexpr char tab { '\t' };
     constexpr char nl { '\n' };
     constexpr char sp { ' ' };
+    constexpr char comma[] { ", " };
     //=====================================================================================================================
     class Trace {
     public:

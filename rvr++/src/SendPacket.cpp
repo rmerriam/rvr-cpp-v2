@@ -33,8 +33,9 @@ namespace rvr {
         RvrMsg mMsg;
         mMsg.clear();
         mMsg.push_back(SOP);
+        mys::TraceOff terr_off { terr };
 
-        // calculate checksum, add to end of payload, then escape payload & checksum
+// calculate checksum, add to end of payload, then escape payload & checksum
         uint8_t sum { checksum(payload) };
         payload.push_back(sum);
 
@@ -46,7 +47,7 @@ namespace rvr {
 
         mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
 
-        terr << __func__ << mys::sp << std::hex << std::uppercase << mMsg;
+        terr << code_loc << std::hex << std::uppercase << mMsg;
     }
     //----------------------------------------------------------------------------------------------------------------------
     auto SendPacket::escape_char(RvrMsg::iterator& p, RvrMsg& payload) {

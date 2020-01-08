@@ -21,6 +21,7 @@
 //
 //======================================================================================================================
 #include <chrono>
+#include <cmath>
 #include <iomanip>
 #include <iostream>
 #include <future>
@@ -40,23 +41,66 @@ using namespace std::literals;
 #include "SensorsDirect.h"
 #include "SensorsStream.h"
 #include "SystemInfo.h"
+
+#include "RosSensors.h"
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
 mys::TraceStart tout { std::cout };
 //---------------------------------------------------------------------------------------------------------------------
 template <typename T>
 void opt_output(std::string const& text, std::optional<T> v) {
-    tout << code_loc << text << mys::sp << (v ? v.value() : T { });
+    terr << code_loc << text << mys::sp << (v ? v.value() : T { });
 }
 //---------------------------------------------------------------------------------------------------------------------
 template <typename T>
 void opt_output_hex(std::string const& text, std::optional<T> v) {
-    tout << code_loc << text << mys::sp << std::hex << (v ? v.value() : T { });
+    terr << code_loc << text << mys::sp << std::hex << (v ? v.value() : T { });
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+rvr::TripleFloat quat2angles(rvr::QuatData q) {
+    float x { -q.x };
+    float y { -q.y };
+    float z { -q.z };
+    float w { q.w };
+    float x_angle = std::atan2( +2.0 * (y * z - w * x), 1.0 - 2.0 * (x * x + y * y)) * 180 / M_PI;
+    float y_angle = std::atan2( -2.0 * (x * z + w * y), 1.0 - 2.0 * (x * x + y * y)) * 180 / M_PI;
+    float z_angle = std::atan2( -2.0 * (x * y + w * z), 1.0 - 2.0 * (x * x + z * z)) * 180 / M_PI;
+    return {x_angle, y_angle, z_angle};
+}
+//---------------------------------------------------------------------------------------------------------------------
+
+void twist(float const linear, float angular, rvr::Drive& drive, rvr::SensorsStream& sen_s) {
+    rvr::ImuData imu { sen_s.imu().value_or(rvr::ImuData { }) };
+
+    static float rot { };
+    static int cnt { };
+    if (abs(imu.yaw) < angular) {
+        rot = -imu.yaw + (angular / 20);
+        drive.driveWithHeading(linear, rot);
+    }
+    else {
+        drive.driveWithHeading(linear, angular);
+    }
+//    cnt = (cnt + 1) % 3;
+    terr << code_loc << "Rotation: " << cnt << mys::sp << rot << mys::sp << angular;
+}
+//---------------------------------------------------------------------------------------------------------------------
+void twist2(float const linear, float angular, rvr::Drive& drive) {
+//    constexpr float wr { .0035 };
+//    constexpr float ws { .018 };
+//    angular = (angular * ws / 2.0) / wr;
+    angular *= 15.8;
+
+    float const vel_left = linear - angular;
+    float const vel_right = linear + angular;
+    drive.drive(vel_left, vel_right);
+    terr << code_loc << "Velocity: " << angular << mys::sp << vel_left << mys::sp << vel_right;
 }
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 //    mys::TraceOff terr_off { terr };
-    tout << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed << std::boolalpha;
+    terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed << std::boolalpha;
 
     SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
@@ -85,6 +129,7 @@ int main(int argc, char* argv[]) {
         rvr::SensorsDirect sen_d(bb, req);
 
         led.ledsOff();
+        drive.resetYaw();
 
         sen_d.resetLocatorXY();
         sen_d.setLocatorFlags(true);
@@ -95,76 +140,102 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(50ms);
 
         // setup streaming for all pose information
-//        sen_s.streamImuAccelGyro();
+        sen_s.streamImuAccelGyro();
         sen_s.streamSpeedVelocityLocator();
-//        sen_s.streamQuaternion();
+        sen_s.streamQuaternion();
 
-        constexpr uint16_t stream_period { 30 };
+        constexpr uint16_t stream_period { 50 };
         sen_s.enableStreaming(stream_period);
 
-        auto [a_x, a_y, a_z] { sen_s.accelerometer().value_or(rvr::AccelData { }) };
-        tout << code_loc << "accelerometer: " << a_x << mys::sp << a_y << mys::sp << a_z;
+        std::this_thread::sleep_for(std::chrono::milliseconds(stream_period * 2));
 
-        auto [g_x, g_y, g_z] { sen_s.gyroscope().value_or(rvr::GyroData { }) };
-        tout << code_loc << "gyroscope: " << g_x << mys::sp << g_y << mys::sp << g_z;
+        rvr::AccelData a { sen_s.accelerometer().value_or(rvr::AccelData { }) };
+        terr << code_loc << "accelerometer: " << a.x << mys::sp << a.y << mys::sp << a.z;
 
-        auto [i_x, i_y, i_z] { sen_s.imu().value_or(rvr::ImuData { }) };
-        tout << code_loc << "imu: " << i_x << mys::sp << i_y << mys::sp << i_z;
+        rvr::GyroData g { sen_s.gyroscope().value_or(rvr::GyroData { }) };
+        terr << code_loc << "gyroscope: " << g.x << mys::sp << g.y << mys::sp << g.z;
+
+        rvr::ImuData imu { sen_s.imu().value_or(rvr::ImuData { }) };
+        terr << code_loc << "imu: " << imu.pitch << mys::sp << imu.roll << mys::sp << imu.yaw;
 
         rvr::LocatorData loc { sen_s.locator().value_or(rvr::LocatorData { }) };
-        tout << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+        terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
 
         opt_output("Speed"s, sen_s.speed());
 
-        auto [v_x, v_y] { sen_s.velocity().value_or(rvr::VelocityData { }) };
-        tout << code_loc << "Velocity: " << v_x << mys::sp << v_y;
+        rvr::VelocityData v { sen_s.velocity().value_or(rvr::VelocityData { }) };
+        terr << code_loc << "Velocity: " << v.x << mys::sp << v.y;
 
-//        auto [q_w, q_x, q_y, q_z] { sen_s.quaternion().value_or(rvr::QuatData { }) };
-//        tout << code_loc << "quaternion: " << q_w << mys::sp << q_x << mys::sp << q_y << mys::sp << q_z;
-
-        drive.resetYaw();
+        rvr::QuatData q { sen_s.quaternion().value_or(rvr::QuatData { }) };
+        terr << code_loc << "quaternion: " << q.w << mys::sp << q.x << mys::sp << q.y << mys::sp << q.z;
 
         loc = sen_s.locator().value_or(rvr::LocatorData { });
-        tout << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+        terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
 
-        double sp { 15 };
+//        float prev_yaw { };
+        double sp { 50 }; // 49.6
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+//        while (loc.y < .5) {
+//        while (abs(imu.yaw) < 90) {
         while (loc.y < 1.0) {
 //            drive.drive(sp, sp);
             drive.driveWithHeading(sp, 0);
+//            twist(sp, 0, drive);
+//            twist(sp, 90, drive, sen_s);
             std::this_thread::sleep_for(std::chrono::milliseconds(stream_period));
+
             loc = sen_s.locator().value_or(rvr::LocatorData { });
-            tout << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+            imu = { sen_s.imu().value_or(rvr::ImuData { }) };
+            a = sen_s.accelerometer().value_or(rvr::AccelData { });
+            v = sen_s.velocity().value_or(rvr::VelocityData { });
+            g = sen_s.gyroscope().value_or(rvr::GyroData { });
+            q = sen_s.quaternion().value_or(rvr::QuatData { });
+
+            terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+//            terr << code_loc << "Velocity: " << v.x << mys::sp << v.y << mys::sp << imu.yaw;
+//            terr << code_loc << "accelerometer: " << a.x << mys::sp << a.y << mys::sp << a.z;
+//            terr << code_loc << " imu: " << imu.pitch << mys::sp << imu.roll << mys::sp << imu.yaw;
+//            terr << code_loc << "gyroscope: " << angles.x << mys::sp << angles.y << mys::sp << angles.z;
+//            terr << code_loc << "yaw: " << imu.yaw << mys::sp << loc.y;
+//            terr << code_loc << "quat: " << q.w << mys::sp << q.x << mys::sp << q.y << mys::sp << q.z;
+//            opt_output("Speed"s, sen_s.speed());
+
+//            rvr::TripleFloat angles { quat2angles(q) };
+//            terr << code_loc << " ang: " << angles.x << mys::sp << angles.y << mys::sp << angles.z;
         }
+//        std::this_thread::sleep_for(300ms);
+//        bb.m_to_v();
 
         drive.stop(0);
         std::this_thread::sleep_for(300ms);
 
         loc = sen_s.locator().value_or(rvr::LocatorData { });
-        tout << code_loc << "locator: " << loc.x << mys::sp << loc.y;
-        tout << code_loc;
-        tout << code_loc;
-        while (loc.y > 0.0) {
-//            drive.drive( -sp, -sp);
-            drive.driveWithHeading( -sp, 0);
-            std::this_thread::sleep_for(std::chrono::milliseconds(stream_period));
-            loc = sen_s.locator().value_or(rvr::LocatorData { });
-            tout << code_loc << "locator: " << loc.x << mys::sp << loc.y;
-        }
-        drive.stop(0);
-//        std::this_thread::sleep_for(std::chrono::milliseconds(stream_period));
-//
+        terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+
+//        terr << code_loc;
+//        terr << code_loc;
+//        while (loc.y > 0.0) {
+////            drive.drive( -sp, -sp);
+//            drive.driveWithHeading( -sp, 0);
+//            std::this_thread::sleep_for(std::chrono::milliseconds(stream_period));
+//            loc = sen_s.locator().value_or(rvr::LocatorData { });
+////            terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+//        }
+//        drive.stop(0);
+////        std::this_thread::sleep_for(std::chrono::milliseconds(stream_period));
+////
 //        loc = sen_s.locator().value_or(rvr::LocatorData { });
-//        tout << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+//        terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
 
     }
     catch (std::exception& e) {
-        tout << code_loc << e.what() << "=================================";
+        terr << code_loc << e.what() << "=================================";
     }
     sen_s.disableStreaming();
     sen_s.clearStreaming();
 
     pow.sleep();
-    tout << code_loc << "----------------" << mys::nl;
+    terr << code_loc << "----------------" << mys::nl;
 
     std::this_thread::sleep_for(1s);
     end_tasks.set_value();

@@ -42,22 +42,22 @@ namespace rvr {
 
     public:
         enum Sensor : uint8_t {
-            ambient_token = 10, //
-            color_token = 3, //
+            ambient_token = 0x0A, //
+            color_token = 0x03, //
 
-            quaternion_id = 0, //
-            quaternion_token = 11, //
-            imu_token = 1, //
-            accel_token = 2, //
-            gyro_token = 4, //
-            locator_token = 6, //
-            velocity_token = 7, //
-            speed_token = 8, //
-            core_time_lower_token = 5, //
-            core_time_upper_token = 9, //
+            quaternion_id = 0x00, //
+            quaternion_token = 0x0B, //
+            imu_token = 0x01, //
+            accel_token = 0x02, //
+            gyro_token = 0x04, //
+            locator_token = 0x06, //
+            velocity_token = 0x07, //
+            speed_token = 0x08, //
+            core_time_lower_token = 0x05, //
+            core_time_upper_token = 0x09, //
 
-            imu_accel_gyro_token = 12, //
-            speed_velocity_locator_token = 13, //
+            imu_accel_gyro_token = 0x0C, //
+            speed_velocity_locator_token = 0x0D, //
         };
 
         SensorsStream(Blackboard& bb, SendPacket& req) :
@@ -233,9 +233,9 @@ namespace rvr {
     }
 //======================================================================================================================
     inline float SensorsStream::normalize(uint32_t const value, float const out_min, float const out_max) {
-        auto max { std::numeric_limits<uint32_t>::max() };
+        static auto max { std::numeric_limits<uint32_t>::max() };
         float res { };
-        if (value != 0) res = (value / float(max) * (out_max - out_min)) + out_min;
+        if (value != 0) res = (value / static_cast<float>(max) * (out_max - out_min)) + out_min;
         return res;
     }
 

@@ -197,7 +197,7 @@ namespace rvr {
         return s;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::addMsgValue(key_t const key, RvrMsg& value) {
+    void Blackboard::addMsgValue(key_t const key, RvrMsg value) {
         mDictionary[key].value = value;
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -304,7 +304,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        addMsgValue(entryKey(target, dev, cmd, 0), fake_msg);
+        addMsgValue(entryKey(target, dev, cmd, 0), { });
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<uint16_t> Blackboard::uintValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {

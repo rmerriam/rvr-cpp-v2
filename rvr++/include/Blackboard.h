@@ -101,10 +101,10 @@ namespace rvr {
             RvrMsg value { };
         };
 
-        using BBDictionary = std::unordered_map <key_t, BlackboardEntry>;
+        using BBDictionary = std::unordered_map <key_t , BlackboardEntry>;
         static BBDictionary mDictionary;
 
-        void addMsgValue(key_t const key, RvrMsg& value);
+        void addMsgValue(key_t const key, RvrMsg value);
 
         RvrMsgRet_t entryValue(key_t const key) const;
         RvrMsgRet_t entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
@@ -114,7 +114,7 @@ namespace rvr {
         // methods for calculating values from dictionary entry
         uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
 
-        static inline RvrMsg fake_msg { 3, 0 };
+//        static inline RvrMsg fake_msg { 3, 0 };
 
         friend std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k);
 

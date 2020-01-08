@@ -64,13 +64,13 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::stop(int const& heading, CommandResponse const want_resp) const {
-//        driveWithHeading(0, heading, want_resp);
         drive(0, 0, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Drive::driveWithHeading(double const& speed, int const& heading, CommandResponse const want_resp) const {
         auto [spd, mode] = speed_mode(abs(speed));
-        RvrMsg msg { spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), (speed >= 0.0) ? 0 : 1 };
+        RvrMsg msg { spd, static_cast<uint8_t>(heading >> 8), static_cast<uint8_t>(heading & 0xFF), static_cast<uint8_t>(
+            (speed >= 0.0) ? 0 : 1) };
         cmdData(drive_with_heading, msg, want_resp);
     }
 }

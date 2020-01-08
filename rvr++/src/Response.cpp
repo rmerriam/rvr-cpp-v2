@@ -49,12 +49,10 @@ namespace rvr {
             mReadPacket.read(in, packet);
 
             if ( !packet.empty()) {
-                terr << code_loc << "pkt: " << std::hex << packet;
                 decode(packet);
                 packet.clear();
             }
         }
-        terr << code_loc << " exit";
         return true;
     }
 //----------------------------------------------------------------------------------------------------------------------
@@ -138,6 +136,8 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
+        mys::TraceOff terr_off { terr };
+        terr << code_loc << "pkt: " << std::hex << packet;
 
         // typical positions of header bytes when target not present, the usual case
         uint8_t flags { 0x00 };   //

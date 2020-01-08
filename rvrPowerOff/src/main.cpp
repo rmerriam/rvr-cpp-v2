@@ -46,7 +46,12 @@ mys::TraceStart terr { std::cerr };
 mys::TraceStart tout { std::cout };
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-    mys::TraceOff terr_off { terr };
+//    mys::TraceOff terr_off { terr };
+
+    if (argc < 2) {
+        tout << "Need serial port defined on command line" << mys::nl;
+        return -1;
+    }
 
     SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
