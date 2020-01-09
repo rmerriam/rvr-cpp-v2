@@ -8,7 +8,7 @@
 
 This repository is work in progress on a C++ implementation of the Rvr serial API communications protocol with an end goal of using the [Robot Operating System](https://www.ros.org/) (ROS). The library is usable for general robotics work without ROS. With the goal of ROS in mind note that some of the more *pure* educational portions probably will not be implemented, e.g color sensing. 
 
-In addition to `rvr++` there are few utility and general testing programs in the repository. See the [development environment](https://bitbucket.org/rmerriam/rvr-cpp/wiki/Development%20Environment) page in the [Wiki](https://bitbucket.org/rmerriam/rvr-cpp/wiki/Home) for details.  
+In addition to `rvr++` there are few utility and general testing programs in the repository. See the [development environment](https://bitbucket.org/rmerriam/rvr-cpp/wiki/dev/Development%20Environment) page in the [Wiki](https://bitbucket.org/rmerriam/rvr-cpp/wiki/Home) for details.  
 
 ***
 # References
