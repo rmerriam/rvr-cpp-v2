@@ -1,23 +1,27 @@
 **Development**
 
 [TOC]
+
 ***
-
-# Organization (or lack thereof) 
-
-It is being done using an RVR connected to my desktop Ubuntu Mate Linux using an [Adafruit USB to TTL Serial Cable - Debug / Console Cable for Raspberry Pi](https://www.adafruit.com/product/954). The cable works with 3.3v signals so is not actually TTL since that implies 5v signals.
+# Development Environment
+As mentioned on the main page code is based on GCC 9.2.1 and C++17 with the addition of the `-fconcepts` flag that provides some early access to that C++20 capabilities. Development started with the Rvr connected to my desktop Ubuntu Mate Linux using an [Adafruit USB to TTL Serial Cable - Debug / Console Cable for Raspberry Pi](https://www.adafruit.com/product/954). The cable works with 3.3v signals so is not actually TTL since that implies 5v signals.
 
 > Note: The document shipped with the RVR has the pinout for the UART incorrect. Sphero has a [note](https://sdk.sphero.com/docs/getting_started/before_you_start/uart_disclaimer/) about this.The pinout on the RVR is correct. 
 
-This is a work in progress so the organization of the repository is not as clean as one might like. That's how I work when tackling a new project. Eventually it gets better organized. 
-
 ## Eclipse
 
-A factor that may cause confusion is the use of Eclipse as the development environment. That leads to an organization that is different from other open source projects. Again, eventually it will get better. There are also Eclipse artifacts in the repository like the `.systems` directory and `.cproject` and `.project` files. 
+Development uses Eclipse for the IDE which means there are Eclipse specific artifacts in the repository like `.cproject` and `.project` files. Eventually for ROS, CMake will be introduced in parallel with Eclipse projects. 
 
-## src Directory
+# Repository Organization 
 
-The `src` directory contains the meat of the protocol work. It should eventually become a shared library.
+The repository, as mentioned, is organized by Eclipse projects. Of main interest is the `rvr++` directory / project. Rvr++ is a static library. 
+
+## Rvr++
+
+Static library that implements the Rvr serial protocol API. See the Wiki for details on the protocol. 
+
+ ![Class Diagram](https://bytebucket.org/rmerriam/rvr-cpp/wiki/images/RVR%2B%2B%20Class%20Diagram.jpg?rev=6d2ee28e60752b3ecb1b5d814a258163439ccd35)
+
 
 ## api, sysinfo, leds, power Directories
 
