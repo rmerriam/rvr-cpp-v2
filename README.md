@@ -23,16 +23,17 @@ The [Sphero Community](https://community.sphero.com/) is another useful resource
 
 The [Wiki](https://bitbucket.org/rmerriam/rvr-cpp/wiki/Home) explains the details of the protocol. The Sphero staff and other Rvr owners have supplied details and experience that isn't otherwise documented. The Rvr is a brand new product and Sphero is adding to their documentation. 
 
-
-
-# Code Issues
+***
+# Posting Code Issues
 
 The **[Issues](https://bitbucket.org/rmerriam/rvr-cpp/issues?status=new&status=open)** capability is open. Feel free to enter problems or questions.
 
+***
 # C++ Version
 
 Code development is with GCC 9.2.1 with C++17. The exception is the use of the `-fconcepts` flag that provides some early access to C++20 capabilities. 
 
+***
 # License
 
 This is totally free to anyone who wants to risk using it for personal or commercial use. I don't issue any assurances that any of it works properly so all liability of use falls on you. 
