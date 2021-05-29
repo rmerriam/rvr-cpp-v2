@@ -1,7 +1,7 @@
 #ifndef SerialPort_Include
 #define SerialPort_Include
 //======================================================================================================================
-// 2010 Copyright Mystic Lake Software
+// 2021 Copyright Mystic Lake Software
 //
 // This is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 //
 //     Author: Rudyard Merriam
 //
-//      $Id: $
+//     Created: May 29, 2021
 //
 //======================================================================================================================
 //
@@ -31,7 +31,7 @@
 class SerialPort {
 
 public:
-    SerialPort(const char* port_name, const uint32_t baud);
+    SerialPort(char const* port_name, uint32_t const baud);
     ~SerialPort();
 
     void flush();
@@ -39,11 +39,11 @@ public:
     int count() const;
     uint8_t read() const;
 
-    int64_t read(uint8_t buffer[], const uint32_t len = 1) const;
+    int64_t read(uint8_t buffer[], uint32_t const len = 1) const;
 
-    int64_t write(const uint8_t buffer[], const uint32_t cnt) const;
-    void write(const uint8_t& ch) const;
-    void write(const uint8_t buffer[]) const {
+    int64_t write(uint8_t const buffer[], uint32_t const cnt) const;
+    void write(uint8_t const& ch) const;
+    void write(uint8_t const buffer[]) const {
         write(buffer + 1, buffer[0]);
     }
 

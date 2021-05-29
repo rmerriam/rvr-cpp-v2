@@ -1,7 +1,7 @@
 #ifndef SENDPACKET_H_
 #define SENDPACKET_H_
 //======================================================================================================================
-// 2019 Copyright Mystic Lake Software
+// 2021 Copyright Mystic Lake Software
 //
 // This is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 21, 2019
+//     Created: May 29, 2021
 //
 //======================================================================================================================
 //  Build a message to send to the RVR

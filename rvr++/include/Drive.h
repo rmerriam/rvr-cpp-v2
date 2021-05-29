@@ -5,7 +5,7 @@
 #include <tuple>
 
 //======================================================================================================================
-// 2019 Copyright Mystic Lake Software
+// 2021 Copyright Mystic Lake Software
 //
 // This is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 //
 //     Author: rmerriam
 //
-//     Created: Oct 22, 2019
+//     Created: May 29, 2021
 //
 //======================================================================================================================
 #include "Blackboard.h"
