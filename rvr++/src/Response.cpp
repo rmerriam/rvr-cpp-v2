@@ -32,12 +32,12 @@ namespace rvr {
 
     DeviceNames device_names { //
     { 0x10, "api_and_shell" }, //
-    { 0x11, "system" }, //
-    { 0x13, "power" }, //
-    { 0x16, "drive" }, //
-    { 0x18, "sensors" }, //
-    { 0x19, "connection" }, //
-    { 0x1A, "io_led" }, //
+        { 0x11, "system" }, //
+        { 0x13, "power" }, //
+        { 0x16, "drive" }, //
+        { 0x18, "sensors" }, //
+        { 0x19, "connection" }, //
+        { 0x1A, "io_led" }, //
     };
     //----------------------------------------------------------------------------------------------------------------------
     bool Response::operator ()() {
@@ -87,7 +87,7 @@ namespace rvr {
         if ((f & response) == 0) {
             flags += "no_response";
         }
-        terr << code_loc << flags;
+//        terr << code_loc << flags;
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_error(auto err_byte) {

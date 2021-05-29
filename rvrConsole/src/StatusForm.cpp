@@ -23,7 +23,7 @@ StatusForm::StatusForm(int const y, int const x) :
     NField::build_header(mFields, "Application Status", 1, COLS - 3);
 
     mWallTime = NField::build_wide_data_item(mFields, "Wall Time:", item_row, width, 13, 2);
-    mSerialName = NField::build_data_item(mFields, "Port:", item_row, width, (COLS - 3) / 3);
+    mSerialName = NField::build_data_item(mFields, "Port:", item_row, width + 3, (COLS - 3) / 3);
 
     mVersion = NField::build_data_item(mFields, "Version:", item_row, width, 2 * (COLS - 3) / 3);
 

@@ -85,8 +85,8 @@ namespace rvr {
 
             auto [out_min, out_max] { SensorFactors[accel_token] };
             return AccelData { normalize(x.value(), out_min, out_max), //
-                               normalize(y.value(), out_min, out_max), //
-                               normalize(z.value(), out_min, out_max), //
+            normalize(y.value(), out_min, out_max), //
+            normalize(z.value(), out_min, out_max), //
             };
         }
         return {};
@@ -110,8 +110,8 @@ namespace rvr {
 
             auto [out_min, out_max] { SensorFactors[gyro_token] };
             return GyroData { normalize(x.value(), out_min, out_max), //
-                              normalize(y.value(), out_min, out_max), //
-                              normalize(z.value(), out_min, out_max), //
+            normalize(y.value(), out_min, out_max), //
+            normalize(z.value(), out_min, out_max), //
             };
         }
         return {};
@@ -125,8 +125,8 @@ namespace rvr {
             auto z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_accel_gyro_token) };
             auto [out_min, out_max] { SensorFactors[imu_token] };
             return ImuData { normalize(x.value(), out_min, out_max), //
-                             normalize(y.value(), out_min / 2, out_max / 2), //
-                             normalize(z.value(), out_min, out_max), //
+            normalize(y.value(), out_min / 2, out_max / 2), //
+            normalize(z.value(), out_min, out_max), //
             };
         }
         return {};
@@ -142,9 +142,9 @@ namespace rvr {
 
             auto [out_min, out_max] { SensorFactors[quaternion_token] };
             return QuatData { normalize(w.value(), out_min, out_max), //
-                              normalize(x.value(), out_min, out_max), //
-                              normalize(y.value(), out_min / 2, out_max / 2), //
-                              normalize(z.value(), out_min, out_max), //
+            normalize(x.value(), out_min, out_max), //
+            normalize(y.value(), out_min / 2, out_max / 2), //
+            normalize(z.value(), out_min, out_max), //
             };
         }
         return {};
@@ -154,20 +154,22 @@ namespace rvr {
         auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, speed_velocity_locator_token) };
 
         if (x) {
-            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4, speed_velocity_locator_token) };
+            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4,
+                                             speed_velocity_locator_token) };
             auto [out_min, out_max] { SensorFactors[locator_token] };
             return LocatorData { normalize(x.value(), out_min, out_max), //
-                                 normalize(y.value(), out_min, out_max), //
+            normalize(y.value(), out_min, out_max), //
             };
         }
         return {};
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<float> SensorsStream::speed() {
-        auto speed { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, speed_velocity_locator_token) };
+        auto speed { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0,
+                                             speed_velocity_locator_token) };
         if (speed) {
             auto [out_min, out_max] { SensorFactors[speed_token] };
-            terr << code_loc << static_cast<int32_t>(speed.value());
+//            terr << code_loc << static_cast<int32_t>(speed.value());
             return normalize(static_cast<int32_t>(speed.value()), out_min, out_max);
         }
         return {};
@@ -177,11 +179,12 @@ namespace rvr {
         auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, speed_velocity_locator_token) };
         if (x) {
 
-            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, speed_velocity_locator_token) };
+            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2,
+                                             speed_velocity_locator_token) };
 
             auto [out_min, out_max] { SensorFactors[velocity_token] };
             return VelocityData { normalize(x.value(), out_min, out_max), //
-                                  normalize(y.value(), out_min, out_max), //
+            normalize(y.value(), out_min, out_max), //
             };
         }
         return {};

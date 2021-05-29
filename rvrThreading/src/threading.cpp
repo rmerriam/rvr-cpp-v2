@@ -314,7 +314,7 @@ int main(int argc, char* argv[]) {
 #endif
 
 #endif
-#if 0
+#if 1
         // DRIVE
         rvr::Drive drive(bb, req);
         rvr::SensorsStream sen_s(bb, req);
@@ -325,15 +325,18 @@ int main(int argc, char* argv[]) {
 //    drive.stop(90, );
 //    std::this_thread::sleep_for(std::chrono::milliseconds(100000));
 
-        drive.driveWithHeading(0, 90);
-        std::this_thread::sleep_for(1s);
+//        drive.driveWithHeading(0, 90);
+//        std::this_thread::sleep_for(1s);
+//
+//        for (auto i { 0 }; i < 10; ++i) {
+//            drive.drive(75, 25);
+//            std::this_thread::sleep_for(3s);
+//            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
+//            terr << code_loc << "locator: " << l_x << mys::sp << l_y;
+//        }
 
-        for (auto i { 0 }; i < 10; ++i) {
-            drive.drive(75, 25);
-            std::this_thread::sleep_for(3s);
-            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
-            terr << code_loc << "locator: " << l_x << mys::sp << l_y;
-        }
+        drive.tank_normalized(15, 15);
+        std::this_thread::sleep_for(1s);
 
 //    drive.driveWithHeading(0, 20, );
 //    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -365,7 +368,7 @@ int main(int argc, char* argv[]) {
 //    terr << code_loc;
 
 #endif
-#if 0
+#if 1
         // Connection, SysInfo, APIShell
         rvr::Connection cmd(bb, req);
         cmd.bluetoothName();    //

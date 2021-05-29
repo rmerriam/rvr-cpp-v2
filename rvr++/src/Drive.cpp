@@ -73,4 +73,12 @@ namespace rvr {
             (speed >= 0.0) ? 0 : 1) };
         cmdData(drive_with_heading, msg, want_resp);
     }
+    //----------------------------------------------------------------------------------------------------------------------
+    void Drive::tank_normalized(double const& left, double const& right, CommandResponse const want_resp) const {
+        auto l_speed { static_cast<uint8_t>(left) };
+        auto r_speed { static_cast<uint8_t>(right) };
+
+        RvrMsg msg { l_speed, r_speed };
+        cmdData(drive_tank_normalized, msg, want_resp);
+    }
 }
