@@ -3,8 +3,8 @@
 	<name>rvrConsole</name>
 	<comment></comment>
 	<projects>
-		<project>rvr_console</project>
 		<project>rvr++</project>
+		<project>rvr_console</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

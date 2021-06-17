@@ -129,6 +129,8 @@ int main(int argc, char* argv[]) {
         rvr::SensorsDirect sen_d(bb, req);
 
         led.ledsOff();
+
+#if 1
         drive.resetYaw();
 
         sen_d.resetLocatorXY();
@@ -171,15 +173,24 @@ int main(int argc, char* argv[]) {
 
         loc = sen_s.locator().value_or(rvr::LocatorData { });
         terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+#endif
 
+//        sen_d.calibrateMagnetometer();
+//        std::this_thread::sleep_for(3000ms);
+//        sen_d.getMagnetometerData();
+//        std::optional<bool> msg_cal_done = sen_d.isMagnetometerCalibrationDone();
+//        terr << code_loc << "mag calibrate " << msg_cal_done.value();
+
+#if 1
 //        float prev_yaw { };
         double sp { 50 }; // 49.6
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
-//        while (loc.y < .5) {
-//        while (abs(imu.yaw) < 90) {
-        while (loc.y < 1.0) {
+//        while (loc.y < .5)
+//        while (abs(imu.yaw) < 90)
+//        while (loc.y < 1.0)
+        {
 //            drive.drive(sp, sp);
-            drive.driveWithHeading(sp, 0);
+//            drive.driveWithHeading(sp, 0);
 //            twist(sp, 0, drive);
 //            twist(sp, 90, drive, sen_s);
             std::this_thread::sleep_for(std::chrono::milliseconds(stream_period));
@@ -191,26 +202,27 @@ int main(int argc, char* argv[]) {
             g = sen_s.gyroscope().value_or(rvr::GyroData { });
             q = sen_s.quaternion().value_or(rvr::QuatData { });
 
-            terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
-//            terr << code_loc << "Velocity: " << v.x << mys::sp << v.y << mys::sp << imu.yaw;
-//            terr << code_loc << "accelerometer: " << a.x << mys::sp << a.y << mys::sp << a.z;
-//            terr << code_loc << " imu: " << imu.pitch << mys::sp << imu.roll << mys::sp << imu.yaw;
+//            terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+            terr << code_loc << "Velocity: " << v.x << mys::sp << v.y << mys::sp << imu.yaw;
+            terr << code_loc << "accelerometer: " << a.x << mys::sp << a.y << mys::sp << a.z;
+            terr << code_loc << " imu: " << imu.pitch << mys::sp << imu.roll << mys::sp << imu.yaw;
 //            terr << code_loc << "gyroscope: " << angles.x << mys::sp << angles.y << mys::sp << angles.z;
-//            terr << code_loc << "yaw: " << imu.yaw << mys::sp << loc.y;
-//            terr << code_loc << "quat: " << q.w << mys::sp << q.x << mys::sp << q.y << mys::sp << q.z;
-//            opt_output("Speed"s, sen_s.speed());
+            terr << code_loc << "yaw: " << imu.yaw << mys::sp << loc.y;
+            terr << code_loc << "quat: " << q.w << mys::sp << q.x << mys::sp << q.y << mys::sp << q.z;
+            opt_output("Speed"s, sen_s.speed());
 
 //            rvr::TripleFloat angles { quat2angles(q) };
 //            terr << code_loc << " ang: " << angles.x << mys::sp << angles.y << mys::sp << angles.z;
         }
 //        std::this_thread::sleep_for(300ms);
 //        bb.m_to_v();
+#endif
 
         drive.stop(0);
         std::this_thread::sleep_for(300ms);
 
-        loc = sen_s.locator().value_or(rvr::LocatorData { });
-        terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
+//        loc = sen_s.locator().value_or(rvr::LocatorData { });
+//        terr << code_loc << "locator: " << loc.x << mys::sp << loc.y;
 
 //        terr << code_loc;
 //        terr << code_loc;
@@ -241,7 +253,7 @@ int main(int argc, char* argv[]) {
     end_tasks.set_value();
     resp_future.get();
 
-//    bb.m_to_v();
+    bb.m_to_v();
 
     return 0;
 }

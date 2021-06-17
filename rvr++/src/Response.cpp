@@ -59,6 +59,10 @@ namespace rvr {
     void Response::decode_flags(uint8_t const f) {
         std::string flags { };
 
+        if ((f & response) == 0) {
+            flags += "notification | ";
+        }
+
         for (auto mask { 0x01 }; mask != 0; mask <<= 1) {
             switch (mask & f) {
                 case response:
@@ -84,13 +88,11 @@ namespace rvr {
                     break;
             }
         }
-        if ((f & response) == 0) {
-            flags += "no_response";
-        }
-//        terr << code_loc << flags;
+        terr << code_loc << flags;
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_error(auto err_byte) {
+
         switch (err_byte) {
             case 1: {
                 terr << code_loc << "bad_did";
@@ -101,7 +103,7 @@ namespace rvr {
                 break;
             }
             case 3: {
-                terr << code_loc << "not_ye1_implemented";
+                terr << code_loc << "not_yet_implemented";
                 break;
             }
             case 4: {
@@ -136,19 +138,28 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
-        mys::TraceOff terr_off { terr };
+//        mys::TraceOff terr_off { terr };
         terr << code_loc << "pkt: " << std::hex << packet;
 
-        // typical positions of header bytes when target not present, the usual case
-        uint8_t flags { 0x00 };   //
+        // typical positions of header bytes when target not present which is the usual case
+        uint8_t flags { 0x00 };
 //        uint8_t targ { 0x01 };   // usually not present
-        uint8_t src { 0x01 };     //
-        uint8_t dev { 0x02 };     //
-        uint8_t cmd { 0x03 };     //
-        uint8_t seq { 0x04 };     //
-        uint8_t status { 0x05 };  //
-        uint8_t data { 0x06 };    //
+        uint8_t src { 0x01 };
+        uint8_t dev { 0x02 };
+        uint8_t cmd { 0x03 };
+        uint8_t seq { 0x04 };
+        uint8_t err_code { 0x05 };
+        uint8_t data { 0x06 };
 
+        /*
+         * There are 2 types of received messages.
+         *
+         * Response: received when a request message sent and a response requested
+         * Notification: received when the RVR sends a message not in response to a request.
+         *      The sequence number for notifications is 0xFF
+         *      There is no error field
+
+         */
         bool const is_resp { (packet[flags] & response) == response };   // versus notification
 
         if (packet[flags] & has_target) {  //
@@ -156,7 +167,7 @@ namespace rvr {
             ++dev;
             ++cmd;
             ++seq;
-            ++status;
+            ++err_code;
             ++data;
         }
 
@@ -164,7 +175,8 @@ namespace rvr {
 
         std::string device = device_names[packet[dev]];
 
-        Blackboard::key_t key { mBlackboard.msgKey(TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], packet[seq]) };
+        Blackboard::key_t key { mBlackboard.msgKey(TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], //
+                                                   (packet[seq] == 0xFF) ? packet[err_code] : packet[seq]) };
 
         std::string command { mBlackboard.entryName(key) };
 
@@ -175,9 +187,9 @@ namespace rvr {
         else {
             terr << code_loc << device << mys::sp << command;
 
-            if (is_resp && packet[status]) {
+            if (is_resp && packet[err_code]) {
                 // a response will have a status of either 0 or and error code
-                auto err_byte { packet[status] };
+                auto err_byte { packet[err_code] };
                 terr << code_loc << "ERROR: " << (uint16_t)err_byte;
                 decode_error(err_byte);
             }

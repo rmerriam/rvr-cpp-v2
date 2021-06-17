@@ -24,6 +24,21 @@
 #include "SensorsStream.h"
 
 namespace rvr {
+
+    //----------------------------------------------------------------------------------------------------------------------
+    std::optional<ColorStream> SensorsStream::colors() {
+        auto const msg { mBlackboard.msgValue(mTarget, mDevice, streaming_service_data_notify, color_token) };
+
+        if (msg) {
+            return ColorStream { static_cast<uint8_t>(msg.value()[0]), //
+                static_cast<uint8_t>(msg.value()[1]), //
+                static_cast<uint8_t>(msg.value()[2]), //
+                static_cast<uint8_t>(msg.value()[3]), //
+                static_cast<float>(msg.value()[4]) };
+        }
+        return {};
+    }
+
     //----------------------------------------------------------------------------------------------------------------------
     void SensorsStream::configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp) {
         cmdData(configure_streaming_service, cfg, want_resp);
@@ -59,7 +74,7 @@ namespace rvr {
         basicAlt(stop_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::disableStreaming(CommandResponse const want_resp) {
+    void SensorsStream::disableAllStreaming(CommandResponse const want_resp) {
         disableStreamingNordic(want_resp);
         disableStreamingBT(want_resp);
     }
@@ -72,7 +87,7 @@ namespace rvr {
         basicAlt(clear_streaming_service, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void SensorsStream::clearStreaming(CommandResponse const want_resp) {
+    void SensorsStream::clearAllStreaming(CommandResponse const want_resp) {
         clearStreamingNordic(want_resp);
         clearStreamingBT(want_resp);
     }
@@ -133,6 +148,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<QuatData> SensorsStream::quaternion() {
+        terr << code_loc << mys::nl;
         auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, quaternion_token) };
 
         if (x) {
@@ -189,5 +205,16 @@ namespace rvr {
         }
         return {};
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
+    uint64_t SensorsStream::btTime() {
+        auto lower { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, core_time_lower_token) };
+        auto upper { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, core_time_upper_token) };
+        return (static_cast<uint64_t>(upper.value_or(0)) << 32) + lower.value_or(0);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    uint64_t SensorsStream::nordicTime() {
+        auto lower { mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_lower_token) };
+        auto upper { mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_upper_token) };
+        return (static_cast<uint64_t>(upper.value_or(0)) << 32) + lower.value_or(0);
+    }
 }

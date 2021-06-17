@@ -67,11 +67,16 @@ namespace rvr {
         static uint8_t seq();
 
     protected:
-        // NOTE: HACK ALERT!!!
-        // The sequence field is used for debugging only. It isn't used for tracking messages.
-        // It is used as a special field for some message that pass an ID. The ID is put in the sequence field.
-        // During deserialization any sequence less than 0x80 is used as part of the dictionary key for updating
-        // values in the dictionary.
+        /*
+         * NOTE: HACK ALERT!!!
+         *       The sequence field is used for debugging only. It isn't used for tracking messages.
+         *       It is used as a special field for some message that pass an ID. The ID is put in the sequence field.
+         *       During deserialization any sequence less than 0x80 is used as part of the dictionary key for updating
+         *       values in the dictionary.
+         *
+         *       A sequence value of 0xFF is an async notification generated automatically by the RVR as opposed to a
+         *       response to a request. NOTE: while sequence() can generate 0xFF it doesn't cause a problem.
+         */
         static uint8_t sequence() {
             return ++mSeq | 0x80;
         }

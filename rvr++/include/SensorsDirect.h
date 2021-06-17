@@ -1,5 +1,4 @@
-#ifndef Sensors_H_
-#define Sensors_H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -95,6 +94,10 @@ namespace rvr {
         void enableThermalProtectionNotify(CommandResponse const want_resp = resp_yes) const;
         void disableThermalProtectionNotify(CommandResponse const want_resp = resp_yes) const;
 
+        void calibrateMagnetometer(CommandResponse const want_resp = resp_yes) const;
+        std::optional<bool> isMagnetometerCalibrationDone() const;
+        void getMagnetometerData(CommandResponse const want_resp = resp_yes) const;
+
         //  Methods to access data
 
         std::optional<bool> isGyroMaxNotifyEnabled() const;
@@ -108,6 +111,7 @@ namespace rvr {
         std::optional<ColorData> currentRGBValues();
         std::optional<ColorDetection> colorDetectionValues();
         std::optional<ThermalProtection> thermalProtectionValues();
+        std::optional<MagnetometerData> magnetometer();
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
@@ -122,42 +126,52 @@ namespace rvr {
 
         enum Cmd : uint8_t {
             enable_gyro_max_notify = 0x0F, //
-            gyro_max_notify = 0x10,
+            gyro_max_notify = 0x10,	//
             //
-            reset_locator_x_and_y = 0x13,
-            set_locator_flags = 0x17,
+            reset_locator_x_and_y = 0x13,	//
+            set_locator_flags = 0x17,	//
             //
-            get_bot_to_bot_infrared_readings = 0x22,
+            get_bot_to_bot_infrared_readings = 0x22,	//
             //
-            get_rgbc_sensor_values = 0x23,
+            get_rgbc_sensor_values = 0x23,	//
             //
-            start_robot_to_robot_infrared_broadcasting = 0x27,
-            start_robot_to_robot_infrared_following = 0x28,
-            stop_robot_to_robot_infrared_broadcasting = 0x29,
-            robot_to_robot_infrared_message_received_notify = 0x2C,
-            get_ambient_light_sensor_value = 0x30,
-            stop_robot_to_robot_infrared_following = 0x32,
-            start_robot_to_robot_infrared_evading = 0x33,
-            stop_robot_to_robot_infrared_evading = 0x34,
+            magnetometer_calibrate_to_north = 0x25,	//
             //
-            enable_color_detection_notify = 0x35,
-            color_detection_notify = 0x36,
-            get_current_detected_color_reading = 0x37,
-            enable_color_detection = 0x38,
+            start_robot_to_robot_infrared_broadcasting = 0x27,	//
+            start_robot_to_robot_infrared_following = 0x28,	//
+            stop_robot_to_robot_infrared_broadcasting = 0x29,	//
+            robot_to_robot_infrared_message_received_notify = 0x2C,	//
             //
-            configure_streaming_service = 0x39,
-            start_streaming_service = 0x3A,
-            stop_streaming_service = 0x3B,
-            clear_streaming_service = 0x3C,
-            streaming_service_data_notify = 0x3D,
+            get_ambient_light_sensor_value = 0x30,	//
             //
-            enable_robot_infrared_message_notify = 0x3E,
-            send_infrared_message = 0x3F,
+            stop_robot_to_robot_infrared_following = 0x32,	//
+            start_robot_to_robot_infrared_evading = 0x33,	//
+            stop_robot_to_robot_infrared_evading = 0x34,	//
             //
-            get_temperature = 0x4A,
-            get_motor_thermal_protection_status = 0x4B,
-            enable_motor_thermal_protection_status_notify = 0x4C,
-            motor_thermal_protection_status_notify = 0x4D,
+            enable_color_detection_notify = 0x35,	//
+            color_detection_notify = 0x36,	//
+            get_current_detected_color_reading = 0x37,	//
+            enable_color_detection = 0x38,	//
+            //
+            configure_streaming_service = 0x39,	//
+            start_streaming_service = 0x3A,	//
+            stop_streaming_service = 0x3B,	//
+            clear_streaming_service = 0x3C,	//
+            streaming_service_data_notify = 0x3D,	//
+            //
+            enable_robot_infrared_message_notify = 0x3E,	//
+            send_infrared_message = 0x3F,	//
+            //
+            get_temperature = 0x4A,	//
+            get_motor_thermal_protection_status = 0x4B,	//
+            enable_motor_thermal_protection_status_notify = 0x4C,	//
+            motor_thermal_protection_status_notify = 0x4D,	//
+            //
+            magnetometer_calibration_complete_notify = 0x51,	//
+            get_magnetometer_reading = 0x52,	//
+            //
+            get_encoder_counts = 0x53,	//
+            disable_notifications_and_active_commands = 0x54,   //
         };
     };
     //----------------------------------------------------------------------------------------------------------------------
@@ -218,10 +232,9 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
         CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice,
-                     enable_color_detection_notify, //
-                     static_cast<uint8_t>(enable ? 0x20 : 0x21), enable, static_cast<uint8_t>(timer >> 8),
-                     static_cast<uint8_t>(timer & 0xFF), confidence };
+        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, enable_color_detection_notify, //
+        static_cast<uint8_t>(enable ? 0x20 : 0x21), enable, static_cast<uint8_t>(timer >> 8), static_cast<uint8_t>(timer
+            & 0xFF), confidence };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -249,6 +262,18 @@ namespace rvr {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 4);
     }
     //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsDirect::calibrateMagnetometer(CommandResponse const want_resp) const {
+        basic(magnetometer_calibrate_to_north, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline std::optional<bool> SensorsDirect::isMagnetometerCalibrationDone() const {
+        return mBlackboard.getNotify(mTarget, mDevice, magnetometer_calibration_complete_notify);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsDirect::getMagnetometerData(CommandResponse const want_resp) const {
+        basic(get_magnetometer_reading, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     inline std::optional<float> SensorsDirect::rightMotorTemp() const {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 5);
     }
@@ -260,8 +285,8 @@ namespace rvr {
     inline void SensorsDirect::resetColorDetectionNotify() const {
         mBlackboard.resetNotify(mTarget, mDevice, color_detection_notify);
     }
+
 }
 
 /* namespace rvr */
 
-#endif

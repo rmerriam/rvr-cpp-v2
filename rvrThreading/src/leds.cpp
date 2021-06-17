@@ -1,5 +1,3 @@
-#ifndef RVR___H_
-#define RVR___H_
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -17,24 +15,36 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //======================================================================================================================
 //
+//		 File: leds.cpp
+//
 //     Author: rmerriam
 //
-//     Created: May 29, 2021
+//    Created: Jun 10, 2021
 //
 //======================================================================================================================
-#include "enum.h"
+#include <future>
 
-#include "Response.h"
-#include <Trace.h>
+#include <rvr++.h>
+//---------------------------------------------------------------------------------------------------------------------
+void leds_test(rvr::IoLed& led) {
 
-#include "ApiShell.h"
-#include "Blackboard.h"
-#include "Drive.h"
-#include "IoLed.h"
-//#include "Magnetometer.h"
-#include "Power.h"
-#include "SensorsDirect.h"
-#include "SensorsStream.h"
-#include "SystemInfo.h"
+    uint32_t led32 { Led::status_indication_left | //
+        Led::status_indication_right | //
+        Led::brakelight_left | //
+        Led::brakelight_right };
 
-#endif /* RVR___H_ */
+    rvr::RvrMsg colors[] { { 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00 }, //
+        { 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF } };
+
+    led.ledsOff();
+    std::this_thread::sleep_for(50ms);
+
+    for (auto i { 0 }; i < 10; ++i) {
+        led.allLed(led32, colors[i % 2]);
+        std::cout << code_loc << "blink" << mys::nl;
+        std::this_thread::sleep_for(1000ms);
+    }
+
+    led.idleLeds();
+    std::this_thread::sleep_for(50ms);
+}

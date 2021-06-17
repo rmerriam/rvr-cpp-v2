@@ -25,38 +25,27 @@
 #include <iostream>
 #include <future>
 #include <version>
+#include <cmath>
 
 using namespace std::literals;
 
-#include "Trace.h"
-#include "Blackboard.h"
-#include "Response.h"
+#include <rvr++.h>
 
-#include "ApiShell.h"
-#include "Connection.h"
-#include "Drive.h"
-#include "IoLed.h"
-#include "Power.h"
-#include "SensorsDirect.h"
-#include "SensorsStream.h"
-#include "SystemInfo.h"
+#include "opt_output.h"
+//---------------------------------------------------------------------------------------------------------------------
+void color(rvr::SensorsDirect& sen_d);
+void direct(rvr::SensorsDirect& sen_d);
+void leds_test(rvr::IoLed& led);
+void streaming(rvr::SensorsStream& sen_s);
 //---------------------------------------------------------------------------------------------------------------------
 mys::TraceStart terr { std::cerr };
 mys::TraceStart tout { std::cout };
-//---------------------------------------------------------------------------------------------------------------------
-template <typename T>
-void opt_output(std::string const& text, std::optional<T> v) {
-    terr << code_loc << text << mys::sp << (v ? v.value() : T { });
-}
-//---------------------------------------------------------------------------------------------------------------------
-template <typename T>
-void opt_output_hex(std::string const& text, std::optional<T> v) {
-    terr << code_loc << text << mys::sp << std::hex << (v ? v.value() : T { });
-}
+
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 
-    terr << code_loc << " Opening serial " << argv[1] << std::setprecision(4) << std::fixed << std::boolalpha;
+    std::cout << std::setprecision(2) << std::fixed << std::boolalpha << std::setfill(' ');
+    std::cout << code_loc << " Opening serial " << argv[1] << mys::nl;
 
     SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
@@ -68,192 +57,67 @@ int main(int argc, char* argv[]) {
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
     rvr::Response resp { in_packet, bb, end_future };
+    std::cout << code_loc << "----------------" << mys::nl;
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
 
+    rvr::Drive drive(bb, req);
+    rvr::IoLed led(bb, req);
     rvr::Power pow(bb, req);
+    rvr::SensorsDirect sen_d(bb, req);
+    rvr::SensorsStream sen_s(bb, req);
 
-    pow.awake();
+    pow.awake(rvr::CommandResponse::resp_yes);
+
     std::this_thread::sleep_for(500ms);
-//---------------------------------------------------------------------------------------------------------------------
+//=====================================================================================================================
     try {
+
+//        color(sen_d);
+//        direct(sen_d);
+//        leds_test(led);
+        streaming(sen_s);
+
 #if 0
-        //---------------------------------------------------------------------------------------------------------------------
-        //  Setup the LED handling
-        rvr::IoLed led(bb, req);
-        led.ledsOff();
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
+        std::this_thread::sleep_for(5000ms);
+//        std::cout << code_loc << "mag cal done: " << sen_d.isMagnetometerCalibrationDone().value() << mys::nl;
+        std::this_thread::sleep_for(500ms);
 
-        uint32_t led32 {    //
-        Led::status_indication_left | Led::status_indication_right |    //
-            Led::headlight_left | Led::headlight_right };
-
-        rvr::RvrMsg colors[] { //
-        { 0x00, 0x00, 0xFF, //
-          0xFF, 0x00, 0x00, //
-          0x00, 0x00, 0xFF, //
-          0xFF, 0x00, 0x00, }, //
-        { 0xFF, 0x00, 0x00, //
-          0x00, 0x00, 0xFF, //
-          0xFF, 0x00, 0x00, //
-          0x00, 0x00, 0xFF, }, //
-        };
-
-        for (auto i { 0 }; i < 10; ++i) {
-            led.allLed(led32, colors[i % 2]);
-            terr << "blink";
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        }
-
-        led.idleLeds();
+        sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
         std::this_thread::sleep_for(5000ms);
 
-#endif
-#if 0
-        // Direct reading of sensors
-        rvr::SensorsDirect sen_d(bb, req);
-
-        sen_d.enableGyroMaxNotify();
-
-        sen_d.resetLocatorXY();
-        sen_d.setLocatorFlags(true);   // set/reset? special id flags
-
-        sen_d.enableColorDetection();   // must preceed color detection to turn on bottom LEDs
-        std::this_thread::sleep_for(50ms);
-
-        sen_d.getRgbcSensorValue();
-        sen_d.getAmbienLightSensorValue();
-
-        sen_d.enableColorDetectionNotify(true, 100, 0);
-        sen_d.getCurrentDectectedColor();
-
-        sen_d.getLeftMotorTemp();
-        sen_d.getRightMotorTemp();
-
-        sen_d.getThermalProtectionStatus();
-        sen_d.enableThermalProtectionNotify();  // responds when status changes
-
-        std::this_thread::sleep_for(150ms);
-
-        terr << code_loc << mys::nl;
-        terr << code_loc << "sense direct";
-
-        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
-        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
-        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().value();
-        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().value();
-
-        std::this_thread::sleep_for(50ms);
-
-        auto [c_r, c_g, c_b, c_c] { sen_d.currentRGBValues().value_or(rvr::ColorData { }) };
-        terr << code_loc << "currentRGBValues: " << c_r << mys::sp << c_g << mys::sp << c_b << mys::sp << c_c << mys::sp;
-
-        auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().value_or(rvr::ColorDetection { }) };
-        terr << code_loc << "colorDetectionValues: " << (int)d_r << mys::sp << (int)d_g << mys::sp << (int)d_b << mys::sp  //
-             << (int)conf << mys::sp << (int)classification << mys::sp;
-
-        auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().value_or(rvr::ThermalProtection { }) };
-        terr << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
-             << mys::sp << right_temp << mys::sp << (int)right_status;
-
-        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
-        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
-        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
-
-        terr << code_loc << "Left Temp: " << sen_d.leftMotorTemp().value();
-        terr << code_loc << "Right Temp: " << sen_d.rightMotorTemp().value();
-        terr << code_loc << mys::nl;
-
-        sen_d.enableColorDetectionNotify(false, 500, 0);
-        sen_d.disableColorDetection(); // turns off bottom LEDs
-        sen_d.disableGyroMaxNotify();
-        sen_d.disableThermalProtectionNotify();
-        std::this_thread::sleep_for(50ms);
-
-        terr << code_loc << mys::nl;
-        terr << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
-        terr << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
-        terr << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().value();
-        terr << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().value();
-
-        terr << code_loc << mys::nl;
+//        while (true)  //
+//        {
+//            sen_d.getMagnetometerData(rvr::CommandResponse::resp_yes);
+//            std::this_thread::sleep_for(500ms);
+//
+//            auto [m_x, m_y, m_z] { sen_d.magnetometer().value_or(rvr::MagnetometerData { }) };
+//            auto angle { std::atan2(m_x, m_y) };
+//            std::cout << code_loc << "magnetometer: " << std::setfill(' ') //
+//                 << std::setw(8) << m_x << mys::sp  //
+//                 << std::setw(8) << m_y << mys::sp //
+//                 << std::setw(8) << m_z << mys::sp  //
+//                 << std::setw(8) << angle << mys::sp  //
+//                 << std::setw(8) << angle * 180.0 / M_PI;
+//        }
+//        {
+//            sen_d.getMagnetometerData(rvr::CommandResponse::resp_yes);
+//            std::this_thread::sleep_for(500ms);
+//
+//            auto [m_x, m_y, m_z] { sen_d.magnetometer().value_or(rvr::MagnetometerData { }) };
+//            auto angle { std::atan2(m_y, m_x) };
+//            std::cout << code_loc << "magnetometer: " << std::setfill(' ')  //
+//                 << std::setw(8) << m_x << mys::sp  //
+//                 << std::setw(8) << m_y << mys::sp //
+//                 << std::setw(8) << m_z << mys::sp  //
+//                 << std::setw(8) << angle << mys::sp  //
+//                 << std::setw(8) << angle * 180.0 / M_PI;
+//        }
 
 #endif
 
-#if 0
-        //  Streaming data from sensors
-        rvr::SensorsStream sen_s(bb, req);
-        sen_s.disableStreaming();
-        sen_s.clearStreaming();
-        std::this_thread::sleep_for(50ms);
-
-        rvr::Drive drive(bb, req);
-        drive.resetYaw();
-        drive.drive(25, 25);
-
-        rvr::SensorsDirect sen_d(bb, req);
-        sen_d.enableColorDetection();   // must precede color detection to turn on bottom LEDs
-
-        terr << code_loc;
-        terr << code_loc;
-        terr << code_loc;
-
-        sen_s.streamAmbient();
-//    sen_s.colorConfig();
-//    sen_s.coreNordicConfig();
-//    sen_s.coreBTConfig();
-
-        sen_s.streamImuAccelGyro();
-        sen_s.streamSpeedVelocityLocator();
-        sen_s.streamQuaternion();
-
-        terr << code_loc;
-        terr << code_loc;
-        terr << code_loc;
-
-        sen_s.startStreamingBT(50);
-        sen_s.startStreamingNordic(50);
-        std::this_thread::sleep_for(1500ms);
-
-        //    sen_s.disableStreamingNordic();
-        //    sen_s.clearStreamingNordic();
-        //
-        //    sen_s.disableStreamingBT();
-        //    sen_s.clearStreamingBT();
-
-        sen_s.disableStreaming();
-        sen_s.clearStreaming();
-
-        terr << code_loc << mys::nl;
-        terr << code_loc << "Streaming";
-        opt_output("Ambient"s, sen_s.ambient());
-        terr << code_loc;
-
-        auto [a_x, a_y, a_z] { sen_s.accelerometer().value_or(rvr::AccelData { }) };
-        terr << code_loc << "accelerometer: " << a_x << mys::sp << a_y << mys::sp << a_z;
-
-        auto [g_x, g_y, g_z] { sen_s.gyroscope().value_or(rvr::GyroData { }) };
-        terr << code_loc << "gyroscope: " << g_x << mys::sp << g_y << mys::sp << g_z;
-
-        auto [i_x, i_y, i_z] { sen_s.imu().value_or(rvr::ImuData { }) };
-        terr << code_loc << "imu: " << i_x << mys::sp << i_y << mys::sp << i_z;
-
-        auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
-        terr << code_loc << "locator: " << l_x << mys::sp << l_y;
-
-        opt_output("Speed"s, sen_s.speed());
-
-        auto [v_x, v_y] { sen_s.velocity().value_or(rvr::VelocityData { }) };
-        terr << code_loc << "Velocity: " << v_x << mys::sp << v_y;
-
-        auto [q_w, q_x, q_y, q_z] { sen_s.quaternion().value_or(rvr::QuatData { }) };
-        terr << code_loc << "quaternion: " << q_w << mys::sp << q_x << mys::sp << q_y << mys::sp << q_z;
-
-        terr << code_loc << mys::nl;
-        drive.stop(0);
-
-#endif
 #if 0
         // POWER
 
@@ -272,8 +136,8 @@ int main(int argc, char* argv[]) {
 
         std::this_thread::sleep_for(1s);
 
-        terr << code_loc << mys::nl;
-        terr << code_loc << "Power";
+        std::cout << code_loc << mys::nl;
+        std::cout << code_loc << "Power";
 
         opt_output("VPercent: ", pow.batteryPercent());
 
@@ -297,24 +161,24 @@ int main(int argc, char* argv[]) {
 
         opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
 
-        terr << code_loc << mys::nl;
-        terr << code_loc << "disableBatteryStateChange";
+        std::cout << code_loc << mys::nl;
+        std::cout << code_loc << "disableBatteryStateChange";
         pow.disableBatteryStateChange();
         std::this_thread::sleep_for(50ms);
 
         opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
 
-        terr << code_loc << mys::nl;
+        std::cout << code_loc << mys::nl;
 #if 0
     pow.sleep();
 
     std::this_thread::sleep_for(5000ms);    // have to wait for notification
-    terr << code_loc  << "Did Sleep Notify: " << pow.isDidSleepNotify();
-    terr << code_loc << mys::nl;
+    std::cout << code_loc  << "Did Sleep Notify: " << pow.isDidSleepNotify();
+    std::cout << code_loc << mys::nl;
 #endif
 
 #endif
-#if 1
+#if 0
         // DRIVE
         rvr::Drive drive(bb, req);
         rvr::SensorsStream sen_s(bb, req);
@@ -332,7 +196,7 @@ int main(int argc, char* argv[]) {
 //            drive.drive(75, 25);
 //            std::this_thread::sleep_for(3s);
 //            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
-//            terr << code_loc << "locator: " << l_x << mys::sp << l_y;
+//            std::cout << code_loc << "locator: " << l_x << mys::sp << l_y;
 //        }
 
         drive.tank_normalized(15, 15);
@@ -354,21 +218,21 @@ int main(int argc, char* argv[]) {
 //
 //    std::this_thread::sleep_for(100ms);
 //
-//    terr << code_loc;
-//    terr << code_loc;
-//    terr << code_loc << "drive";
+//    std::cout << code_loc;
+//    std::cout << code_loc;
+//    std::cout << code_loc << "drive";
 //
-//    terr << code_loc << "Fault Notify State: " << drive.motorFaultState();
-//    terr << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
+//    std::cout << code_loc << "Fault Notify State: " << drive.motorFaultState();
+//    std::cout << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
 //
-//    terr << code_loc << "Stall Notify State: " << drive.motorFaultState();
-//    terr << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
+//    std::cout << code_loc << "Stall Notify State: " << drive.motorFaultState();
+//    std::cout << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
 //
-//    terr << code_loc;
-//    terr << code_loc;
+//    std::cout << code_loc;
+//    std::cout << code_loc;
 
 #endif
-#if 1
+#if 0
         // Connection, SysInfo, APIShell
         rvr::Connection cmd(bb, req);
         cmd.bluetoothName();    //
@@ -388,9 +252,9 @@ int main(int argc, char* argv[]) {
         api.echo(dead);    // alt
 
         std::this_thread::sleep_for(100ms);
-        terr << code_loc << mys::nl;
-        terr << code_loc << mys::nl;
-        terr << code_loc << mys::nl << "Connection, SysInfo, APIShell";
+        std::cout << code_loc << mys::nl;
+        std::cout << code_loc << mys::nl;
+        std::cout << code_loc << mys::nl << "Connection, SysInfo, APIShell";
         opt_output("App Version: ", sys.mainAppVersion());
         opt_output("App Version: ", sys.mainAppVersion2());
         opt_output("Boot Version: ", sys.bootVersion());
@@ -408,7 +272,7 @@ int main(int argc, char* argv[]) {
         opt_output_hex("Echo: ", api.echo());
         opt_output_hex("Echo Alt: ", api.echoAlt());
 
-        terr << code_loc << mys::nl;
+        std::cout << code_loc << mys::nl;
 
 #endif
 #if 0
@@ -420,13 +284,13 @@ int main(int argc, char* argv[]) {
 
     sen_d.resetLocatorXY();
     drive.resetYaw();
-    sen_s.clearStreaming();
-    mys::TraceOff toff { terr };
+    sen_s.clearAllStreaming();
+    mys::TraceOff toff { std::cout };
 
     sen_s.locatorConfig();
     sen_s.enableStreaming(30);
     std::this_thread::sleep_for(30ms);
-    terr << code_loc << mys::nl;
+    std::cout << code_loc << mys::nl;
 
     rvr::LocatorData l { sen_s.locator() };
     tout << code_loc << mys::nl;
@@ -466,10 +330,10 @@ int main(int argc, char* argv[]) {
 #endif
     }
     catch (std::exception& e) {
-        terr << code_loc << e.what() << "=================================";
+        std::cout << code_loc << e.what() << "=================================";
     }
-    pow.sleep();
-    terr << code_loc << "----------------" << mys::nl;
+
+    pow.sleep(rvr::CommandResponse::resp_yes);
 
     std::this_thread::sleep_for(1s);
     end_tasks.set_value();

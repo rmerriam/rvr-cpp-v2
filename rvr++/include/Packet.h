@@ -40,7 +40,7 @@ namespace rvr {
         no_response = 0x00, //
         response = 0x01,  //
         request_response = 0x02,  //
-        request_error_response = 0x06, // must request response to get error response
+        request_error_response = 0x04, // must request response to get error response
         activity = 0x08, //
         has_target = 0x10, //
         has_source = 0x20, //

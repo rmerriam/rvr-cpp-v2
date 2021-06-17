@@ -45,9 +45,10 @@ namespace rvr {
         std::optional<bool> boolValue(TargetPort const target, Devices const dev, uint8_t const cmd);
         std::optional<uint8_t> byteValue(TargetPort const target, Devices const dev, uint8_t const cmd);
         std::optional<int16_t> intValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        std::optional<uint16_t> uintValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
-        std::optional<uint32_t> uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
-            uint8_t const id = 0);
+        std::optional<uint16_t> uintValue(TargetPort const target, Devices const dev, uint8_t const cmd,
+            uint8_t const pos = 0);
+        std::optional<uint32_t> uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd,
+            uint8_t const pos = 0, uint8_t const id = 0);
         std::optional<uint64_t> uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
         std::optional<float> floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const = 0.0,
             uint8_t const id = 0);
@@ -72,7 +73,7 @@ namespace rvr {
         inline static float const NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
 
         /*  =============================================================================================================
-         * Key stuff is gnarly because of using unorderedmap which uses a hash table but has limited hashing capability
+         *  Key stuff is gnarly because of using unorderedmap which uses a hash table but has limited hashing capability
          *  The key is "key_t" but is a combination of processor, device, command, and id. That's not easy to deal with
          *  so key_s is a struct with those fields with a conversion operator. That allows constructing the key by fields
          *  and then converting it to the key_t.

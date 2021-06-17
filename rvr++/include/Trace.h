@@ -33,13 +33,13 @@
 #include <type_traits>
 #include <vector>
 //---------------------------------------------------------------------------------------------------------------------
-namespace mys {
-
 #if 1
-    constexpr bool trace_active { true };
+constexpr bool trace_active { true };
 #else
-    constexpr bool trace_active { false };
+constexpr bool trace_active { false };
 #endif
+
+namespace mys {
 
     template <typename T, typename = std::void_t<>>
     struct has_value_type : std::false_type {
@@ -104,8 +104,6 @@ namespace mys {
     private:
         Trace& mTrace;
     };
-    //=====================================================================================================================
-#define code_loc __func__ << mys::sp
     //=====================================================================================================================
     inline Trace::Trace(std::ostream& os) :
         mOs { os } {
@@ -184,7 +182,9 @@ namespace mys {
         mTrace.on();
     }
 }
-//---------------------------------------------------------------------------------------------------------------------
+//=====================================================================================================================
+#define code_loc __func__ << mys::sp << std::setw(4) << __LINE__ << mys::tab
+
 extern mys::TraceStart terr;
 extern mys::TraceStart tout;
 

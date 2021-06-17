@@ -1,5 +1,4 @@
-#ifndef RVR___H_
-#define RVR___H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -17,24 +16,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //======================================================================================================================
 //
+//		 File: SensorBase.h
+//
 //     Author: rmerriam
 //
-//     Created: May 29, 2021
+//    Created: Jun 7, 2021
 //
 //======================================================================================================================
+
 #include "enum.h"
-
+#include "Request.h"
 #include "Response.h"
-#include <Trace.h>
+#include "SendPacket.h"
+//----------------------------------------------------------------------------------------------------------------------
+namespace rvr {
 
-#include "ApiShell.h"
-#include "Blackboard.h"
-#include "Drive.h"
-#include "IoLed.h"
-//#include "Magnetometer.h"
-#include "Power.h"
-#include "SensorsDirect.h"
-#include "SensorsStream.h"
-#include "SystemInfo.h"
+    class SensorBase : public Response, public Request {
+    public:
+        SensorBase(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::sensors, req, bluetoothSOC } {
+        }
+        SensorBase(SensorBase const& other) = delete;
+        SensorBase(SensorBase&& other) = delete;
+        SensorBase& operator=(SensorBase const& other) = delete;
+        SensorBase& operator=(SensorBase&& other) = delete;
+        ~SensorBase() = delete;
 
-#endif /* RVR___H_ */
+    };
+
+} /* namespace rvr */
+

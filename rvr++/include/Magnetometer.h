@@ -1,5 +1,4 @@
-#ifndef RVR___H_
-#define RVR___H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -17,24 +16,30 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //======================================================================================================================
 //
+//		 File: Magnetometer.h
+//
 //     Author: rmerriam
 //
-//     Created: May 29, 2021
+//    Created: Jun 7, 2021
 //
 //======================================================================================================================
-#include "enum.h"
 
-#include "Response.h"
-#include <Trace.h>
+#include <SensorBase.hx>
 
-#include "ApiShell.h"
-#include "Blackboard.h"
-#include "Drive.h"
-#include "IoLed.h"
-//#include "Magnetometer.h"
-#include "Power.h"
-#include "SensorsDirect.h"
-#include "SensorsStream.h"
-#include "SystemInfo.h"
+namespace rvr {
 
-#endif /* RVR___H_ */
+    class Magnetometer : public SensorBase {
+    public:
+        Magnetometer(Blackboard& bb, SendPacket& req) :
+            SensorBase(bb, req) {
+        }
+        ~Magnetometer() = delete;
+        Magnetometer(Magnetometer const& other) = delete;
+        Magnetometer(Magnetometer&& other) = delete;
+        Magnetometer& operator=(Magnetometer const& other) = delete;
+        Magnetometer& operator=(Magnetometer&& other) = delete;
+
+    };
+
+} /* namespace rvr */
+

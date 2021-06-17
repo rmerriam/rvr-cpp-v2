@@ -40,6 +40,7 @@ namespace rvr {
     using AccelData = TripleFloat;
     using GyroData = TripleFloat;
     using LocatorData = DoubleFloat;
+    using MagnetometerData = TripleFloat;
     using VelocityData = DoubleFloat;
 
     struct ImuData {
@@ -55,6 +56,10 @@ namespace rvr {
         float z;
     };
 
+    struct CoreTime {
+        uint32_t upper;
+        uint32_t lower;
+    };
     struct ColorData {
         uint16_t red;
         uint16_t green;
@@ -68,6 +73,14 @@ namespace rvr {
         uint8_t blue;
         uint8_t confidence;
         uint8_t classification;
+    };
+
+    struct ColorStream {
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+        uint8_t index;
+        float confidence;
     };
 
     enum VoltageType : uint8_t {
@@ -91,7 +104,7 @@ namespace rvr {
     enum CommandResponse : uint8_t {
         resp_no = no_response, //
         resp_yes = request_response, //
-        resp_on_error = request_error_response,
+        resp_on_error = request_error_response | request_response,
     };
     enum MotorIndexes : uint8_t {
         left_motor_index = 0, //
