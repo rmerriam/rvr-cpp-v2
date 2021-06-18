@@ -88,58 +88,58 @@ namespace rvr {
                     break;
             }
         }
-        terr << code_loc << flags;
+        mys::tdbg << code_loc << flags;
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_error(auto err_byte) {
 
         switch (err_byte) {
             case 1: {
-                terr << code_loc << "bad_did";
+                mys::tdbg << code_loc << "bad_did";
                 break;
             }
             case 2: {
-                terr << code_loc << "bad_cid";
+                mys::tdbg << code_loc << "bad_cid";
                 break;
             }
             case 3: {
-                terr << code_loc << "not_yet_implemented";
+                mys::tdbg << code_loc << "not_yet_implemented";
                 break;
             }
             case 4: {
-                terr << code_loc << "cannot be executed in current mode";
+                mys::tdbg << code_loc << "cannot be executed in current mode";
                 break;
             }
             case 5: {
-                terr << code_loc << "bad_data_length";
+                mys::tdbg << code_loc << "bad_data_length";
                 break;
             }
             case 6: {
-                terr << code_loc << "failed for command specific reason";
+                mys::tdbg << code_loc << "failed for command specific reason";
                 break;
             }
             case 7: {
-                terr << code_loc << "Bad Parameter Value";
+                mys::tdbg << code_loc << "Bad Parameter Value";
                 break;
             }
             case 8: {
-                terr << code_loc << "busy";
+                mys::tdbg << code_loc << "busy";
                 break;
             }
             case 9: {
-                terr << code_loc << "bad_tid";
+                mys::tdbg << code_loc << "bad_tid";
                 break;
             }
             case 0xA: {
-                terr << code_loc << "target_unavailable";
+                mys::tdbg << code_loc << "target_unavailable";
                 break;
             }
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
-//        mys::TraceOff terr_off { terr };
-        terr << code_loc << "pkt: " << std::hex << packet;
+        mys::TraceOff tdbg_off { mys::tdbg };
+        mys::tdbg << code_loc << "pkt: " << std::hex << packet;
 
         // typical positions of header bytes when target not present which is the usual case
         uint8_t flags { 0x00 };
@@ -181,22 +181,22 @@ namespace rvr {
         std::string command { mBlackboard.entryName(key) };
 
         if (command.empty()) {
-            terr << code_loc << "Command not in decode table " << device //
-                 << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key;
+            mys::tdbg << code_loc << "Command not in decode table " << device //
+                      << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key;
         }
         else {
-            terr << code_loc << device << mys::sp << command;
+            mys::tdbg << code_loc << device << mys::sp << command;
 
             if (is_resp && packet[err_code]) {
                 // a response will have a status of either 0 or and error code
                 auto err_byte { packet[err_code] };
-                terr << code_loc << "ERROR: " << (uint16_t)err_byte;
+                mys::tdbg << code_loc << "ERROR: " << (uint16_t)err_byte;
                 decode_error(err_byte);
             }
             else {
                 mBlackboard.msgArray(key, packet.begin() + seq, packet.end());
             }
         }
-        terr << __func__ << " **************";
+        mys::tdbg << __func__ << " **************";
     }
 }

@@ -27,11 +27,11 @@
 //---------------------------------------------------------------------------------------------------------------------
 template <typename T>
 void opt_output(std::string const& text, std::optional<T> v) {
-    std::cout << code_loc << text << mys::sp << (v ? v.value() : T { }) << mys::nl;
+    mys::tinfo << code_loc << text << mys::sp << (v ? v.value() : T { });
 }
 //---------------------------------------------------------------------------------------------------------------------
 template <typename T>
 void opt_output_hex(std::string const& text, std::optional<T> v) {
-    std::cout << code_loc << text << mys::sp << std::hex << (v ? v.value() : T { }) << mys::nl;
+    mys::tinfo << code_loc << text << mys::sp << std::hex << (v ? v.value() : T { });
 }
 

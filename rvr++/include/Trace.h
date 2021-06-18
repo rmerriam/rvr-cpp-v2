@@ -40,23 +40,27 @@ constexpr bool trace_active { false };
 #endif
 
 namespace mys {
-
-    template <typename T, typename = std::void_t<>>
-    struct has_value_type : std::false_type {
-    };
-
-    template <typename T>
-    struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {
-    };
-
+//
+//    template <typename T, typename = std::void_t<>>
+//    struct has_value_type : std::false_type {
+//    };
+//
+//    template <typename T>
+//    struct has_value_type<T, std::void_t<typename T::value_type>> : std::true_type {
+//    };
+//
     constexpr char tab { '\t' };
     constexpr char nl { '\n' };
     constexpr char sp { ' ' };
     constexpr char comma[] { ", " };
     //=====================================================================================================================
     class Trace {
+    protected:
+        explicit Trace(std::ostream& os) :
+            mOs { os } {
+            mOs << std::boolalpha << std::fixed << std::setprecision(2) << std::uppercase;
+        }
     public:
-        Trace(std::ostream& os);
         Trace(Trace const& other) = delete;
         Trace(Trace&& other) = delete;
         Trace& operator=(Trace const& other) = delete;
@@ -64,17 +68,26 @@ namespace mys {
         template <typename C>
         Trace& operator<<(C const& data);
 
-        void off();
-        void on();
+        friend struct OnOffBase;
+        friend class TraceOff;
+        friend class TraceOn;
 
     protected:
+        bool mEnabled { true };
         std::ostream& mOs;
-        std::mutex mOutputMutex;
+//        std::mutex mOutputMutex;
+
+        void off() {
+            mEnabled = false;
+        }
+        void on() {
+            mEnabled = true;
+        }
     };
     //=====================================================================================================================
     class TraceStart : public Trace {
     public:
-        TraceStart(std::ostream& os);
+        TraceStart(std::ostream& os, char const ch);
         TraceStart(Trace const& other) = delete;
         TraceStart(Trace&& other) = delete;
         TraceStart& operator=(Trace const& other) = delete;
@@ -84,38 +97,37 @@ namespace mys {
 
     private:
         Trace& mTrace;
+        char const mType;
         int16_t mCnt { };
 
         void time_stamp();
     };
     //=====================================================================================================================
-    class TraceOff {
+    struct OnOffBase {
+        OnOffBase(Trace& t) :
+            mTrace { t }, mPrevEnable { mTrace.mEnabled } {
+        }
+        ~OnOffBase() {
+            mTrace.mEnabled = mPrevEnable;
+        }
+        Trace& mTrace;
+        bool const mPrevEnable;
+    };
+    //=====================================================================================================================
+    class TraceOff : protected OnOffBase {
     public:
         TraceOff(Trace& t);
-        ~TraceOff();
-    private:
-        Trace& mTrace;
     };
     //=====================================================================================================================
-    class TraceOn {
+    class TraceOn : protected OnOffBase {
     public:
         TraceOn(Trace& t);
-        ~TraceOn();
-    private:
-        Trace& mTrace;
     };
     //=====================================================================================================================
-    inline Trace::Trace(std::ostream& os) :
-        mOs { os } {
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     template <typename C>
     inline mys::Trace& Trace::operator <<(C const& data) {
         if constexpr (trace_active) {
-            if constexpr (has_value_type<C>()) {
-                std::copy(data.begin(), data.end(), std::ostream_iterator<int>(mOs, " "));
-            }
-            else {
+            if (mEnabled) {
                 mOs << data;
             }
         }
@@ -125,31 +137,39 @@ namespace mys {
     template <>
     inline mys::Trace& Trace::operator <<(std::string const& data) {
         if constexpr (trace_active) {
-            mOs << data;
+            if (mEnabled) {
+                mOs << data;
+            }
         }
         return *this;
     }
     //---------------------------------------------------------------------------------------------------------------------
-    inline void Trace::off() {
-        mOs.setstate(std::ios_base::badbit);
-    }
-    //---------------------------------------------------------------------------------------------------------------------
-    inline void Trace::on() {
-        mOs.clear();
-    }
-    //---------------------------------------------------------------------------------------------------------------------
-    inline TraceStart::TraceStart(std::ostream& os) :
-        Trace { os }, mTrace { *this } {
+
+    template <>
+    inline mys::Trace& Trace::operator <<(std::basic_string<uint8_t> const& data) {
+        if constexpr (trace_active) {
+            if (mEnabled) {
+                mOs << std::hex;
+                for (auto const& c : data) {
+                    mOs << (uint16_t)c << ' ';
+                }
+            }
+        }
+        return *this;
+    } //---------------------------------------------------------------------------------------------------------------------
+    inline TraceStart::TraceStart(std::ostream& os, char const ch) :
+        Trace { os }, mTrace { *this }, mType { ch } {
     }
     //---------------------------------------------------------------------------------------------------------------------
     template <typename T>
     inline mys::Trace& TraceStart::operator <<(T const& value) {
         if constexpr (trace_active) {
-            mOs << std::dec;
-            time_stamp();
-            mOs << value;
+            if (mEnabled) {
+                time_stamp();
+                mOs << value;
+            }
         }
-        return mTrace;
+        return *this;
     }
     //---------------------------------------------------------------------------------------------------------------------
     inline void TraceStart::time_stamp() {
@@ -158,34 +178,32 @@ namespace mys {
             auto now = system_clock::now();
             auto timer = system_clock::to_time_t(now);
 
-            mTrace << std::put_time(std::localtime( &timer), "%n%y%m%d.%H%M%S."); //
-            mTrace << std::dec << std::setfill('0') << std::setw(3);
-            mTrace << (duration_cast<milliseconds>(now.time_since_epoch()) % 1000).count() << ": ";
+            mOs << std::dec << nl << mType << ',';
+            mOs << std::put_time(std::localtime( &timer), "%y%m%d.%H%M%S."); //
+            mOs << std::setfill('0') << std::setw(3) << (duration_cast<milliseconds>(now.time_since_epoch()) % 1000).count()
+                << ": ";
         }
     }
     //---------------------------------------------------------------------------------------------------------------------
     inline TraceOff::TraceOff(Trace& t) :
-        mTrace(t) {
-        mTrace.off();
-    }
-    //---------------------------------------------------------------------------------------------------------------------
-    inline TraceOff::~TraceOff() {
-        mTrace.on();
-    }
-    //---------------------------------------------------------------------------------------------------------------------
-    inline TraceOn::~TraceOn() {
+        OnOffBase { t } {
         mTrace.off();
     }
     //---------------------------------------------------------------------------------------------------------------------
     inline TraceOn::TraceOn(Trace& t) :
-        mTrace(t) {
+        OnOffBase { t } {
         mTrace.on();
     }
+    //---------------------------------------------------------------------------------------------------------------------
+    inline TraceStart tdbg { std::cerr, 'D' };
+    inline TraceStart tlog { std::clog, 'L' };
+    inline TraceStart tinfo { std::cout, 'I' };
 }
 //=====================================================================================================================
-#define code_loc __func__ << mys::sp << std::setw(4) << __LINE__ << mys::tab
-
-extern mys::TraceStart terr;
-extern mys::TraceStart tout;
+#define code_loc __FUNCTION__ << mys::tab
+#define code_line __FUNCTION__ << mys::sp << __LINE__ << mys::tab
+#define code_entry __FUNCTION__<< " entry"  << mys::tab
+#define code_exit __FUNCTION__ << " exit" << mys::tab
+#define code_return __FUNCTION__ << " return" << mys::tab
 
 #endif

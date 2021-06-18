@@ -38,29 +38,26 @@ void direct(rvr::SensorsDirect& sen_d);
 void leds_test(rvr::IoLed& led);
 void streaming(rvr::SensorsStream& sen_s);
 //---------------------------------------------------------------------------------------------------------------------
-mys::TraceStart terr { std::cerr };
-mys::TraceStart tout { std::cout };
-
-//---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
+//    mys::TraceOn mys::tdbg_on { mys::tdbg };
+    mys::TraceOff tdbg_off { mys::tdbg };
+    mys::tdbg << code_loc << " Opening serial " << argv[1];
 
-    std::cout << std::setprecision(2) << std::fixed << std::boolalpha << std::setfill(' ');
-    std::cout << code_loc << " Opening serial " << argv[1] << mys::nl;
+    mys::tinfo << code_loc << " Opening serial " << argv[1];
 
     SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
     rvr::ReadPacket in_packet { serial };
     rvr::Blackboard bb;
-
 //---------------------------------------------------------------------------------------------------------------------
-//  Setup the thread to read responses
+//  Setup the response thread to read responses
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
     rvr::Response resp { in_packet, bb, end_future };
-    std::cout << code_loc << "----------------" << mys::nl;
+    mys::tdbg << code_loc << "----------------" << mys::nl;
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
-
+    //---------------------------------------------------------------------------------------------------------------------
     rvr::Drive drive(bb, req);
     rvr::IoLed led(bb, req);
     rvr::Power pow(bb, req);
@@ -68,7 +65,6 @@ int main(int argc, char* argv[]) {
     rvr::SensorsStream sen_s(bb, req);
 
     pow.awake(rvr::CommandResponse::resp_yes);
-
     std::this_thread::sleep_for(500ms);
 //=====================================================================================================================
     try {
@@ -82,7 +78,7 @@ int main(int argc, char* argv[]) {
 
         sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
         std::this_thread::sleep_for(5000ms);
-//        std::cout << code_loc << "mag cal done: " << sen_d.isMagnetometerCalibrationDone().value() << mys::nl;
+//        mys:;tinfo<< code_loc << "mag cal done: " << sen_d.isMagnetometerCalibrationDone().value() << mys::nl;
         std::this_thread::sleep_for(500ms);
 
         sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
@@ -95,7 +91,7 @@ int main(int argc, char* argv[]) {
 //
 //            auto [m_x, m_y, m_z] { sen_d.magnetometer().value_or(rvr::MagnetometerData { }) };
 //            auto angle { std::atan2(m_x, m_y) };
-//            std::cout << code_loc << "magnetometer: " << std::setfill(' ') //
+//            mys:;tinfo<< code_loc << "magnetometer: " << std::setfill(' ') //
 //                 << std::setw(8) << m_x << mys::sp  //
 //                 << std::setw(8) << m_y << mys::sp //
 //                 << std::setw(8) << m_z << mys::sp  //
@@ -108,7 +104,7 @@ int main(int argc, char* argv[]) {
 //
 //            auto [m_x, m_y, m_z] { sen_d.magnetometer().value_or(rvr::MagnetometerData { }) };
 //            auto angle { std::atan2(m_y, m_x) };
-//            std::cout << code_loc << "magnetometer: " << std::setfill(' ')  //
+//            mys:;tinfo<< code_loc << "magnetometer: " << std::setfill(' ')  //
 //                 << std::setw(8) << m_x << mys::sp  //
 //                 << std::setw(8) << m_y << mys::sp //
 //                 << std::setw(8) << m_z << mys::sp  //
@@ -136,8 +132,8 @@ int main(int argc, char* argv[]) {
 
         std::this_thread::sleep_for(1s);
 
-        std::cout << code_loc << mys::nl;
-        std::cout << code_loc << "Power";
+        mys:;tinfo<< code_loc << mys::nl;
+        mys:;tinfo<< code_loc << "Power";
 
         opt_output("VPercent: ", pow.batteryPercent());
 
@@ -161,20 +157,20 @@ int main(int argc, char* argv[]) {
 
         opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
 
-        std::cout << code_loc << mys::nl;
-        std::cout << code_loc << "disableBatteryStateChange";
+        mys:;tinfo<< code_loc << mys::nl;
+        mys:;tinfo<< code_loc << "disableBatteryStateChange";
         pow.disableBatteryStateChange();
         std::this_thread::sleep_for(50ms);
 
         opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
 
-        std::cout << code_loc << mys::nl;
+        mys:;tinfo<< code_loc << mys::nl;
 #if 0
     pow.sleep();
 
     std::this_thread::sleep_for(5000ms);    // have to wait for notification
-    std::cout << code_loc  << "Did Sleep Notify: " << pow.isDidSleepNotify();
-    std::cout << code_loc << mys::nl;
+    mys:;tinfo<< code_loc  << "Did Sleep Notify: " << pow.isDidSleepNotify();
+    mys:;tinfo<< code_loc << mys::nl;
 #endif
 
 #endif
@@ -196,7 +192,7 @@ int main(int argc, char* argv[]) {
 //            drive.drive(75, 25);
 //            std::this_thread::sleep_for(3s);
 //            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
-//            std::cout << code_loc << "locator: " << l_x << mys::sp << l_y;
+//            mys:;tinfo<< code_loc << "locator: " << l_x << mys::sp << l_y;
 //        }
 
         drive.tank_normalized(15, 15);
@@ -218,18 +214,18 @@ int main(int argc, char* argv[]) {
 //
 //    std::this_thread::sleep_for(100ms);
 //
-//    std::cout << code_loc;
-//    std::cout << code_loc;
-//    std::cout << code_loc << "drive";
+//    mys:;tinfo<< code_loc;
+//    mys:;tinfo<< code_loc;
+//    mys:;tinfo<< code_loc << "drive";
 //
-//    std::cout << code_loc << "Fault Notify State: " << drive.motorFaultState();
-//    std::cout << code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
+//    mys:;tinfo<< code_loc << "Fault Notify State: " << drive.motorFaultState();
+//    mys:;tinfo<< code_loc << "Fault Notify Set: " << drive.motorFaultNotifySet();
 //
-//    std::cout << code_loc << "Stall Notify State: " << drive.motorFaultState();
-//    std::cout << code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
+//    mys:;tinfo<< code_loc << "Stall Notify State: " << drive.motorFaultState();
+//    mys:;tinfo<< code_loc << "Stall Notify Set: " << drive.motorStallNotifySet();
 //
-//    std::cout << code_loc;
-//    std::cout << code_loc;
+//    mys:;tinfo<< code_loc;
+//    mys:;tinfo<< code_loc;
 
 #endif
 #if 0
@@ -252,9 +248,9 @@ int main(int argc, char* argv[]) {
         api.echo(dead);    // alt
 
         std::this_thread::sleep_for(100ms);
-        std::cout << code_loc << mys::nl;
-        std::cout << code_loc << mys::nl;
-        std::cout << code_loc << mys::nl << "Connection, SysInfo, APIShell";
+        mys:;tinfo<< code_loc << mys::nl;
+        mys:;tinfo<< code_loc << mys::nl;
+        mys:;tinfo<< code_loc << mys::nl << "Connection, SysInfo, APIShell";
         opt_output("App Version: ", sys.mainAppVersion());
         opt_output("App Version: ", sys.mainAppVersion2());
         opt_output("Boot Version: ", sys.bootVersion());
@@ -272,7 +268,7 @@ int main(int argc, char* argv[]) {
         opt_output_hex("Echo: ", api.echo());
         opt_output_hex("Echo Alt: ", api.echoAlt());
 
-        std::cout << code_loc << mys::nl;
+        mys:;tinfo<< code_loc << mys::nl;
 
 #endif
 #if 0
@@ -285,16 +281,16 @@ int main(int argc, char* argv[]) {
     sen_d.resetLocatorXY();
     drive.resetYaw();
     sen_s.clearAllStreaming();
-    mys::TraceOff toff { std::cout };
+    mys::TraceOff toff { mys:;tinfo};
 
     sen_s.locatorConfig();
     sen_s.enableStreaming(30);
     std::this_thread::sleep_for(30ms);
-    std::cout << code_loc << mys::nl;
+    mys:;tinfo<< code_loc << mys::nl;
 
     rvr::LocatorData l { sen_s.locator() };
-    tout << code_loc << mys::nl;
-    tout << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+    mys:;tinfo << code_loc << mys::nl;
+    mys:;tinfo << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
     float forty_in = -40 * in_to_m;
     double sp { 25 };
@@ -303,16 +299,16 @@ int main(int argc, char* argv[]) {
         drive.driveWithHeading(sp, 0);
         std::this_thread::sleep_for(30ms);
         l = sen_s.locator();
-        tout << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+        mys:;tinfo << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
     }
     drive.stop(0);
     l = sen_s.locator();
-    tout << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+    mys:;tinfo << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
     std::this_thread::sleep_for(30ms);
 
     l = sen_s.locator();
-    tout << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+    mys:;tinfo << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
     while (l.y < 0) {
         drive.driveWithHeading( -sp, 0);
@@ -321,16 +317,16 @@ int main(int argc, char* argv[]) {
     }
     drive.stop(0);
     l = sen_s.locator();
-    tout << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+    mys:;tinfo << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
     std::this_thread::sleep_for(30ms);
 
     l = sen_s.locator();
-    tout << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+    mys:;tinfo << code_loc << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
 #endif
     }
     catch (std::exception& e) {
-        std::cout << code_loc << e.what() << "=================================";
+        mys::tdbg << code_loc << e.what() << "=================================";
     }
 
     pow.sleep(rvr::CommandResponse::resp_yes);

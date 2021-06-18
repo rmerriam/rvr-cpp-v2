@@ -236,17 +236,13 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::msgArray(Blackboard::key_t key, RvrMsg::iterator begin, RvrMsg::iterator end) {
 
-        terr << code_loc << "key: " << std::hex << key;
-
         RvrMsg msg { begin, end };
-        terr << code_loc << "msg: " << std::hex << msg;
 
         if (msg.empty()) {
             msg.push_back(0xFF);
         }
         else if (msg.size() >= 2) {
             uint8_t seq { msg.front() };
-            terr << code_loc << "seq: " << std::hex << (int)seq << " | " << (int)msg[1];
 
             if (seq == 0xFF) {  // this is a notification
                 msg.erase(msg.begin()); // remove 0xFF sequence number
@@ -275,7 +271,6 @@ namespace rvr {
             }
 
         }
-        terr << code_loc << std::setfill('0') << std::hex << key << mys::sp << msg;
         addMsgValue(key, msg);
     }
     //======================================================================================================================
@@ -354,13 +349,11 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<uint32_t> Blackboard::uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd,
         uint8_t const pos, uint8_t const id) {
-        mys::TraceOff terr_off { terr };
 
         RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
         uint32_t res { };
 
         if (msg) {
-            terr << code_loc << msg.value() << mys::nl;
             auto begin { msg.value().begin() + 1 /* + 2 */};
             begin += (pos * sizeof(uint32_t));
 
@@ -440,8 +433,9 @@ namespace rvr {
                       return a.key < b.key;
                   }
         );
+
         for (auto& i : vec) {
-            terr << std::hex << std::uppercase << i.key << mys::tab << std::setw(45) << std::setfill(' ') << std::left
+            mys::tinfo << std::hex << std::uppercase << i.key << mys::sp << std::setw(45) << std::setfill(' ') << std::left
                 << i.be.name <<    //
                 mys::tab << mys::tab << i.be.value;
         }

@@ -148,7 +148,6 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<QuatData> SensorsStream::quaternion() {
-        terr << code_loc << mys::nl;
         auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, quaternion_token) };
 
         if (x) {
@@ -185,7 +184,6 @@ namespace rvr {
                                              speed_velocity_locator_token) };
         if (speed) {
             auto [out_min, out_max] { SensorFactors[speed_token] };
-//            terr << code_loc << static_cast<int32_t>(speed.value());
             return normalize(static_cast<int32_t>(speed.value()), out_min, out_max);
         }
         return {};
