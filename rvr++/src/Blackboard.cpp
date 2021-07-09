@@ -20,13 +20,14 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-#include <Request.h>
 #include <limits>
 #include <optional>
 #include <string_view>
+#include <vector>
 
-#include "Trace.h"
+#include <Trace.h>
 
+#include "Request.h"
 #include "Blackboard.h"
 
 #include "ApiShell.h"
@@ -65,7 +66,7 @@ namespace rvr {
         { bb::entryKey(nordic, dev::power, 0x01), bb::BlackboardEntry { "snooze" } },                                   //
         { bb::entryKey(nordic, dev::power, 0x0D), bb::BlackboardEntry { "wake" } },                                   //
         { bb::entryKey(nordic, dev::power, 0x10), bb::BlackboardEntry { "get_battery_percentage" } },                      //
-        { bb::entryKey(nordic, dev::power, 0x11), bb::BlackboardEntry { "system_awake_notify" } },                         //
+        { bb::entryKey(nordic, dev::power, 0x11), bb::BlackboardEntry { "system_awake_notify" } },                   //
         { bb::entryKey(nordic, dev::power, 0x17), bb::BlackboardEntry { "get_battery_voltage_state" } },                   //
         { bb::entryKey(nordic, dev::power, 0x19), bb::BlackboardEntry { "will_sleep_notify" } },                           //
         { bb::entryKey(nordic, dev::power, 0x1A), bb::BlackboardEntry { "did_sleep_notify" } },                            //
@@ -131,7 +132,7 @@ namespace rvr {
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 4), bb::BlackboardEntry { "gyro stream" } },                      //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 1), bb::BlackboardEntry { "imu stream" } },                       //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 6), bb::BlackboardEntry { "locator stream" } },                   //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 11), bb::BlackboardEntry { "quat stream" } },                     //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x0B), bb::BlackboardEntry { "quat stream" } },                   //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 8), bb::BlackboardEntry { "speed stream" } },                     //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 7), bb::BlackboardEntry { "velocity stream" } },                  //
         //
@@ -203,14 +204,18 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::entryName(key_t key) {
         std::string s;
+        mys::TraceOff tdbg_ctrl { mys::tdbg };
+        mys::tdbg << code_line << "key: " << std::hex << key;
 
         auto it { mDictionary.find(key) };
 
         if (it == mDictionary.end()) {
             it = mDictionary.find(key & 0xFFFFFF00);
+            mys::tdbg << code_line << "key: " << std::hex << (key & 0xFFFFFF00);
         }
         if (it != mDictionary.end()) {
             s = it->second.name;
+            mys::tdbg << code_line << "key: " << std::hex << key << mys::tab << s;
         }
         return s;
     }
@@ -234,9 +239,11 @@ namespace rvr {
     //======================================================================================================================
     //  Method to put RvrMsg data into dictionary
     //----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::msgArray(Blackboard::key_t key, RvrMsg::iterator begin, RvrMsg::iterator end) {
+    void Blackboard::msgArray(Blackboard::key_t key, uint8_t const cmd, RvrMsg::iterator begin, RvrMsg::iterator end) {
+        mys::TraceOn tdbg_ctrl { mys::tdbg };
 
         RvrMsg msg { begin, end };
+        mys::tdbg << code_line << mys::tab << msg;
 
         if (msg.empty()) {
             msg.push_back(0xFF);
@@ -244,8 +251,10 @@ namespace rvr {
         else if (msg.size() >= 2) {
             uint8_t seq { msg.front() };
 
-            if (seq == 0xFF) {  // this is a notification
-                msg.erase(msg.begin()); // remove 0xFF sequence number
+            if (seq == 0xFF) {  // either a stream or notification
+                if (cmd != 0x3D) {  // stream
+                    msg.erase(0, 1);    // remove 0xFF and stream byte
+                }
             }
             else if ((seq < 0x80) && (seq >= 0x04)) {
                 // message seq has special flags that are not sequence number (> 0x80) or ids (< enable (0x20) - its a hack
@@ -254,7 +263,7 @@ namespace rvr {
                     // special case for motor temperatures
                     case 4:
                     case 5:
-                        msg.erase(msg.begin() + 1 /* + 2 */);
+                        msg.erase(0, 3);
                         break;
 
                         // handling enable / disable messages
@@ -269,14 +278,18 @@ namespace rvr {
                         break;
                 }
             }
+            else {
+                msg.erase(0, 2);
+            }
 
         }
+        mys::tdbg << code_line << mys::tab << msg;
         addMsgValue(key, msg);
     }
     //======================================================================================================================
     //  Methods to calculate values from RvrMsg in dictionary
     //----------------------------------------------------------------------------------------------------------------------
-    float Blackboard::floatConvert(RvrMsg::const_iterator begin) {
+    float Blackboard::floatConvert(RvrMsg::const_iterator begin) const {
         union {
             uint8_t buf[4];
             float result { NaN };
@@ -323,6 +336,15 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
+    std::optional<bool> Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
+
+        bool res { };
+        if (msg) {
+            res = { msg.value()[1] != 0 };
+        }
+        return res;
+    } //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
         addMsgValue(entryKey(target, dev, cmd, 0), { });
     }
@@ -332,10 +354,13 @@ namespace rvr {
 
         RvrMsgRet_t msg { entryValue(target, dev, cmd) };
 
+        mys::TraceOn tdbg_on { mys::tdbg };
+        mys::tdbg << code_line << msg.value() << mys::sp << pos;
+
         uint16_t res { };
         if (msg) {
 
-            auto begin { msg.value().begin() + 1 /* + 2 */};
+            auto begin { msg.value().begin() };
             begin += (pos * sizeof(uint16_t));
 
             res = uintConvert(begin, sizeof(uint16_t));
@@ -354,7 +379,7 @@ namespace rvr {
         uint32_t res { };
 
         if (msg) {
-            auto begin { msg.value().begin() + 1 /* + 2 */};
+            auto begin { msg.value().begin() };
             begin += (pos * sizeof(uint32_t));
 
             res = uintConvert(begin, sizeof(uint32_t));
@@ -367,7 +392,7 @@ namespace rvr {
         uint64_t res { };
 
         if (msg) {
-            res = uintConvert(msg.value().begin() + 1 /* + 2 */, sizeof(uint64_t));
+            res = uintConvert(msg.value().begin(), sizeof(uint64_t));
         }
         return res;
     }
@@ -378,28 +403,19 @@ namespace rvr {
 
         float result { };
         if (msg) {
-            auto begin { msg.value().begin() + 1 /* + 2 */};
+            auto begin { msg.value().begin() };
             begin += (pos * sizeof(float));
 
             result = floatConvert(begin);
         }
         return result;
     }
-    //----------------------------------------------------------------------------------------------------------------------
-    std::optional<bool> Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
 
-        bool res { };
-        if (msg) {
-            res = { msg.value()[1] != 0 };
-        }
-        return res;
-    }
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<std::string> Blackboard::stringValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsgRet_t msg { entryValue(target, dev, cmd) };
         if (msg) {
-            return std::string { msg.value().begin() + 1 /* + 2 */, msg.value().end() - 1 };
+            return std::string { msg.value().begin(), msg.value().end() - 1 };
         }
         return {};
     }
@@ -408,7 +424,7 @@ namespace rvr {
         RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
 
         if (msg) {
-            return RvrMsg { msg.value().begin() + 1 /* + 2 */, msg.value().end() };
+            return RvrMsg { msg.value().begin(), msg.value().end() };
         }
         return {};
     }

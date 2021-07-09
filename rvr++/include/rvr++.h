@@ -1,5 +1,4 @@
-#ifndef RVR___H_
-#define RVR___H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -22,10 +21,10 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
+#include <enumerate.h>
 #include "enum.h"
 
 #include "Response.h"
-#include <Trace.h>
 
 #include "ApiShell.h"
 #include "Blackboard.h"
@@ -37,4 +36,3 @@
 #include "SensorsStream.h"
 #include "SystemInfo.h"
 
-#endif /* RVR___H_ */

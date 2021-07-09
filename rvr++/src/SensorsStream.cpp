@@ -148,12 +148,15 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     std::optional<QuatData> SensorsStream::quaternion() {
-        auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, quaternion_token) };
+        auto w { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, quaternion_token) };
 
-        if (x) {
-            auto w { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, quaternion_token) };
+        if (w) {
+            auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, quaternion_token) };
             auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, quaternion_token) };
             auto z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, quaternion_token) };
+
+            mys::ttmp << code_line << w.value() << mys::sp << x.value() << mys::sp << y.value() << mys::sp << z.value()
+                      << mys::sp;
 
             auto [out_min, out_max] { SensorFactors[quaternion_token] };
             return QuatData { normalize(w.value(), out_min, out_max), //

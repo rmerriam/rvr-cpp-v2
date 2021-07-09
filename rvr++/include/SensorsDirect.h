@@ -46,38 +46,40 @@ namespace rvr {
         SensorsDirect(SensorsDirect&& other) = delete;
         SensorsDirect& operator=(SensorsDirect const& other) = delete;
 
-        void enableGyroMaxNotify(CommandResponse const want_resp = resp_yes) const;
-        void disableGyroMaxNotify(CommandResponse const want_resp = resp_yes) const;
+        void enableGyroMaxNotify(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void disableGyroMaxNotify(CommandResponse const want_resp = CommandResponse::resp_yes) const;
         // Gyro Max Notify
         void resetMaxGyroNotify() const;    // not part of API
 
-        void resetLocatorXY(CommandResponse const want_resp = resp_on_error) const;
-        void setLocatorFlags(bool const flag, CommandResponse const want_resp = resp_on_error) const;
+        void resetLocatorXY(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void setLocatorFlags(bool const flag, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
         //  Get Bot To Bot Infrared Readings
 
-        void getRgbcSensorValue(CommandResponse const want_resp = resp_yes) const;
+        void getRgbcSensorValue(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
         //  Start Robot To Robot Infrared Broadcasting
         //  Start Robot To Robot Infrared Following
         //  Stop Robot To Robot Infrared Broadcasting
         //  Robot To Robot Infrared Message Received Notify
 
-        void getAmbienLightSensorValue(CommandResponse const want_resp = resp_yes) const;
+        void getAmbientLightSensorValue(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
         //  Stop Robot To Robot Infrared Following
         //  Start Robot To Robot Infrared Evading
         //  Stop Robot To Robot Infrared Evading
 
+        //----------------------------------------------------------------------------------------------------------------------
         void enableColorDetectionNotify(bool const enable, uint16_t const timer, uint8_t const confidence,
-            CommandResponse const want_resp = resp_yes) const;
+            CommandResponse const want_resp = CommandResponse::resp_yes) const;
         //  Color Detection Notify
         void resetColorDetectionNotify() const;     // not part of API
 
-        void getCurrentDectectedColor(CommandResponse const want_resp = resp_yes) const;
-        void enableColorDetection(CommandResponse const want_resp = resp_yes) const;
-        void disableColorDetection(CommandResponse const want_resp = resp_yes) const;
+        void getCurrentDectectedColor(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void enableColorDetection(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void disableColorDetection(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
+        //----------------------------------------------------------------------------------------------------------------------
         //* implemented in SensorsStream class
         //*     Configure Streaming Service
         //*     Start Streaming Service
@@ -88,30 +90,32 @@ namespace rvr {
         //  Enable Robot Infrared Message Notify
         //  Send Infrared Message
 
-        void getRightMotorTemp(CommandResponse const want_resp = resp_yes) const;
-        void getLeftMotorTemp(CommandResponse const want_resp = resp_yes) const;
-        void getThermalProtectionStatus(CommandResponse const want_resp = resp_yes) const;
-        void enableThermalProtectionNotify(CommandResponse const want_resp = resp_yes) const;
-        void disableThermalProtectionNotify(CommandResponse const want_resp = resp_yes) const;
+        //----------------------------------------------------------------------------------------------------------------------
+        void getRightMotorTemp(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void getLeftMotorTemp(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void getThermalProtectionStatus(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void enableThermalProtectionNotify(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void disableThermalProtectionNotify(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
-        void calibrateMagnetometer(CommandResponse const want_resp = resp_yes) const;
-        std::optional<bool> isMagnetometerCalibrationDone() const;
-        void getMagnetometerData(CommandResponse const want_resp = resp_yes) const;
+        void calibrateMagnetometer(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void getMagnetometerData(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
         //  Methods to access data
 
-        std::optional<bool> isGyroMaxNotifyEnabled() const;
-        std::optional<bool> isThermalProtectionNotifyEnabled() const;
         std::optional<bool> isColorDetectionEnabled() const;
         std::optional<bool> isColorDetectionNotifyEnabled() const;
+        std::optional<bool> isGyroMaxNotifyEnabled() const;
+        std::optional<bool> isMagnetometerCalibrationDone() const;
+        std::optional<bool> isThermalProtectionNotifyEnabled() const;
 
-        std::optional<float> ambient() const;
+        std::optional<float> ambientLight() const;
         std::optional<float> leftMotorTemp() const;
         std::optional<float> rightMotorTemp() const;
         std::optional<ColorData> currentRGBValues();
         std::optional<ColorDetection> colorDetectionValues();
         std::optional<ThermalProtection> thermalProtectionValues();
-        std::optional<MagnetometerData> magnetometer();
+        std::optional<MagnetometerData> magnetometerData();
+        std::optional<int16_t> magnetometerCalibration() const;
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
@@ -214,7 +218,7 @@ namespace rvr {
         cmdDisable(enable_motor_thermal_protection_status_notify, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::getAmbienLightSensorValue(CommandResponse const want_resp) const {
+    inline void SensorsDirect::getAmbientLightSensorValue(CommandResponse const want_resp) const {
         basicAlt(get_ambient_light_sensor_value, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -254,7 +258,7 @@ namespace rvr {
         return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<float> SensorsDirect::ambient() const {
+    inline std::optional<float> SensorsDirect::ambientLight() const {
         return mBlackboard.floatValue(mAltTarget, mDevice, get_ambient_light_sensor_value);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -262,20 +266,16 @@ namespace rvr {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 4);
     }
     //----------------------------------------------------------------------------------------------------------------------
+    inline std::optional<float> SensorsDirect::rightMotorTemp() const {
+        return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 5);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::calibrateMagnetometer(CommandResponse const want_resp) const {
         basic(magnetometer_calibrate_to_north, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<bool> SensorsDirect::isMagnetometerCalibrationDone() const {
-        return mBlackboard.getNotify(mTarget, mDevice, magnetometer_calibration_complete_notify);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getMagnetometerData(CommandResponse const want_resp) const {
         basic(get_magnetometer_reading, want_resp);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<float> SensorsDirect::rightMotorTemp() const {
-        return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 5);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetMaxGyroNotify() const {

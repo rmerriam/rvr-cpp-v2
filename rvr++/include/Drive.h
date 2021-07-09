@@ -40,22 +40,24 @@ namespace rvr {
         Drive(Drive const& other) = delete;
         Drive& operator=(Drive const& other) = delete;
 
-        void drive(double const& left, double const& right, CommandResponse const want_resp = resp_on_error) const;
-        void stop(int const& heading, CommandResponse const want_resp = resp_on_error) const;
+        void drive(double const& left, double const& right,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void stop(int const& heading, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void tank_normalized(double const& left, double const& right, CommandResponse const want_resp = resp_on_error) const;
+        void tank_normalized(double const& left, double const& right,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void resetYaw(CommandResponse const want_resp = resp_on_error) const;
+        void resetYaw(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
         void driveWithHeading(double const& speed, int const& heading,
-            CommandResponse const want_resp = resp_on_error) const;
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void enableMotorStallNotify(CommandResponse const want_resp = resp_on_error) const;
-        void disableMotorStallNotify(CommandResponse const want_resp = resp_on_error) const;
+        void enableMotorStallNotify(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void disableMotorStallNotify(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void enableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
-        void disableMotorFaultNotify(CommandResponse const want_resp = resp_on_error) const;
+        void enableMotorFaultNotify(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void disableMotorFaultNotify(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void getMotorFault(CommandResponse const want_resp = resp_on_error) const;
+        void getMotorFault(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
         //======================================================================================================================
         // Access data

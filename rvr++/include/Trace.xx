@@ -1,5 +1,4 @@
-#ifndef TRACE_H_
-#define TRACE_H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -144,9 +143,8 @@ namespace mys {
         return *this;
     }
     //---------------------------------------------------------------------------------------------------------------------
-
     template <>
-    inline mys::Trace& Trace::operator <<(std::basic_string<uint8_t> const& data) {
+    inline mys::Trace& Trace::operator <<(std::basic_string<u_char> const& data) {
         if constexpr (trace_active) {
             if (mEnabled) {
                 mOs << std::hex;
@@ -156,7 +154,8 @@ namespace mys {
             }
         }
         return *this;
-    } //---------------------------------------------------------------------------------------------------------------------
+    }
+    //---------------------------------------------------------------------------------------------------------------------
     inline TraceStart::TraceStart(std::ostream& os, char const ch) :
         Trace { os }, mTrace { *this }, mType { ch } {
     }
@@ -206,4 +205,3 @@ namespace mys {
 #define code_exit __FUNCTION__ << " exit" << mys::tab
 #define code_return __FUNCTION__ << " return" << mys::tab
 
-#endif

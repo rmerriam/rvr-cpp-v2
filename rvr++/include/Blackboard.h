@@ -31,7 +31,6 @@
 namespace rvr {
 
     class Blackboard {
-//        friend class Response;
 
     public:
 
@@ -53,6 +52,8 @@ namespace rvr {
         std::optional<float> floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const = 0.0,
             uint8_t const id = 0);
 
+        uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
+
         std::optional<bool> notifyState(TargetPort const target, Devices const dev, uint8_t const cmd);
 
         std::optional<bool> getNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
@@ -64,11 +65,15 @@ namespace rvr {
         void m_to_v();
 
         std::string entryName(key_t key);
-        void msgArray(key_t key, RvrMsg::iterator begin, RvrMsg::iterator end);
+        void msgArray(key_t key, uint8_t const cmd, RvrMsg::iterator begin, RvrMsg::iterator end);
         Blackboard::key_t msgKey(TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
 
+        float floatConvert(RvrMsg::const_iterator begin) const;
+        float floatConvert(uint8_t const* begin) const {
+            return floatConvert(RvrMsg::const_iterator { begin });
+        }
+
     private:
-        float floatConvert(RvrMsg::const_iterator begin);
 
         inline static float const NaN { (0.0f / 0.0f) };    // something to return when there is no value for float
 
@@ -113,7 +118,7 @@ namespace rvr {
         // methods for processing received responses
 
         // methods for calculating values from dictionary entry
-        uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
+//        uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
 
 //        static inline RvrMsg fake_msg { 3, 0 };
 

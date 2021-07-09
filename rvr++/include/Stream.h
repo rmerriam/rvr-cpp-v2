@@ -1,5 +1,4 @@
-#ifndef Connection_H_
-#define Connection_H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -17,41 +16,33 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //======================================================================================================================
 //
+//		 File: Stream.h
+//
 //     Author: rmerriam
 //
-//     Created: May 29, 2021
+//    Created: Jun 27, 2021
 //
 //======================================================================================================================
-#include <Request.h>
-#include <SendPacket.h>
-//----------------------------------------------------------------------------------------------------------------------
+
 namespace rvr {
-    class Blackboard;
 
-    class Connection : protected Request {
+    class Stream {
     public:
-        Connection(Blackboard& bb, SendPacket& req) :
-            Request { bb, Devices::connection, req, nordic } {
+        Stream() {
         }
-        Connection(Connection const& other) = delete;
-        Connection(Connection&& other) = delete;
-        Connection& operator=(Connection const& other) = delete;
+        virtual ~Stream()= 0;
 
-        void bluetoothName(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        Stream(Stream const& other) = delete;
+        Stream(Stream&& other) = delete;
+        Stream& operator=(Stream const& other) = delete;
+        Stream& operator=(Stream&& other) = delete;
 
-        std::optional<std::string> name();
+        virtual auto read() -> uint8_t const = 0;
+        virtual auto write(uint8_t const& ch) -> int64_t const = 0;
 
-    private:
-        enum Cmd : uint8_t {
-            get_bluetooth_advertising_name = 0x05, //
-        };
-
+//        virtual uint8_t read() const = 0;
+//        virtual int64_t write(uint8_t const& ch) const = 0;
     };
-    //----------------------------------------------------------------------------------------------------------------------
-    inline void Connection::bluetoothName(CommandResponse const want_resp) const {
-        basic(get_bluetooth_advertising_name, want_resp);
-    }
 
 } /* namespace rvr */
 
-#endif /* Connection_H_ */

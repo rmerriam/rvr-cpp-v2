@@ -35,25 +35,33 @@ namespace rvr {
 
         uint8_t buildFlags(CommandResponse const want_resp) const;
 
-        void basic(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
-        void basicAlt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void basic(uint8_t const cmd, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void basicAlt(uint8_t const cmd, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void reqByte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
-        void reqByteAlt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void reqByte(uint8_t const cmd, uint8_t const data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void reqByteAlt(uint8_t const cmd, uint8_t const data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void byteId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
-        void byteAltId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void byteId(uint8_t const cmd, uint8_t const data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void byteAltId(uint8_t const cmd, uint8_t const data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void reqInt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
-        void reqIntAlt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp = resp_on_error) const;
+        void reqInt(uint8_t const cmd, uint16_t const data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void reqIntAlt(uint8_t const cmd, uint16_t const data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void cmdEnable(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
-        void cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
-        void cmdDisable(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
-        void cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp = resp_on_error) const;
+        void cmdEnable(uint8_t const cmd, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void cmdDisable(uint8_t const cmd, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void cmdData(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
-        void cmdDataAlt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp = resp_on_error) const;
+        void cmdData(uint8_t const cmd, RvrMsg const& data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void cmdDataAlt(uint8_t const cmd, RvrMsg const& data,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
         Request(Request const& other) = delete;
         Request(Request&& other) = delete;

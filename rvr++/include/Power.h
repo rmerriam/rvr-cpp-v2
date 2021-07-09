@@ -50,22 +50,22 @@ namespace rvr {
         Power(Power&& other) = delete;
         Power& operator=(Power const& other) = delete;
 
-        void powerOff(uint8_t const secs, CommandResponse const want_resp = resp_on_error) const;
-        void sleep(CommandResponse const want_resp = resp_on_error) const;
-        void awake(CommandResponse const want_resp = resp_on_error) const;
+        void powerOff(uint8_t const secs, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void sleep(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void awake(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void batteryPercentage(CommandResponse const want_resp = resp_yes) const;
-        void batteryVoltageState(CommandResponse const want_resp = resp_yes) const;
+        void batteryPercentage(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void batteryVoltageState(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
         //  Will Sleep Notify
         //  Did Sleep Notify
 
-        void enableBatteryStateChange(CommandResponse const want_resp = resp_yes) const;
-        void disableBatteryStateChange(CommandResponse const want_resp = resp_yes) const;
+        void enableBatteryStateChange(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void disableBatteryStateChange(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
-        void batteryVoltage(VoltageType const vt, CommandResponse const want_resp = resp_yes) const;
-        void batteryVoltThresholds(CommandResponse const want_resp = resp_yes) const;
-        void batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp = resp_yes) const;
+        void batteryVoltage(VoltageType const vt, CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void batteryVoltThresholds(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void batteryMotorCurrent(MotorSide const ms, CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
         //----------------------------------------------------------------------------------------------------------------------
         // Data access methods

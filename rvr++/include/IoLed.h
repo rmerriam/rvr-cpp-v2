@@ -81,6 +81,8 @@ namespace rvr {
                 right_status_indication_green |   //
                 right_status_indication_blue,
 
+            status_indications = status_indication_right | status_indication_left, //
+
             headlight_left = left_headlight_red |   //
                 left_headlight_green |   //
                 left_headlight_blue,
@@ -88,6 +90,8 @@ namespace rvr {
             headlight_right = right_headlight_red |   //
                 right_headlight_green |   //
                 right_headlight_blue,
+
+            headlights = headlight_right | headlight_left, //
 
             battery_door_front = battery_door_front_red |   //
                 battery_door_front_green |   //
@@ -97,6 +101,8 @@ namespace rvr {
                 battery_door_rear_green |   //
                 battery_door_rear_blue,
 
+            battery_doors = battery_door_front | battery_door_rear,
+
             power_button_front = power_button_front_red |   //
                 power_button_front_green |   //
                 power_button_front_blue,
@@ -105,6 +111,8 @@ namespace rvr {
                 power_button_rear_green |   //
                 power_button_rear_blue,
 
+            power_buttons = power_button_front | power_button_rear,
+
             brakelight_left = left_brakelight_red |   //
                 left_brakelight_green |   //
                 left_brakelight_blue,
@@ -112,6 +120,8 @@ namespace rvr {
             brakelight_right = right_brakelight_red |   //
                 right_brakelight_green |   //
                 right_brakelight_blue,
+
+            brakelights = brakelight_right | brakelight_left,   //
 
             all_lights = status_indication_left |   //
                 status_indication_right |   //
@@ -122,7 +132,7 @@ namespace rvr {
                 power_button_front |   //
                 power_button_rear |   //
                 brakelight_left |   //
-                brakelight_right,
+                brakelight_right | 0, //
 
             undercarriage = undercarriage_white
         };
@@ -135,12 +145,13 @@ namespace rvr {
         IoLed(IoLed&& other) = delete;
         IoLed& operator=(IoLed const& other) = delete;
 
-        void allLed(uint32_t const led_bits, RvrMsg const& colors, CommandResponse const want_resp = resp_on_error) const;
+        void allLed(uint32_t const led_bits, RvrMsg const& colors,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
-        void getActiveColorPalette(CommandResponse const want_resp = resp_on_error) const;
-        void getColorId(CommandResponse const want_resp = resp_on_error) const;
-        void idleLeds(CommandResponse const want_resp = resp_on_error) const;
-        void ledsOff(CommandResponse const want_resp = resp_on_error) const;
+        void getActiveColorPalette(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void getColorId(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void idleLeds(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void ledsOff(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
         enum Cmd : uint8_t {
             set_all_leds = 0x1A, //
@@ -167,15 +178,16 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void IoLed::ledsOff(CommandResponse const want_resp) const {
         static rvr::RvrMsg off = { 0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
-                                   0x00, 0x00, 0x00, //
+        0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+            0x00, 0x00, 0x00, //
+//            0x00, 0x00, //
         };
         allLed(all_lights, off, want_resp);
     }

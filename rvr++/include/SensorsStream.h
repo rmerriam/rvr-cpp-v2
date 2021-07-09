@@ -66,32 +66,32 @@ namespace rvr {
         SensorsStream(SensorsStream&& other) = delete;
         SensorsStream& operator=(SensorsStream const& other) = delete;
 
-        void streamAmbient(CommandResponse const want_resp = resp_on_error);
+        void streamAmbient(CommandResponse const want_resp = CommandResponse::resp_on_error);
         void enableColorDetection(CommandResponse const want_resp) const;
         void disableColorDetection(CommandResponse const want_resp) const;
-        void streamColor(CommandResponse const want_resp = resp_on_error);
-        void streamNordicTime(CommandResponse const want_resp = resp_on_error);
+        void streamColor(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void streamNordicTime(CommandResponse const want_resp = CommandResponse::resp_on_error);
 
-        void streamImuAccelGyro(CommandResponse const want_resp = resp_on_error);
-        void streamSpeedVelocityLocator(CommandResponse const want_resp = resp_on_error);
-        void streamBtTime(CommandResponse const want_resp = resp_on_error);
-        void streamQuaternion(CommandResponse const want_resp = resp_on_error);
+        void streamImuAccelGyro(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void streamSpeedVelocityLocator(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void streamBtTime(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void streamQuaternion(CommandResponse const want_resp = CommandResponse::resp_on_error);
 
-        void configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
-        void configureStreamingBT(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
-        void configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp = resp_on_error);
+        void configureStreamingNordic(RvrMsg const& cfg, CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void configureStreamingBT(RvrMsg const& cfg, CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void configureStreaming(RvrMsg const& cfg, CommandResponse const want_resp = CommandResponse::resp_on_error);
 
-        void enableStreaming(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
-        void startStreamingNordic(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
-        void startStreamingBT(uint16_t const millis, CommandResponse const want_resp = resp_on_error);
+        void enableStreaming(uint16_t const millis, CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void startStreamingNordic(uint16_t const millis, CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void startStreamingBT(uint16_t const millis, CommandResponse const want_resp = CommandResponse::resp_on_error);
 
-        void disableAllStreaming(CommandResponse const want_resp = resp_on_error);
-        void disableStreamingNordic(CommandResponse const want_resp = resp_on_error);
-        void disableStreamingBT(CommandResponse const want_resp = resp_on_error);
+        void disableAllStreaming(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void disableStreamingNordic(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void disableStreamingBT(CommandResponse const want_resp = CommandResponse::resp_on_error);
 
-        void clearAllStreaming(CommandResponse const want_resp = resp_on_error);
-        void clearStreamingNordic(CommandResponse const want_resp = resp_on_error);
-        void clearStreamingBT(CommandResponse const want_resp = resp_on_error);
+        void clearAllStreaming(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void clearStreamingNordic(CommandResponse const want_resp = CommandResponse::resp_on_error);
+        void clearStreamingBT(CommandResponse const want_resp = CommandResponse::resp_on_error);
         //======================================================================================================================
         // data access methods
         float normalize(uint32_t const value, float const out_min, float const out_max);
@@ -240,7 +240,9 @@ namespace rvr {
     inline float SensorsStream::normalize(uint32_t const value, float const out_min, float const out_max) {
         static auto max { std::numeric_limits<uint32_t>::max() };
         float res { };
-        if (value != 0) res = (value / static_cast<float>(max) * (out_max - out_min)) + out_min;
+        if (value != 0) {
+            res = (value / static_cast<float>(max) * (out_max - out_min)) + out_min;
+        }
         return res;
     }
 } /* namespace rvr */

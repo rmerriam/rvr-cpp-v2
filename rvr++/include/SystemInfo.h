@@ -38,14 +38,14 @@ namespace rvr {
         SystemInfo(SystemInfo&& other) = delete;
         SystemInfo& operator=(SystemInfo const& other) = delete;
 
-        void getMainAppVersion(CommandResponse const want_resp = resp_yes);
-        void getBootloaderVersion(CommandResponse const want_resp = resp_yes);
-        void getBoardRevision(CommandResponse const want_resp = resp_yes);
-        void getMacId(CommandResponse const want_resp = resp_yes);
-        void getStatsId(CommandResponse const want_resp = resp_yes);
-        void getProcessorName(CommandResponse const want_resp = resp_yes);
-        void getSku(CommandResponse const want_resp = resp_yes);
-        void getCoreUpTime(CommandResponse const want_resp = resp_yes);
+        void getMainAppVersion(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getBootloaderVersion(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getBoardRevision(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getMacId(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getStatsId(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getProcessorName(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getSku(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getCoreUpTime(CommandResponse const want_resp = CommandResponse::resp_yes);
 
         std::optional<int64_t> boardVersion();
         std::optional<std::string> bootVersion();

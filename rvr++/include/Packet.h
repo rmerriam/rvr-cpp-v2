@@ -22,10 +22,10 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
+#include <optional>
 #include <string>
 
-#include "Trace.h"
-
+#include <Trace.h>
 #include "SerialPort.h"
 //----------------------------------------------------------------------------------------------------------------------
 using char_ptr = char const *;
@@ -33,7 +33,7 @@ using char_ptr = char const *;
 
 namespace rvr {
 
-    using RvrMsg = std::basic_string<uint8_t>;
+    using RvrMsg = std::basic_string<u_char>;
     using RvrMsgRet_t = std::optional<RvrMsg>;
 
     enum flags : uint8_t {

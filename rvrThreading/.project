@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>rvr++</project>
+		<project>Trace</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

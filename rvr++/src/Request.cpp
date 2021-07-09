@@ -30,7 +30,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint8_t Request::buildFlags(CommandResponse const want_resp) const {
-        int flags { want_resp | activity | has_target };
+        int flags { int(want_resp) | activity | has_target };
         return static_cast<uint8_t>(flags);
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -83,13 +83,13 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     void Request::reqInt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), //
-                     static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+        static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Request::reqIntAlt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
         RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), //
-                     static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+        static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------

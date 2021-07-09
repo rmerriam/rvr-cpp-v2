@@ -83,12 +83,12 @@ namespace rvr {
         float confidence;
     };
 
-    enum VoltageType : uint8_t {
+    enum struct VoltageType : uint8_t {
         CalibratedFiltered = 0, //
         CalibratedUnfiltered = 1,  //
         UncalibratedUnfiltered = 2,
     };
-    enum ThermalStatus : uint8_t {
+    enum struct ThermalStatus : uint8_t {
         okay,  //
         warn,  //
         critical
@@ -96,19 +96,23 @@ namespace rvr {
 
     struct ThermalProtection {
         float leftMotorTemp;
-        uint8_t leftStatus;
+        ThermalStatus leftStatus;
         float rightMotorTemp;
-        uint8_t rightStatus;
+        ThermalStatus rightStatus;
     };
 
-    enum CommandResponse : uint8_t {
+    enum struct CommandResponse : uint8_t {
         resp_no = no_response, //
         resp_yes = request_response, //
         resp_on_error = request_error_response | request_response,
     };
-    enum MotorIndexes : uint8_t {
+    enum struct MotorIndexes : uint8_t {
         left_motor_index = 0, //
         right_motor_index = 1,
+    };
+
+    enum struct FloatSize : uint8_t {
+        one_byte = 0, two_byte = 2, four_byte = 4
     };
 
 } // namespace rvr

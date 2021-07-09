@@ -26,16 +26,16 @@
 
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
-void direct(rvr::SensorsDirect& sen_d) {
-    std::cout << code_loc << mys::nl << mys::nl;
-    std::cout << code_loc << "sense direct" << mys::nl;
-
+void color(rvr::SensorsDirect& sen_d);
+void magnetometer(rvr::SensorsDirect& sen_d);
+//---------------------------------------------------------------------------------------------------------------------
+void general(rvr::SensorsDirect& sen_d) {
     sen_d.enableGyroMaxNotify();
 
     sen_d.resetLocatorXY();
-    sen_d.setLocatorFlags(true);   // set/reset? special id flags
+    sen_d.setLocatorFlags(true);
 
-    sen_d.getAmbienLightSensorValue();
+    sen_d.getAmbientLightSensorValue();
 
     sen_d.getLeftMotorTemp();
     sen_d.getRightMotorTemp();
@@ -45,33 +45,42 @@ void direct(rvr::SensorsDirect& sen_d) {
 
     std::this_thread::sleep_for(150ms);
 
-    std::cout << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value() << mys::nl;
-    std::cout << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value()
-              << mys::nl;
+    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
+    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
 
     std::this_thread::sleep_for(50ms);
 
+    mys::tinfo << code_loc << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().value();
+
     auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().value_or(
         rvr::ThermalProtection { }) };
-    std::cout << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
-              << mys::sp << right_temp << mys::sp << (int)right_status << mys::nl;
+    mys::tinfo << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
+               << mys::sp << right_temp << mys::sp << (int)right_status;
 
 //        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
 //        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
 //        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
 
-    std::cout << code_loc << "Left Temp: " << sen_d.leftMotorTemp().value() << mys::nl;
-    std::cout << code_loc << "Right Temp: " << sen_d.rightMotorTemp().value() << mys::nl;
+    mys::tinfo << code_loc << "Left Temp: " << sen_d.leftMotorTemp().value();
+    mys::tinfo << code_loc << "Right Temp: " << sen_d.rightMotorTemp().value();
 
     sen_d.disableGyroMaxNotify();
     sen_d.disableThermalProtectionNotify();
     std::this_thread::sleep_for(50ms);
 
-    std::cout << code_loc << mys::nl << mys::nl;
-    std::cout << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value() << mys::nl;
-    std::cout << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value()
-              << mys::nl;
+    mys::tinfo << code_loc << mys::nl;
+    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
+    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
 
-    std::cout << code_loc << mys::nl << mys::nl;
+    mys::tinfo << code_loc << mys::nl;
+}
+//---------------------------------------------------------------------------------------------------------------------
+void direct(rvr::SensorsDirect& sen_d) {
+    mys::tinfo << code_loc;
+
+//    general(sen_d);
+//    color(sen_d);
+    magnetometer(sen_d);
+
 }
 

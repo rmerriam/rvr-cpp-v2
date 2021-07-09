@@ -1,5 +1,4 @@
-#ifndef SerialPort_Include
-#define SerialPort_Include
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -27,35 +26,46 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <cstdint>
+
+#include "Stream.h"
+
+namespace rvr {
+
 //-----------------------------------------------------------------------------
-class SerialPort {
+    class SerialPort : public Stream {
 
-public:
-    SerialPort(char const* port_name, uint32_t const baud);
-    ~SerialPort();
+    public:
+        SerialPort(char const* port_name, uint32_t const baud);
+        ~SerialPort();
 
-    void flush();
+        SerialPort(SerialPort const& other) = delete;
+        SerialPort(SerialPort&& other) = delete;
+        SerialPort& operator=(SerialPort const& other) = delete;
+        SerialPort& operator=(SerialPort&& other) = delete;
 
-    int count() const;
-    uint8_t read() const;
+        void flush();
 
-    int64_t read(uint8_t buffer[], uint32_t const len = 1) const;
+        int count() const;
 
-    int64_t write(uint8_t const buffer[], uint32_t const cnt) const;
-    void write(uint8_t const& ch) const;
-    void write(uint8_t const buffer[]) const {
-        write(buffer + 1, buffer[0]);
+        virtual auto read() -> uint8_t const override;
+        int64_t read(uint8_t buffer[], uint32_t const len = 1) const;
+
+        virtual auto write(uint8_t const& ch) -> int64_t const override;
+        int64_t write(uint8_t const buffer[], uint32_t const cnt) const;
+
+//        void write(uint8_t const buffer[]) const {
+//            write(buffer + 1, buffer[0]);
+//        }
+
+    private:
+        int mFd;
+
     }
-
-private:
-    int mFd;
-
-};
+    ;
 //----------------------------------------------------------------------------------------------------------------------
-inline int SerialPort::count() const {
-    int bytes_avail;
-    ::ioctl(mFd, FIONREAD, &bytes_avail);
-    return bytes_avail;
+    inline int SerialPort::count() const {
+        int bytes_avail;
+        ::ioctl(mFd, FIONREAD, &bytes_avail);
+        return bytes_avail;
+    }
 }
-
-#endif
