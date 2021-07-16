@@ -23,6 +23,7 @@
 //
 //======================================================================================================================
 #include <Request.h>
+#include "Blackboard.h"
 //----------------------------------------------------------------------------------------------------------------------
 using namespace std::literals;
 
@@ -47,17 +48,17 @@ namespace rvr {
         void getSku(CommandResponse const want_resp = CommandResponse::resp_yes);
         void getCoreUpTime(CommandResponse const want_resp = CommandResponse::resp_yes);
 
-        std::optional<int64_t> boardVersion();
-        std::optional<std::string> bootVersion();
-        std::optional<std::string> bootVersion2();
-        std::optional<std::string> macAddress();
-        std::optional<std::string> mainAppVersion();
-        std::optional<std::string> mainAppVersion2();
-        std::optional<std::string> processorName();
-        std::optional<std::string> processorName2();
-        std::optional<int16_t> statsId();
-        std::optional<std::string> sku();
-        std::optional<int64_t> coreUpTime();
+        ResultUInt8 boardVersion();
+        ResultString bootVersion();
+        ResultString bootVersion2();
+        ResultString macAddress();
+        ResultString mainAppVersion();
+        ResultString mainAppVersion2();
+        ResultString processorName();
+        ResultString processorName2();
+        ResultInt16 statsId();
+        ResultString sku();
+        ResultInt64 coreUpTime();
 
     private:
         enum Cmd : uint8_t {
@@ -71,7 +72,7 @@ namespace rvr {
             get_core_up_time_in_milliseconds = 0x39, //
         };
 
-        std::optional<std::string> versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
+        ResultString versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
     };
     //----------------------------------------------------------------------------------------------------------------------
     inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {

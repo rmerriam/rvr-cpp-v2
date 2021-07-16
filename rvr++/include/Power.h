@@ -52,7 +52,7 @@ namespace rvr {
 
         void powerOff(uint8_t const secs, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
         void sleep(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
-        void awake(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void awake(CommandResponse const want_resp = CommandResponse::resp_on_error) const noexcept;
 
         void batteryPercentage(CommandResponse const want_resp = CommandResponse::resp_yes) const;
         void batteryVoltageState(CommandResponse const want_resp = CommandResponse::resp_yes) const;
@@ -70,32 +70,32 @@ namespace rvr {
         //----------------------------------------------------------------------------------------------------------------------
         // Data access methods
 
-        std::optional<int> batteryPercent();
+        ResultUInt16 batteryPercent() const noexcept;
 
         enum BatteryVoltState : uint8_t {
             unknown, ok, low, critical,
         };
-        std::optional<BatteryVoltState> voltState();
-        std::optional<std::string> voltStateText();
+        Result<Power::BatteryVoltState> voltState() const noexcept;
+        ResultString voltStateText() const noexcept;
 
         // batteryVoltage
-        std::optional<float> voltsCalibratedFiltered();
-        std::optional<float> voltsCalibratedUnfiltered();
-        std::optional<float> voltsUncalibratedUnfiltered();
+        ResultFloat voltsCalibratedFiltered() const noexcept;
+        ResultFloat voltsCalibratedUnfiltered() const noexcept;
+        ResultFloat voltsUncalibratedUnfiltered() const noexcept;
 
         // batteryVoltThresholds
-        std::optional<float> voltThresholdCritical();
-        std::optional<float> voltThresholdLow();
-        std::optional<float> voltThresholdHysteresis();
+        ResultFloat voltThresholdCritical() const noexcept;
+        ResultFloat voltThresholdLow() const noexcept;
+        ResultFloat voltThresholdHysteresis() const noexcept;
 
         // batteryMotorCurrent
-        std::optional<float> motorCurrent(MotorSide const ms);
+        ResultFloat motorCurrent(MotorSide const ms) const noexcept;
 
-        std::optional<bool> isWakeNotify();
-        void resetWakeNotify();
+        ResultBool isWakeNotify() const noexcept;
+        void resetWakeNotify() const noexcept;
 
-        std::optional<bool> isBatteryStateChangeEnabled();
-        std::optional<bool> isDidSleepNotify();
+        ResultBool isBatteryStateChangeEnabled() const noexcept;
+        ResultBool isDidSleepNotify() const noexcept;
 
     private:
 
@@ -117,7 +117,7 @@ namespace rvr {
 
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void Power::awake(CommandResponse const want_resp) const {
+    inline void Power::awake(CommandResponse const want_resp) const noexcept {
         basic(wake, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------

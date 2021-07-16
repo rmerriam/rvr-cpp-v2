@@ -121,23 +121,23 @@ namespace rvr {
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D), bb::BlackboardEntry { "streaming_service_data_notify" } },       //
         { bb::entryKey(nordic, dev::sensors, 0x3D), bb::BlackboardEntry { "streaming_service_data_notify" } },             //
         //
-        { bb::entryKey(nordic, dev::sensors, 0x3D, 3), bb::BlackboardEntry { "color stream" } },                        //
-        { bb::entryKey(nordic, dev::sensors, 0x3D, 5), bb::BlackboardEntry { "nordic core time lower" } },              //
-        { bb::entryKey(nordic, dev::sensors, 0x3D, 9), bb::BlackboardEntry { "nordic core time upper" } },              //
-        { bb::entryKey(nordic, dev::sensors, 0x3D, 10), bb::BlackboardEntry { "ambient stream" } },                      //
+        { bb::entryKey(nordic, dev::sensors, 0x3D, 0x03), bb::BlackboardEntry { "color stream" } },                        //
+        { bb::entryKey(nordic, dev::sensors, 0x3D, 0x05), bb::BlackboardEntry { "nordic core time lower" } },              //
+        { bb::entryKey(nordic, dev::sensors, 0x3D, 0x09), bb::BlackboardEntry { "nordic core time upper" } },              //
+        { bb::entryKey(nordic, dev::sensors, 0x3D, 0x0A), bb::BlackboardEntry { "ambient stream" } },                      //
         //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 2), bb::BlackboardEntry { "accelerometer stream" } },             //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 5), bb::BlackboardEntry { "bt core time lower" } },               //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 9), bb::BlackboardEntry { "bt core time upper" } },               //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 4), bb::BlackboardEntry { "gyro stream" } },                      //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 1), bb::BlackboardEntry { "imu stream" } },                       //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 6), bb::BlackboardEntry { "locator stream" } },                   //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x02), bb::BlackboardEntry { "accelerometer stream" } },          //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x05), bb::BlackboardEntry { "bt core time lower" } },            //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x09), bb::BlackboardEntry { "bt core time upper" } },            //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x04), bb::BlackboardEntry { "gyro stream" } },                   //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x01), bb::BlackboardEntry { "imu stream" } },                    //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x06), bb::BlackboardEntry { "locator stream" } },                //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x0B), bb::BlackboardEntry { "quat stream" } },                   //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 8), bb::BlackboardEntry { "speed stream" } },                     //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 7), bb::BlackboardEntry { "velocity stream" } },                  //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x08), bb::BlackboardEntry { "speed stream" } },                  //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x07), bb::BlackboardEntry { "velocity stream" } },               //
         //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 12), bb::BlackboardEntry { "imu accel gyro stream" } },           //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 13), bb::BlackboardEntry { "speed velocity locator token" } },    //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x0C), bb::BlackboardEntry { "imu accel gyro stream" } },         //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x0D), bb::BlackboardEntry { "speed velocity locator token" } },  //
         //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3E), bb::BlackboardEntry { "enable_robot_infrared_message_notify" } }, //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3F), bb::BlackboardEntry { "send_infrared_message" } },               //
@@ -224,23 +224,28 @@ namespace rvr {
         mDictionary[key].value = value;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsgRet_t Blackboard::entryValue(TargetPort const target, Devices const dev, uint8_t const cmd,
+    RvrMsgView Blackboard::msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
+        return entryValue(target, dev, cmd, id);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    RvrMsgView Blackboard::entryValue(TargetPort const target, Devices const dev, uint8_t const cmd,
         uint8_t const id) const {
-        RvrMsgRet_t msg_opt { entryValue(entryKey(target, dev, cmd, id)) };
+        RvrMsgView msg_opt { entryValue(entryKey(target, dev, cmd, id)) };
         return msg_opt;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    RvrMsgRet_t Blackboard::entryValue(key_t const key) const {
+    RvrMsgView Blackboard::entryValue(key_t const key) const {
+        RvrMsgView res;
         if (auto it = mDictionary.find(key); (it != mDictionary.end()) & ( !it->second.value.empty())) {
-            return it->second.value;
+            res = RvrMsgView { it->second.value };
         }
-        return {};
+        return res;
     }
     //======================================================================================================================
     //  Method to put RvrMsg data into dictionary
     //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::msgArray(Blackboard::key_t key, uint8_t const cmd, RvrMsg::iterator begin, RvrMsg::iterator end) {
-        mys::TraceOn tdbg_ctrl { mys::tdbg };
+        mys::TraceOff tdbg_ctrl { mys::tdbg };
 
         RvrMsg msg { begin, end };
         mys::tdbg << code_line << mys::tab << msg;
@@ -252,7 +257,10 @@ namespace rvr {
             uint8_t seq { msg.front() };
 
             if (seq == 0xFF) {  // either a stream or notification
-                if (cmd != 0x3D) {  // stream
+                if (cmd == 0x3D) {  // stream
+                    msg.erase(0, 2);
+                }
+                else {
                     msg.erase(0, 1);    // remove 0xFF and stream byte
                 }
             }
@@ -283,7 +291,7 @@ namespace rvr {
             }
 
         }
-        mys::tdbg << code_line << mys::tab << msg;
+        mys::tdbg << code_line << mys::tab << std::hex << key << mys::tab << msg;
         addMsgValue(key, msg);
     }
     //======================================================================================================================
@@ -302,7 +310,7 @@ namespace rvr {
         return result;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    uint64_t Blackboard::uintConvert(RvrMsg::const_iterator begin, uint8_t const n) {
+    uint64_t Blackboard::uintConvert(RvrMsgView::const_iterator begin, uint8_t const n) {
         uint64_t res { };
         for (auto it { begin }; it != begin + n; ++it) {
             res <<= 8;
@@ -311,37 +319,36 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<bool> Blackboard::boolValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        return (byteValue(target, dev, cmd) != 0);
+    ResultBool Blackboard::boolValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        return ResultBool { (byteValue(target, dev, cmd).get() != 0) };
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<uint8_t> Blackboard::byteValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
-        uint8_t res { };
+    ResultUInt8 Blackboard::byteValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
+        ResultUInt8 res;
 
-        if (msg) {
-            res = msg.value()[2];
+        if ( !msg.empty()) {
+            res = static_cast<uint8_t>(msg[0]);
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    // these two methods are for notifications that return a single 0xFF
-    std::optional<bool> Blackboard::notifyState(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
+    ResultBool Blackboard::notifyState(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
+        ResultBool res;
 
-        bool res { };
-        if (msg) {
-            res = msg.value()[0] != 0;
+        if ( !msg.empty()) {
+            res = bool(msg[0] != 0);
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<bool> Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
+    ResultBool Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
 
-        bool res { };
-        if (msg) {
-            res = { msg.value()[1] != 0 };
+        ResultBool res;
+        if ( !msg.empty()) {
+            res = ResultBool(msg[1] != 0);
         }
         return res;
     } //----------------------------------------------------------------------------------------------------------------------
@@ -349,37 +356,39 @@ namespace rvr {
         addMsgValue(entryKey(target, dev, cmd, 0), { });
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<uint16_t> Blackboard::uintValue(TargetPort const target, Devices const dev, uint8_t const cmd,
-        uint8_t const pos) {
+    ResultUInt16 Blackboard::uint16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
 
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
+        RvrMsgView msg { entryValue(target, dev, cmd) };
 
-        mys::TraceOn tdbg_on { mys::tdbg };
-        mys::tdbg << code_line << msg.value() << mys::sp << pos;
-
-        uint16_t res { };
-        if (msg) {
-
-            auto begin { msg.value().begin() };
+        ResultUInt16 res;
+        if ( !msg.empty()) {
+            auto begin { msg.begin() };
             begin += (pos * sizeof(uint16_t));
-
             res = uintConvert(begin, sizeof(uint16_t));
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<int16_t> Blackboard::intValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        return static_cast<std::optional<int16_t>>(uintValue(target, dev, cmd));
+    ResultInt16 Blackboard::int16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
+
+        ResultInt16 res;
+        if ( !msg.empty()) {
+            auto begin { msg.begin() };
+            begin += (pos * sizeof(int16_t));
+            res = uintConvert(begin, sizeof(int16_t));
+        }
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<uint32_t> Blackboard::uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd,
-        uint8_t const pos, uint8_t const id) {
+    ResultUInt32 Blackboard::uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos,
+        uint8_t const id) {
 
-        RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
-        uint32_t res { };
+        RvrMsgView msg { entryValue(target, dev, cmd, id) };
+        ResultUInt32 res;
 
-        if (msg) {
-            auto begin { msg.value().begin() };
+        if ( !msg.empty()) {
+            auto begin { msg.begin() };
             begin += (pos * sizeof(uint32_t));
 
             res = uintConvert(begin, sizeof(uint32_t));
@@ -387,46 +396,47 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<uint64_t> Blackboard::uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
-        uint64_t res { };
+    ResultInt64 Blackboard::int64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
+        ResultInt64 res;
 
-        if (msg) {
-            res = uintConvert(msg.value().begin(), sizeof(uint64_t));
+        if ( !msg.empty()) {
+            res = static_cast<int64_t>(uintConvert(msg.begin(), sizeof(uint64_t)));
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<float> Blackboard::floatValue(TargetPort const target, Devices const dev, uint8_t const cmd,
-        float const pos, uint8_t const id) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
+    ResultUInt64 Blackboard::uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
+        ResultUInt64 res;
 
-        float result { };
-        if (msg) {
-            auto begin { msg.value().begin() };
+        if ( !msg.empty()) {
+            res = uintConvert(msg.begin(), sizeof(uint64_t));
+        }
+        return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    ResultFloat Blackboard::floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos,
+        uint8_t const id) {
+        RvrMsgView msg { entryValue(target, dev, cmd, id) };
+
+        ResultFloat result;
+        if ( !msg.empty()) {
+            auto begin { msg.begin() };
             begin += (pos * sizeof(float));
 
             result = floatConvert(begin);
         }
         return result;
     }
-
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<std::string> Blackboard::stringValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd) };
-        if (msg) {
-            return std::string { msg.value().begin(), msg.value().end() - 1 };
+    ResultString Blackboard::stringValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
+        RvrMsgView msg { entryValue(target, dev, cmd) };
+        ResultString res;
+        if ( !msg.empty()) {
+            res = std::string(msg.begin(), msg.end() - 1);
         }
-        return {};
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    RvrMsgRet_t const Blackboard::msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
-        RvrMsgRet_t msg { entryValue(target, dev, cmd, id) };
-
-        if (msg) {
-            return RvrMsg { msg.value().begin(), msg.value().end() };
-        }
-        return {};
+        return res;
     }
     //======================================================================================================================
     std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k) {
@@ -456,6 +466,5 @@ namespace rvr {
                 mys::tab << mys::tab << i.be.value;
         }
     }
-
 }
 /* namespace rvr */

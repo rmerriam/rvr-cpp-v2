@@ -37,7 +37,9 @@ using namespace std::literals;
 void direct(rvr::SensorsDirect& sen_d);
 void notifications(rvr::SensorsDirect& sen_d);
 void leds_test(rvr::IoLed& led);
+void power(rvr::Power& pow);
 void streaming(rvr::SensorsStream& sen_s);
+void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api);
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
 //    mys::TraceOn mys::tdbg_on { mys::tdbg };
@@ -59,125 +61,34 @@ int main(int argc, char* argv[]) {
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
     //---------------------------------------------------------------------------------------------------------------------
+    rvr::ApiShell api(bb, req);
+    rvr::Connection cmd(bb, req);
     rvr::Drive drive(bb, req);
     rvr::IoLed led(bb, req);
     rvr::Power pow(bb, req);
     rvr::SensorsDirect sen_d(bb, req);
     rvr::SensorsStream sen_s(bb, req);
+    rvr::SystemInfo sys(bb, req);
 
     pow.awake(rvr::CommandResponse::resp_yes);
-    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().value() << mys::nl;
+    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().get() << mys::nl;
     std::this_thread::sleep_for(500ms);
-    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().value() << mys::nl;
+
+    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().get() << mys::nl;
+//    bb.m_to_v();
+//    pow.sleep(rvr::CommandResponse::resp_yes);
+//    return 0;
 
 //=====================================================================================================================
     try {
 
-        direct(sen_d);
-        //        leds_test(led);
+//        direct(sen_d);
+//        leds_test(led);
 //        notifications(sen_d);
+        power(pow);
 //        streaming(sen_s);
+//        sysinfo(sys, cmd, api);
 
-#if 0
-
-        sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
-        std::this_thread::sleep_for(5000ms);
-//        mys:;tinfo<< code_line << "mag cal done: " << sen_d.isMagnetometerCalibrationDone().value() << mys::nl;
-        std::this_thread::sleep_for(500ms);
-
-        sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
-        std::this_thread::sleep_for(5000ms);
-
-//        while (true)  //
-//        {
-//            sen_d.getMagnetometerData(rvr::CommandResponse::resp_yes);
-//            std::this_thread::sleep_for(500ms);
-//
-//            auto [m_x, m_y, m_z] { sen_d.magnetometer().value_or(rvr::MagnetometerData { }) };
-//            auto angle { std::atan2(m_x, m_y) };
-//            mys:;tinfo<< code_line << "magnetometer: " << std::setfill(' ') //
-//                 << std::setw(8) << m_x << mys::sp  //
-//                 << std::setw(8) << m_y << mys::sp //
-//                 << std::setw(8) << m_z << mys::sp  //
-//                 << std::setw(8) << angle << mys::sp  //
-//                 << std::setw(8) << angle * 180.0 / M_PI;
-//        }
-//        {
-//            sen_d.getMagnetometerData(rvr::CommandResponse::resp_yes);
-//            std::this_thread::sleep_for(500ms);
-//
-//            auto [m_x, m_y, m_z] { sen_d.magnetometer().value_or(rvr::MagnetometerData { }) };
-//            auto angle { std::atan2(m_y, m_x) };
-//            mys:;tinfo<< code_line << "magnetometer: " << std::setfill(' ')  //
-//                 << std::setw(8) << m_x << mys::sp  //
-//                 << std::setw(8) << m_y << mys::sp //
-//                 << std::setw(8) << m_z << mys::sp  //
-//                 << std::setw(8) << angle << mys::sp  //
-//                 << std::setw(8) << angle * 180.0 / M_PI;
-//        }
-
-#endif
-
-#if 0
-        // POWER
-
-        pow.batteryPercentage();
-        pow.batteryVoltageState();
-
-        pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
-        pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
-        pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
-
-        pow.enableBatteryStateChange();
-
-        pow.batteryVoltThresholds();
-        pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
-        pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
-
-        std::this_thread::sleep_for(1s);
-
-        mys:;tinfo<< code_line << mys::nl;
-        mys:;tinfo<< code_line << "Power";
-
-        opt_output("VPercent: ", pow.batteryPercent());
-
-        opt_output("Sleep Notify: ", pow.isDidSleepNotify());
-        opt_output("State: ", pow.voltState());
-
-        opt_output("Wake Notify: ", pow.isWakeNotify());
-
-        opt_output("VoltageCF: ", pow.voltsCalibratedFiltered());
-        opt_output("VoltageCUf: ", pow.voltsCalibratedUnfiltered());
-        opt_output("VoltageUcUf: ", pow.voltsUncalibratedUnfiltered());
-        opt_output("L Motor Current: ", pow.motorCurrent(rvr::Power::MotorSide::left));
-        opt_output("R Motor Current: ", pow.motorCurrent(rvr::Power::MotorSide::right));
-        opt_output("Critical Threshold: ", pow.voltThresholdCritical());
-        opt_output("Low Threshold: ", pow.voltThresholdLow());
-        opt_output("Hysteresis Threshold: ", pow.voltThresholdHysteresis());
-
-        opt_output("Wake Notify Set?: ", pow.isWakeNotify());
-
-        opt_output("Wake Notify Cleared?: ", pow.isWakeNotify());
-
-        opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
-
-        mys:;tinfo<< code_line << mys::nl;
-        mys:;tinfo<< code_line << "disableBatteryStateChange";
-        pow.disableBatteryStateChange();
-        std::this_thread::sleep_for(50ms);
-
-        opt_output("Set State Change Enabled: ", pow.isBatteryStateChangeEnabled());
-
-        mys:;tinfo<< code_line << mys::nl;
-#if 0
-    pow.sleep();
-
-    std::this_thread::sleep_for(5000ms);    // have to wait for notification
-    mys:;tinfo<< code_line  << "Did Sleep Notify: " << pow.isDidSleepNotify();
-    mys:;tinfo<< code_line << mys::nl;
-#endif
-
-#endif
 #if 0
         // DRIVE
         rvr::Drive drive(bb, req);
@@ -232,49 +143,7 @@ int main(int argc, char* argv[]) {
 //    mys:;tinfo<< code_line;
 
 #endif
-#if 0
-        // Connection, SysInfo, APIShell
-        rvr::Connection cmd(bb, req);
-        cmd.bluetoothName();    //
 
-        rvr::SystemInfo sys(bb, req);
-        sys.getMainAppVersion();    // alt
-        sys.getBootloaderVersion();    //
-        sys.getBoardRevision();  // ??
-        sys.getMacId();  // ??
-        sys.getStatsId();
-        sys.getProcessorName();  // alt
-        sys.getSku();    // ??
-        sys.getCoreUpTime(); //
-//
-        rvr::ApiShell api(bb, req);
-        rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
-        api.echo(dead);    // alt
-
-        std::this_thread::sleep_for(100ms);
-        mys:;tinfo<< code_line << mys::nl;
-        mys:;tinfo<< code_line << mys::nl;
-        mys:;tinfo<< code_line << mys::nl << "Connection, SysInfo, APIShell";
-        opt_output("App Version: ", sys.mainAppVersion());
-        opt_output("App Version: ", sys.mainAppVersion2());
-        opt_output("Boot Version: ", sys.bootVersion());
-        opt_output("Boot Version: ", sys.bootVersion2());
-        opt_output("Board Version: ", sys.boardVersion());
-        opt_output("MAC Addr: ", sys.macAddress());
-        opt_output("Stats Id: ", sys.statsId());
-        opt_output("Processor: ", sys.processorName());
-        opt_output("Processor: ", sys.processorName2());
-        opt_output("SKU: ", sys.sku());
-        opt_output("Up Time: ", sys.coreUpTime());
-
-        opt_output("BT Name: ", cmd.name());
-
-        opt_output_hex("Echo: ", api.echo());
-        opt_output_hex("Echo Alt: ", api.echoAlt());
-
-        mys:;tinfo<< code_line << mys::nl;
-
-#endif
 #if 0
     constexpr float in_to_m { 0.0254 };
 

@@ -40,8 +40,8 @@ void color(rvr::SensorsDirect& sen_d) {
     auto [c_r, c_g, c_b, c_c] { sen_d.currentRGBValues().value_or(rvr::ColorData { }) };
     auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().value_or(rvr::ColorDetection { }) };
 
-    mys::tinfo << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().value();
-    mys::tinfo << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().value();
+    mys::tinfo << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get();
+    mys::tinfo << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get();
 
     mys::tinfo << code_loc << "currentRGBValues: " << c_r << mys::sp << c_g << mys::sp << c_b << mys::sp << c_c;
     mys::tinfo << code_loc << "colorDetectionValues: " << (int)(d_r) << mys::sp << (int)(d_g) << mys::sp << (int)(d_b)
@@ -54,7 +54,7 @@ void color(rvr::SensorsDirect& sen_d) {
     std::this_thread::sleep_for(50ms);
 
     mys::tinfo << code_loc;
-    mys::tinfo << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().value();
-    mys::tinfo << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().value();
+    mys::tinfo << code_loc << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get();
+    mys::tinfo << code_loc << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get();
     mys::tinfo << code_loc << mys::nl;
 }

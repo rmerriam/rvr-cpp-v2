@@ -39,7 +39,7 @@ namespace rvr {
 
         void bluetoothName(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
-        std::optional<std::string> name();
+        ResultString  name();
 
     private:
         enum Cmd : uint8_t {

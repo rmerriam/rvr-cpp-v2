@@ -96,17 +96,18 @@ namespace rvr {
         // data access methods
         float normalize(uint32_t const value, float const out_min, float const out_max);
 
-        std::optional<AccelData> accelerometer();
-        std::optional<float> ambient();
-        std::optional<ColorStream> colors();
-        std::optional<GyroData> gyroscope();
-        std::optional<ImuData> imu();
-        std::optional<QuatData> quaternion();
-        std::optional<float> speed();
-        std::optional<VelocityData> velocity();
-        std::optional<LocatorData> locator();
-        uint64_t btTime();
-        uint64_t nordicTime();
+        Result<AccelData> accelerometer();
+        ResultFloat ambient();
+        //----------------------------------------------------------------------------------------------------------------------
+        Result<ColorStream> colors();
+        Result<GyroData> gyroscope();
+        Result<ImuData> imu();
+        Result<QuatData> quaternion();
+        ResultFloat speed();
+        Result<VelocityData> velocity();
+        Result<LocatorData> locator();
+        ResultUInt64 btTime();
+        ResultUInt64 nordicTime();
 
     private:
 
@@ -159,6 +160,12 @@ namespace rvr {
             //
             get_motor_temperature = 0x4A, get_motor_thermal_protection_status = 0x4B,
             enable_motor_thermal_protection_status_notify = 0x4C, motor_thermal_protection_status_notify = 0x4D,
+
+            magnetometer_calibration_complete_notify = 0x51,    //
+            get_magnetometer_reading = 0x52,    //
+            //
+            get_encoder_counts = 0x53,  //
+            disable_notifications_and_active_commands = 0x54,   //
         };
 
         using NormalizeFactor = std::tuple<float, float>;
@@ -205,38 +212,38 @@ namespace rvr {
                                  0x00, locator_token, 0x02, //
             }, want_resp);
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::enableColorDetection(CommandResponse const want_resp) const {
         cmdEnable(enable_color_detection, want_resp);
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::disableColorDetection(CommandResponse const want_resp) const {
         cmdDisable(enable_color_detection, want_resp);
     }
-
+    //----------------------------------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::streamAmbient(CommandResponse const want_resp) {
         configureStreamingNordic(rvr::RvrMsg { ambient_token, 0x00, ambient_token, 0x02 }, want_resp);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::streamColor(CommandResponse const want_resp) {
         configureStreamingNordic(rvr::RvrMsg { color_token, 0x00, color_token, eight_bit }, want_resp);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::streamNordicTime(CommandResponse const want_resp) {
         configureStreamingNordic(rvr::RvrMsg { core_time_lower_token, 0x00, core_time_lower_token, 0x02 }, want_resp);
         configureStreamingNordic(rvr::RvrMsg { core_time_upper_token, 0x00, core_time_upper_token, 0x02 }, want_resp);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::streamBtTime(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { core_time_lower_token, 0x00, core_time_lower_token, 0x02 }, want_resp);
         configureStreamingBT(rvr::RvrMsg { core_time_upper_token, 0x00, core_time_upper_token, 0x02 }, want_resp);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsStream::streamQuaternion(CommandResponse const want_resp) {
         configureStreamingBT(rvr::RvrMsg { quaternion_token, 0x00, quaternion_id, 0x02 }, want_resp);
     }
-//======================================================================================================================
+    //======================================================================================================================
     inline float SensorsStream::normalize(uint32_t const value, float const out_min, float const out_max) {
         static auto max { std::numeric_limits<uint32_t>::max() };
         float res { };
@@ -245,6 +252,7 @@ namespace rvr {
         }
         return res;
     }
+
 } /* namespace rvr */
 
 #endif

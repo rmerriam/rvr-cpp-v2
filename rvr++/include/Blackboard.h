@@ -22,14 +22,72 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-#include <Request.h>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
+#include <variant>
 
+#include <Request.h>
 #include "ReadPacket.h"
 
 namespace rvr {
 
+#if 0
+    template <typename T>
+    struct Result : protected std::optional<T> {
+
+        bool valid() const noexcept {
+            return std::optional<T>::has_value();
+        }
+        bool invalid() const noexcept {
+            return !valid();
+        }
+        T const get() {
+            return std::optional<T>::value_or(T { });
+        }
+    private:
+
+    };
+#else
+    struct ResultCode { // type just used as flag when variant does not contain data
+    };
+
+    template <typename T>
+    struct Result : public std::variant<ResultCode, T> {
+
+        constexpr Result(T&& t) noexcept :
+            std::variant<ResultCode, T> { t } {
+        }
+        constexpr Result(T& t) noexcept :
+            std::variant<ResultCode, T> { t } {
+        }
+        Result() {
+        }
+        bool valid() const noexcept {
+            return std::holds_alternative<T>( *this);
+        }
+        bool invalid() const noexcept {
+            return !valid();
+        }
+        T get() {
+            return (valid() ? std::get<T>( *this) : T());
+        }
+    };
+#endif
+    //----------------------------------------------------------------------------------------------------------------------
+    using ResultBool = Result<bool>;
+    using ResultUInt8 = Result<uint8_t>;
+    using ResultInt16 = Result<int16_t>;
+    using ResultUInt16 = Result<uint16_t>;
+    using ResultInt32 = Result<int32_t>;
+    using ResultUInt32 = Result<uint32_t>;
+    using ResultInt64 = Result<int64_t>;
+    using ResultUInt64 = Result<uint64_t>;
+    using ResultFloat = Result<float>;
+    using ResultString = Result<std::string>;
+    using ResultMsg = Result<RvrMsgView>;
+    //----------------------------------------------------------------------------------------------------------------------
     class Blackboard {
 
     public:
@@ -41,26 +99,30 @@ namespace rvr {
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(Blackboard const& other) = delete;
 
-        std::optional<bool> boolValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        std::optional<uint8_t> byteValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        std::optional<int16_t> intValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        std::optional<uint16_t> uintValue(TargetPort const target, Devices const dev, uint8_t const cmd,
-            uint8_t const pos = 0);
-        std::optional<uint32_t> uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd,
-            uint8_t const pos = 0, uint8_t const id = 0);
-        std::optional<uint64_t> uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
-        std::optional<float> floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, float const = 0.0,
+        ResultBool boolValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+        ResultUInt8 byteValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        ResultInt16 int16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
+        ResultUInt16 uint16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
+
+        ResultUInt32 uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
             uint8_t const id = 0);
 
-        uint64_t uintConvert(RvrMsg::const_iterator begin, uint8_t n);
+        ResultInt64 int64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
+        ResultUInt64 uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        std::optional<bool> notifyState(TargetPort const target, Devices const dev, uint8_t const cmd);
+        ResultFloat floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
+            uint8_t const id = 0);
 
-        std::optional<bool> getNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
+        ResultBool notifyState(TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        ResultBool getNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
         void resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        std::optional<std::string> stringValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        RvrMsgRet_t const msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
+        ResultString stringValue(TargetPort const target, Devices const dev, uint8_t const cmd);
+
+        RvrMsgView msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
+        uint64_t uintConvert(RvrMsgView::const_iterator begin, uint8_t n);
 
         void m_to_v();
 
@@ -112,8 +174,8 @@ namespace rvr {
 
         void addMsgValue(key_t const key, RvrMsg value);
 
-        RvrMsgRet_t entryValue(key_t const key) const;
-        RvrMsgRet_t entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
+        RvrMsgView entryValue(key_t const key) const;
+        RvrMsgView entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
         static key_t entryKey(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
         // methods for processing received responses
 

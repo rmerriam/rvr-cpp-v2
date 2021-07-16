@@ -24,6 +24,7 @@
 //======================================================================================================================
 #include <Request.h>
 #include <SendPacket.h>
+#include <Blackboard.h>
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
     class Blackboard;
@@ -39,8 +40,8 @@ namespace rvr {
 
         void echo(RvrMsg const& data) const;
 
-        RvrMsgRet_t echo() const;
-        RvrMsgRet_t echoAlt() const;
+        ResultMsg echo() const;
+        ResultMsg echoAlt() const;
 
     private:
         enum Cmd : uint8_t {

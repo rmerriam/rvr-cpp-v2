@@ -25,74 +25,84 @@
 namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<ColorData> SensorsDirect::currentRGBValues() {
-        auto msg { mBlackboard.msgValue(mAltTarget, mDevice, get_rgbc_sensor_values) };
+    Result<ColorData> SensorsDirect::currentRGBValues() {
+        auto const msg { mBlackboard.msgValue(mAltTarget, mDevice, get_rgbc_sensor_values) };
+        Result<ColorData> res;
 
-        if (msg) {
-            return ColorData { static_cast<uint16_t>(mBlackboard.uintConvert(msg.value().begin(), 2)), //
-                static_cast<uint16_t>(mBlackboard.uintConvert(msg.value().begin() + 2, 2)),  //
-                static_cast<uint16_t>(mBlackboard.uintConvert(msg.value().begin() + 4, 2)),  //
+        if ( !msg.empty()) {
+            res = ColorData { static_cast<uint16_t>(mBlackboard.uintConvert(msg.begin(), 2)), //
+                static_cast<uint16_t>(mBlackboard.uintConvert(msg.begin() + 2, 2)),  //
+                static_cast<uint16_t>(mBlackboard.uintConvert(msg.begin() + 4, 2)),  //
 
-                static_cast<uint16_t>(mBlackboard.uintConvert(msg.value().begin() + 6, 2)),  //
+                static_cast<uint16_t>(mBlackboard.uintConvert(msg.begin() + 6, 2)),  //
             };
         }
-        return {};
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<ColorDetection> SensorsDirect::colorDetectionValues() {
-        auto const msg { mBlackboard.msgValue(mAltTarget, mDevice, color_detection_notify) };
-        if (msg) {
-            return ColorDetection { //
-            static_cast<uint8_t>(msg.value()[0]), //
-                static_cast<uint8_t>(msg.value()[1]), //
-                static_cast<uint8_t>(msg.value()[2]), //
-                static_cast<uint8_t>(msg.value()[3]), //
-                static_cast<uint8_t>(msg.value()[4]), //
+    Result<ColorDetection> SensorsDirect::colorDetectionValues() {
+        auto const& msg { mBlackboard.msgValue(mAltTarget, mDevice, color_detection_notify) };
+        Result<ColorDetection> res;
+
+        if ( !msg.empty()) {
+            res = ColorDetection { //
+            static_cast<uint8_t>(msg[0]), //
+                static_cast<uint8_t>(msg[1]), //
+                static_cast<uint8_t>(msg[2]), //
+                static_cast<uint8_t>(msg[3]), //
+                static_cast<uint8_t>(msg[4]), //
             };
         }
-        return {};
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<ThermalProtection> SensorsDirect::thermalProtectionValues() {
+    Result<ThermalProtection> SensorsDirect::thermalProtectionValues() {
         auto const& msg { mBlackboard.msgValue(mTarget, mDevice, get_motor_thermal_protection_status) };
-        if (msg) {
-            auto const& begin { msg.value().begin() };
+        Result<ThermalProtection> res;
+
+        if ( !msg.empty()) {
+            auto const& begin { msg.begin() };
             auto lm { mBlackboard.floatConvert(begin) };
             auto rm { mBlackboard.floatConvert(begin + 5) };
-            return ThermalProtection { lm, (rvr::ThermalStatus)msg.value()[4], rm, (rvr::ThermalStatus)msg.value()[9] };
+            res = ThermalProtection { lm, (rvr::ThermalStatus)msg[4], rm, (rvr::ThermalStatus)msg[9] };
         }
-        return {};
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<bool> SensorsDirect::isMagnetometerCalibrationDone() const {
+    ResultBool SensorsDirect::isMagnetometerCalibrationDone() const {
+
+        rvr::ResultBool res;
+
         auto const msg { mBlackboard.msgValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
-        if (msg) {
-            return { //
-                msg.value()[0],
-            };
+        if ( !msg.empty()) {
+            res = ResultBool(static_cast<bool>(msg[0]));
         }
-        return {};
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<int16_t> SensorsDirect::magnetometerCalibration() const {
-        auto const& msg { mBlackboard.msgValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
-        if (msg) {
-            return {
-                static_cast<int16_t>(mBlackboard.uintConvert(msg.value().begin() + 1, 2))
-            };
+    ResultInt16 SensorsDirect::magnetometerCalibrationYaw() const {
+        auto const msg { mBlackboard.msgValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
+        ResultInt16 res;
+        if ( !msg.empty()) {
+            res = ResultInt16(static_cast<int16_t>(mBlackboard.uintConvert(msg.begin() + 1, 2)));
         }
 
-        return {};
+        return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    std::optional<MagnetometerData> SensorsDirect::magnetometerData() {
-        auto x { mBlackboard.floatValue(mTarget, mDevice, get_magnetometer_reading, 0) };
-        if (x) {
-            auto y { mBlackboard.floatValue(mTarget, mDevice, get_magnetometer_reading, 1) };
-            auto z { mBlackboard.floatValue(mTarget, mDevice, get_magnetometer_reading, 2) };
+    Result<MagnetometerData> SensorsDirect::magnetometerData() const noexcept {
+        Result<MagnetometerData> res;
+        auto const& msg { mBlackboard.msgValue(mTarget, mDevice, get_magnetometer_reading) };
 
-            return MagnetometerData { x.value_or(0), y.value_or(0), z.value_or(0) };
+        if ( !msg.empty()) {
+            auto const& begin { msg.begin() };
+            auto const x { mBlackboard.floatConvert(begin) };
+            auto const y { mBlackboard.floatConvert(begin + 2) };
+            auto const z { mBlackboard.floatConvert(begin + 4) };
+            res = Result<MagnetometerData> { MagnetometerData { x, y, z } };
+
         }
-        return {};
+
+        return res;
     }
 }   // end of rvr

@@ -45,12 +45,12 @@ void general(rvr::SensorsDirect& sen_d) {
 
     std::this_thread::sleep_for(150ms);
 
-    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
-    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
+    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get();
+    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get();
 
     std::this_thread::sleep_for(50ms);
 
-    mys::tinfo << code_loc << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().value();
+    mys::tinfo << code_loc << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().get();
 
     auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().value_or(
         rvr::ThermalProtection { }) };
@@ -61,16 +61,16 @@ void general(rvr::SensorsDirect& sen_d) {
 //        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
 //        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
 
-    mys::tinfo << code_loc << "Left Temp: " << sen_d.leftMotorTemp().value();
-    mys::tinfo << code_loc << "Right Temp: " << sen_d.rightMotorTemp().value();
+    mys::tinfo << code_loc << "Left Temp: " << sen_d.leftMotorTemp().get();
+    mys::tinfo << code_loc << "Right Temp: " << sen_d.rightMotorTemp().get();
 
     sen_d.disableGyroMaxNotify();
     sen_d.disableThermalProtectionNotify();
     std::this_thread::sleep_for(50ms);
 
     mys::tinfo << code_loc << mys::nl;
-    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().value();
-    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().value();
+    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get();
+    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get();
 
     mys::tinfo << code_loc << mys::nl;
 }
@@ -78,9 +78,9 @@ void general(rvr::SensorsDirect& sen_d) {
 void direct(rvr::SensorsDirect& sen_d) {
     mys::tinfo << code_loc;
 
-//    general(sen_d);
-//    color(sen_d);
-    magnetometer(sen_d);
+    general(sen_d);
+    color(sen_d);
+//    magnetometer(sen_d);
 
 }
 

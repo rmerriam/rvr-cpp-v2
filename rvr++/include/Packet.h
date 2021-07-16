@@ -1,5 +1,4 @@
-#ifndef PACKET_H_
-#define PACKET_H_
+#pragma once
 //======================================================================================================================
 // 2021 Copyright Mystic Lake Software
 //
@@ -24,6 +23,7 @@
 //======================================================================================================================
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include <Trace.h>
 #include "SerialPort.h"
@@ -33,8 +33,8 @@ using char_ptr = char const *;
 
 namespace rvr {
 
-    using RvrMsg = std::basic_string<u_char>;
-    using RvrMsgRet_t = std::optional<RvrMsg>;
+    using RvrMsg = std::basic_string<uint8_t>;
+    using RvrMsgView = std::basic_string_view<RvrMsg::value_type>;
 
     enum flags : uint8_t {
         no_response = 0x00, //
@@ -75,4 +75,3 @@ namespace rvr {
     };
 }
 
-#endif /* PACKET_H_ */

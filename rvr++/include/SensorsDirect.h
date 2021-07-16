@@ -102,20 +102,24 @@ namespace rvr {
 
         //  Methods to access data
 
-        std::optional<bool> isColorDetectionEnabled() const;
-        std::optional<bool> isColorDetectionNotifyEnabled() const;
-        std::optional<bool> isGyroMaxNotifyEnabled() const;
-        std::optional<bool> isMagnetometerCalibrationDone() const;
-        std::optional<bool> isThermalProtectionNotifyEnabled() const;
+        ResultBool isColorDetectionEnabled() const;
+        ResultBool isColorDetectionNotifyEnabled() const;
+        ResultBool isGyroMaxNotifyEnabled() const;
+        ResultBool isThermalProtectionNotifyEnabled() const;
 
-        std::optional<float> ambientLight() const;
-        std::optional<float> leftMotorTemp() const;
-        std::optional<float> rightMotorTemp() const;
-        std::optional<ColorData> currentRGBValues();
-        std::optional<ColorDetection> colorDetectionValues();
-        std::optional<ThermalProtection> thermalProtectionValues();
-        std::optional<MagnetometerData> magnetometerData();
-        std::optional<int16_t> magnetometerCalibration() const;
+        [[nodiscard]] ResultBool isMagnetometerCalibrationDone() const;
+
+        void resetMagnetometerCalibration() {
+            mBlackboard.resetNotify(mTarget, mDevice, magnetometer_calibration_complete_notify);
+        }
+        ResultFloat ambientLight() const;
+        ResultFloat leftMotorTemp() const;
+        ResultFloat rightMotorTemp() const;
+        Result<ColorData> currentRGBValues();
+        Result<ColorDetection> colorDetectionValues();
+        Result<ThermalProtection> thermalProtectionValues();
+        Result<MagnetometerData> magnetometerData() const noexcept;
+        ResultInt16 magnetometerCalibrationYaw() const;
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
@@ -242,31 +246,31 @@ namespace rvr {
         mRequest.send(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<bool> SensorsDirect::isGyroMaxNotifyEnabled() const {
+    inline ResultBool SensorsDirect::isGyroMaxNotifyEnabled() const {
         return mBlackboard.getNotify(mTarget, mDevice, enable_gyro_max_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<bool> SensorsDirect::isThermalProtectionNotifyEnabled() const {
+    inline ResultBool SensorsDirect::isThermalProtectionNotifyEnabled() const {
         return mBlackboard.getNotify(mTarget, mDevice, enable_motor_thermal_protection_status_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<bool> SensorsDirect::isColorDetectionEnabled() const {
+    inline ResultBool SensorsDirect::isColorDetectionEnabled() const {
         return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<bool> SensorsDirect::isColorDetectionNotifyEnabled() const {
+    inline ResultBool SensorsDirect::isColorDetectionNotifyEnabled() const {
         return mBlackboard.getNotify(mAltTarget, mDevice, enable_color_detection_notify);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<float> SensorsDirect::ambientLight() const {
+    inline ResultFloat SensorsDirect::ambientLight() const {
         return mBlackboard.floatValue(mAltTarget, mDevice, get_ambient_light_sensor_value);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<float> SensorsDirect::leftMotorTemp() const {
+    inline ResultFloat SensorsDirect::leftMotorTemp() const {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 4);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    inline std::optional<float> SensorsDirect::rightMotorTemp() const {
+    inline ResultFloat SensorsDirect::rightMotorTemp() const {
         return mBlackboard.floatValue(mTarget, mDevice, get_temperature, 0, 5);
     }
     //----------------------------------------------------------------------------------------------------------------------

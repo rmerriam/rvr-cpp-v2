@@ -138,7 +138,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
-        mys::TraceOn tdbg_ctrl { mys::tdbg };
+        mys::TraceOff tdbg_ctrl { mys::tdbg };
         mys::tdbg << code_line << "pkt: " << std::hex << packet;
 
         // typical positions of header bytes when target not present which is the usual case
@@ -176,13 +176,13 @@ namespace rvr {
         std::string device = device_names[packet[dev]];
 
         Blackboard::key_t key { mBlackboard.msgKey(TargetPort(packet[src]), Devices(packet[dev]), packet[cmd], //
-                                                   (packet[seq] == 0xFF) ? 0 : packet[seq]) };
+                                                   (packet[seq] == 0xFF) ? packet[err_code] : packet[seq]) };
 
         std::string command { mBlackboard.entryName(key) };
 
         if (command.empty()) {
             mys::tdbg << code_line << "Command not in decode table " << device //
-                      << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key << mys::sp << packet;
+                << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key << mys::sp << packet;
         }
         else {
             mys::tdbg << code_line << device << mys::sp << command;
