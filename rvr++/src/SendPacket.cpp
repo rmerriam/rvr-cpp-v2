@@ -28,64 +28,63 @@
 #include <SendPacket.h>
 
 namespace rvr {
-    //----------------------------------------------------------------------------------------------------------------------
-    void SendPacket::send(RvrMsg const& p) {
-        RvrMsg payload { p };
-        RvrMsg mMsg;
-        mMsg.clear();
-        mMsg.push_back(SOP);
+//----------------------------------------------------------------------------------------------------------------------
+void SendPacket::send(RvrMsg const& p) {
+   RvrMsg payload { p };
+   RvrMsg mMsg;
+   mMsg.clear();
+   mMsg.push_back(SOP);
 
-// calculate checksum, add to end of payload, then escape payload & checksum
-        uint8_t sum { checksum(payload) };
-        payload.push_back(sum);
+   // calculate checksum, add to end of payload, then escape payload & checksum
+   uint8_t sum { checksum(payload) };
+   payload.push_back(sum);
 
-        escape_msg(payload);
+   escape_msg(payload);
 
-        std::copy(payload.begin(), payload.end(), std::back_insert_iterator(mMsg));
+   std::copy(payload.begin(), payload.end(), std::back_insert_iterator(mMsg));
 
-        mMsg.push_back(EOP);
+   mMsg.push_back(EOP);
 
-        mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    auto SendPacket::escape_char(RvrMsg::iterator& p, RvrMsg& payload) {
-
-        switch ( *p) {
-            case SOP: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_SOP);
-                break;
-            }
-            case EOP: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_EOP);
-                break;
-            }
-            case ESC: {
-                *p = ESC;
-                payload.insert(p + 1, escaped_ESC);
-                break;
-            }
-        }
-        ++p;
-        return p;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint8_t SendPacket::checksum(RvrMsg const& payload) const {
-        unsigned int sum { };
-        sum = ~std::accumulate(payload.begin(), payload.end(), 0);
-        return sum;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    bool SendPacket::isPacketChar(uint8_t const c) {
-        return (c == SOP) || (c == EOP) || (c == ESC);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void SendPacket::escape_msg(RvrMsg& payload) {
-        for (auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end();
-            p = find_if(p, payload.end(), isPacketChar)) {
-            p = escape_char(p, payload);
-        }
-    }
-
+   mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
 }
+//----------------------------------------------------------------------------------------------------------------------
+auto SendPacket::escape_char(RvrMsg::iterator& p, RvrMsg& payload) {
+
+   switch(*p) {
+   case SOP: {
+      *p = ESC;
+      payload.insert(p + 1, escaped_SOP);
+      break;
+   }
+   case EOP: {
+      *p = ESC;
+      payload.insert(p + 1, escaped_EOP);
+      break;
+   }
+   case ESC: {
+      *p = ESC;
+      payload.insert(p + 1, escaped_ESC);
+      break;
+   }
+   }
+   ++p;
+   return p;
+}
+//----------------------------------------------------------------------------------------------------------------------
+uint8_t SendPacket::checksum(RvrMsg const& payload) const {
+   unsigned int sum {};
+   sum = ~std::accumulate(payload.begin(), payload.end(), 0);
+   return sum;
+}
+//----------------------------------------------------------------------------------------------------------------------
+bool SendPacket::isPacketChar(uint8_t const c) {
+   return (c == SOP) || (c == EOP) || (c == ESC);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void SendPacket::escape_msg(RvrMsg& payload) {
+   for(auto p { find_if(payload.begin(), payload.end(), isPacketChar) }; p != payload.end(); p = find_if(p, payload.end(), isPacketChar)) {
+      p = escape_char(p, payload);
+   }
+}
+
+} // namespace rvr

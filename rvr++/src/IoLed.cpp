@@ -20,19 +20,20 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-#include "enum.h"
 #include "IoLed.h"
+#include "enum.h"
 namespace rvr {
 
-    void IoLed::allLed(uint32_t const led_bits, RvrMsg const& colors, CommandResponse const want_resp) const {
+void IoLed::allLed(uint32_t const led_bits, RvrMsg const& colors, CommandResponse const want_resp) const {
 
-        RvrMsg leds { //
-        static_cast<uint8_t>(led_bits >> 24), //
-            static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
-            static_cast<uint8_t>((led_bits >> 8) & 0xFF), //
-            static_cast<uint8_t>(led_bits & 0xFF) //
-        };
-        leds.insert(leds.end(), colors.begin(), colors.end());
-        cmdData(set_all_leds, leds, want_resp);
-    }
+   RvrMsg leds {
+      //
+      static_cast<uint8_t>(led_bits >> 24),          //
+      static_cast<uint8_t>((led_bits >> 16) & 0xFF), //
+      static_cast<uint8_t>((led_bits >> 8) & 0xFF),  //
+      static_cast<uint8_t>(led_bits & 0xFF)          //
+   };
+   leds.insert(leds.end(), colors.begin(), colors.end());
+   cmdData(set_all_leds, leds, want_resp);
 }
+} // namespace rvr

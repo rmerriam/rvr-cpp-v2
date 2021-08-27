@@ -20,15 +20,10 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-#include <chrono>
-#include <iomanip>
-#include <iostream>
-#include <future>
-#include <version>
-#include <cmath>
+#include <thread>
+using namespace std::literals;
 
 #include <Trace.h>
-using namespace std::literals;
 
 #include <rvr++.h>
 
@@ -41,23 +36,24 @@ void power(rvr::Power& pow);
 void streaming(rvr::SensorsStream& sen_s);
 void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api);
 //---------------------------------------------------------------------------------------------------------------------
-int main(int argc, char* argv[]) {
-//    mys::TraceOn mys::tdbg_on { mys::tdbg };
-    mys::TraceOff tdbg_off { mys::tdbg };
-    mys::tdbg << code_line << " Opening serial " << argv[1];
+int main(int argc, char* argv[])
+{
+    //    mys::TraceOn mys::tdbg_on { mys::terr };
+    mys::TraceOff tdbg_off { mys::terr };
+    mys::terr << code_line << " Opening serial " << argv[1];
 
-    mys::tinfo << code_line << " Opening serial " << argv[1] << mys::nl;
+    mys::tout << code_line << " Opening serial " << argv[1] << mys::nl;
 
     rvr::SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
     rvr::ReadPacket in_packet { serial };
     rvr::Blackboard bb;
-//---------------------------------------------------------------------------------------------------------------------
-//  Setup the response thread to read responses
+    //---------------------------------------------------------------------------------------------------------------------
+    //  Setup the response thread to read responses
     std::promise<void> end_tasks;
-    std::shared_future<void> end_future(end_tasks.get_future());
+    std::shared_future<void> end_future(end_tasks.get_future( ));
     rvr::Response resp { in_packet, bb, end_future };
-    mys::tdbg << code_line << "----------------" << mys::nl;
+    mys::terr << code_line << "----------------" << mys::nl;
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
     //---------------------------------------------------------------------------------------------------------------------
@@ -71,23 +67,19 @@ int main(int argc, char* argv[]) {
     rvr::SystemInfo sys(bb, req);
 
     pow.awake(rvr::CommandResponse::resp_yes);
-    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().get() << mys::nl;
+    mys::tout << code_line << "is awake:  " << pow.isWakeNotify( ).get( ) << mys::nl;
     std::this_thread::sleep_for(500ms);
 
-    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().get() << mys::nl;
-//    bb.m_to_v();
-//    pow.sleep(rvr::CommandResponse::resp_yes);
-//    return 0;
-
-//=====================================================================================================================
+    mys::tout << code_line << "is awake:  " << pow.isWakeNotify( ).get( ) << mys::nl;
+    //=====================================================================================================================
     try {
 
-//        direct(sen_d);
-//        leds_test(led);
-//        notifications(sen_d);
+        //        direct(sen_d);
+        //        leds_test(led);
+        //        notifications(sen_d);
         power(pow);
-//        streaming(sen_s);
-//        sysinfo(sys, cmd, api);
+        //        streaming(sen_s);
+        //        sysinfo(sys, cmd, api);
 
 #if 0
         // DRIVE
@@ -197,19 +189,17 @@ int main(int argc, char* argv[]) {
     mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
 #endif
-    }
-    catch (std::exception& e) {
-        mys::tdbg << code_line << e.what() << "=================================";
+    } catch (std::exception& e) {
+        mys::terr << code_line << e.what( ) << "=================================";
     }
 
     pow.sleep(rvr::CommandResponse::resp_yes);
 
     std::this_thread::sleep_for(1s);
-    end_tasks.set_value();
-    resp_future.get();
+    end_tasks.set_value( );
+    resp_future.get( );
 
-    bb.m_to_v();
+    bb.m_to_v( );
 
     return 0;
 }
-

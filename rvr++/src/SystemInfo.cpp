@@ -21,79 +21,79 @@
 //
 //======================================================================================================================
 
-#include "Blackboard.h"
 #include "SystemInfo.h"
+#include "Blackboard.h"
 namespace rvr {
 
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView const& msg { mBlackboard.msgValue(target, mDevice, cmd) };
-        ResultString res;
-        if ( !msg.empty()) {
-            res = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
-                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::processorName() {
-        return mBlackboard.stringValue(mTarget, mDevice, get_processor_name);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::processorName2() {
-        return mBlackboard.stringValue(mAltTarget, mDevice, get_processor_name);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::sku() {
-        return mBlackboard.stringValue(mAltTarget, mDevice, get_sku);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::mainAppVersion() {
-        return versionValue(mTarget, mDevice, get_main_application_version);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::mainAppVersion2() {
-        return versionValue(mAltTarget, mDevice, get_main_application_version);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::bootVersion() {
-        return versionValue(mTarget, mDevice, get_bootloader_version);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::bootVersion2() {
-        return versionValue(mAltTarget, mDevice, get_bootloader_version);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultUInt8 SystemInfo::boardVersion() {
-        return mBlackboard.byteValue(mAltTarget, mDevice, get_board_revision);
-    }
 //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::macAddress() {
-        RvrMsgView msg { mBlackboard.msgValue(mAltTarget, mDevice, get_mac_address) };
-        ResultString res;
-
-        if ( !msg.empty()) {
-            constexpr char colon { ':' };
-
-            std::string mac { msg.begin(), msg.end() };
-
-            mac.insert(10, 1, colon);
-            mac.insert(8, 1, colon);
-            mac.insert(6, 1, colon);
-            mac.insert(4, 1, colon);
-            mac.insert(2, 1, colon);
-            res = mac;
-        }
-        return res;
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    ResultInt16 SystemInfo::statsId() {
-        return mBlackboard.int16Value(mAltTarget, mDevice, get_stats_id);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    ResultInt64 SystemInfo::coreUpTime() {
-        return ResultInt64 { mBlackboard.int64Value(mTarget, mDevice, get_core_up_time_in_milliseconds) };
-    }
-
+ResultString SystemInfo::versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd) {
+   RvrMsgView const& msg { mBlackboard.msgValue(target, mDevice, cmd) };
+   ResultString res;
+   if(!msg.empty()) {
+      res = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
+          std::to_string(((msg[2] << 8) | msg[3])) + '.' +   //
+          std::to_string(((msg[4] << 8) | msg[5]));
+   }
+   return res;
 }
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::processorName() {
+   return mBlackboard.stringValue(mTarget, mDevice, get_processor_name);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::processorName2() {
+   return mBlackboard.stringValue(mAltTarget, mDevice, get_processor_name);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::sku() {
+   return mBlackboard.stringValue(mAltTarget, mDevice, get_sku);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::mainAppVersion() {
+   return versionValue(mTarget, mDevice, get_main_application_version);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::mainAppVersion2() {
+   return versionValue(mAltTarget, mDevice, get_main_application_version);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::bootVersion() {
+   return versionValue(mTarget, mDevice, get_bootloader_version);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::bootVersion2() {
+   return versionValue(mAltTarget, mDevice, get_bootloader_version);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultUInt8 SystemInfo::boardVersion() {
+   return mBlackboard.byteValue(mAltTarget, mDevice, get_board_revision);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultString SystemInfo::macAddress() {
+   RvrMsgView msg { mBlackboard.msgValue(mAltTarget, mDevice, get_mac_address) };
+   ResultString res;
+
+   if(!msg.empty()) {
+      constexpr char colon { ':' };
+
+      std::string mac { msg.begin(), msg.end() };
+
+      mac.insert(10, 1, colon);
+      mac.insert(8, 1, colon);
+      mac.insert(6, 1, colon);
+      mac.insert(4, 1, colon);
+      mac.insert(2, 1, colon);
+      res = mac;
+   }
+   return res;
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultInt16 SystemInfo::statsId() {
+   return mBlackboard.int16Value(mAltTarget, mDevice, get_stats_id);
+}
+//----------------------------------------------------------------------------------------------------------------------
+ResultInt64 SystemInfo::coreUpTime() {
+   return ResultInt64 { mBlackboard.int64Value(mTarget, mDevice, get_core_up_time_in_milliseconds) };
+}
+
+} // namespace rvr

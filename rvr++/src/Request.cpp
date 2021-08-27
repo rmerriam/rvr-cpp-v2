@@ -20,117 +20,123 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-#include <Request.h>
 #include "Blackboard.h"
+#include <Request.h>
 
 namespace rvr {
-    //----------------------------------------------------------------------------------------------------------------------
-    Request::Request(Blackboard& bb, Devices const device, SendPacket& request, TargetPort const target) :
-        mBlackboard { bb }, mDevice { device }, mRequest { request }, mTarget { target }, mAltTarget { makeAltProc() } {
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::buildFlags(CommandResponse const want_resp) const {
-        int flags { int(want_resp) | activity | has_target };
-        return static_cast<uint8_t>(flags);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::makeAltProc() {
-        uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
-        return alt_target;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::basic(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::basicAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::reqByte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::reqByteAlt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::byteId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::byteAltId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, data, data };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::cmdData(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
-        msg.insert(msg.end(), data.begin(), data.end());
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::cmdDataAlt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
-        msg.insert(msg.end(), data.begin(), data.end());
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::reqInt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), //
-        static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::reqIntAlt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), //
-        static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::cmdEnable(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, enable, true };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, enable, true };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::cmdDisable(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, disable, false };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    void Request::cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
-        RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, disable, false };
-        mRequest.send(msg);
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    TargetPort const Request::altTarget() const {
-        return mAltTarget;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    TargetPort const Request::target() const {
-        return mTarget;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    Devices const Request::device() const {
-        return mDevice;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    SendPacket& Request::request() const {
-        return mRequest;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint8_t Request::seq() {
-        return mSeq;
-    }
-
+//----------------------------------------------------------------------------------------------------------------------
+Request::Request(Blackboard& bb, Devices const device, SendPacket& request, TargetPort const target)
+    : mBlackboard { bb }
+    , mDevice { device }
+    , mRequest { request }
+    , mTarget { target }
+    , mAltTarget { makeAltProc() } {
 }
+//----------------------------------------------------------------------------------------------------------------------
+uint8_t Request::buildFlags(CommandResponse const want_resp) const {
+   int flags { int(want_resp) | activity | has_target };
+   return static_cast<uint8_t>(flags);
+}
+//----------------------------------------------------------------------------------------------------------------------
+uint8_t Request::makeAltProc() {
+   uint8_t alt_target = (bluetoothSOC + nordic) - mTarget;
+   return alt_target;
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::basic(uint8_t const cmd, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::basicAlt(uint8_t const cmd, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::reqByte(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence(), data };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::reqByteAlt(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence(), data };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::byteId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, data, data };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::byteAltId(uint8_t const cmd, uint8_t const data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, data, data };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::cmdData(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, sequence() };
+   msg.insert(msg.end(), data.begin(), data.end());
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::cmdDataAlt(uint8_t const cmd, RvrMsg const& data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, sequence() };
+   msg.insert(msg.end(), data.begin(), data.end());
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::reqInt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd,
+      sequence(), //
+      static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::reqIntAlt(uint8_t const cmd, uint16_t const data, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd,
+      sequence(), //
+      static_cast<uint8_t>(data >> 8), static_cast<uint8_t>(data & 0xFF) };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::cmdEnable(uint8_t const cmd, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, enable, true };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::cmdEnableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, enable, true };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::cmdDisable(uint8_t const cmd, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mTarget, mDevice, cmd, disable, false };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+void Request::cmdDisableAlt(uint8_t const cmd, CommandResponse const want_resp) const {
+   RvrMsg msg { buildFlags(want_resp), mAltTarget, mDevice, cmd, disable, false };
+   mRequest.send(msg);
+}
+//----------------------------------------------------------------------------------------------------------------------
+TargetPort const Request::altTarget() const {
+   return mAltTarget;
+}
+//----------------------------------------------------------------------------------------------------------------------
+TargetPort const Request::target() const {
+   return mTarget;
+}
+//----------------------------------------------------------------------------------------------------------------------
+Devices const Request::device() const {
+   return mDevice;
+}
+//----------------------------------------------------------------------------------------------------------------------
+SendPacket& Request::request() const {
+   return mRequest;
+}
+//----------------------------------------------------------------------------------------------------------------------
+uint8_t Request::seq() {
+   return mSeq;
+}
+
+} // namespace rvr

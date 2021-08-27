@@ -22,59 +22,60 @@
 //    Created: Jun 10, 2021
 //
 //======================================================================================================================
+#include <thread>
 #include <Trace.h>
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void power(rvr::Power& pow) {
-    pow.batteryPercentage();
-    pow.batteryVoltageState();
+   pow.batteryPercentage();
+   pow.batteryVoltageState();
 
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
-    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
+   pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
+   pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
+   pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
 
-    pow.enableBatteryStateChange();
+   pow.enableBatteryStateChange();
 
-    pow.batteryVoltThresholds();
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
+   pow.batteryVoltThresholds();
+   pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
+   pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
 
-    std::this_thread::sleep_for(1s);
+   std::this_thread::sleep_for(1s);
 
-    mys::tinfo << code_line << mys::nl;
-    mys::tinfo << code_line << "Power";
+   mys::tout << code_line << mys::nl;
+   mys::tout << code_line << "Power";
 
-    mys::tinfo << code_line << "VPercent: " << pow.batteryPercent().get();
+   mys::tout << code_line << "VPercent: " << pow.batteryPercent().get();
 
-    mys::tinfo << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get();
-    mys::tinfo << code_line << "State: " << (int)pow.voltState().get();
+   mys::tout << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get();
+   mys::tout << code_line << "State: " << (int)pow.voltState().get();
 
-    mys::tinfo << code_line << "Wake Notify: " << pow.isWakeNotify().get();
+   mys::tout << code_line << "Wake Notify: " << pow.isWakeNotify().get();
 
-    mys::tinfo << code_line << "VoltageCF: " << pow.voltsCalibratedFiltered().get();
-    mys::tinfo << code_line << "VoltageCUf: " << pow.voltsCalibratedUnfiltered().get();
-    mys::tinfo << code_line << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered().get();
-    mys::tinfo << code_line << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left).get();
-    mys::tinfo << code_line << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right).get();
-    mys::tinfo << code_line << "Critical Threshold: " << pow.voltThresholdCritical().get();
-    mys::tinfo << code_line << "Low Threshold: " << pow.voltThresholdLow().get();
-    mys::tinfo << code_line << "Hysteresis Threshold: " << pow.voltThresholdHysteresis().get();
+   mys::tout << code_line << "VoltageCF: " << pow.voltsCalibratedFiltered().get();
+   mys::tout << code_line << "VoltageCUf: " << pow.voltsCalibratedUnfiltered().get();
+   mys::tout << code_line << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered().get();
+   mys::tout << code_line << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left).get();
+   mys::tout << code_line << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right).get();
+   mys::tout << code_line << "Critical Threshold: " << pow.voltThresholdCritical().get();
+   mys::tout << code_line << "Low Threshold: " << pow.voltThresholdLow().get();
+   mys::tout << code_line << "Hysteresis Threshold: " << pow.voltThresholdHysteresis().get();
 
-    mys::tinfo << code_line << "Wake Notify Set?: " << pow.isWakeNotify().get();
+   mys::tout << code_line << "Wake Notify Set?: " << pow.isWakeNotify().get();
 
-    mys::tinfo << code_line << "Wake Notify Cleared?: " << pow.isWakeNotify().get();
+   mys::tout << code_line << "Wake Notify Cleared?: " << pow.isWakeNotify().get();
 
-    mys::tinfo << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get();
+   mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get();
 
-    mys::tinfo << code_line << mys::nl;
-    mys::tinfo << code_line << "disableBatteryStateChange";
+   mys::tout << code_line << mys::nl;
+   mys::tout << code_line << "disableBatteryStateChange";
 
-    pow.disableBatteryStateChange();
-    std::this_thread::sleep_for(50ms);
+   pow.disableBatteryStateChange();
+   std::this_thread::sleep_for(50ms);
 
-    mys::tinfo << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get();
+   mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get();
 
-    mys::tinfo << code_line << mys::nl;
+   mys::tout << code_line << mys::nl;
 #if 0
  pow.sleep().get();
 
@@ -82,6 +83,4 @@ void power(rvr::Power& pow) {
  mys:;tinfo<< code_line  << "Did Sleep Notify: " << pow.isDidSleepNotify().get();
  mys:;tinfo<< code_line << mys::nl;
 #endif
-
 }
-

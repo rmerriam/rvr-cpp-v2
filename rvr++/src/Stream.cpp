@@ -4,7 +4,7 @@
 
 namespace rvr {
 
-    Stream::~Stream() {
-    }
-
+Stream::~Stream() {
 }
+
+} // namespace rvr
