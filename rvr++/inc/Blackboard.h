@@ -32,48 +32,35 @@
 #include <Request.h>
 
 namespace rvr {
+//----------------------------------------------------------------------------------------------------------------------
+template <typename T> // size 8 for int, 40 for string
+struct Result : protected std::optional<T> {
+   explicit constexpr Result() noexcept = default;
 
-#if 0
-    template <typename T>
-    struct Result : protected std::optional<T> {
-
-        bool valid() const noexcept {
-            return std::optional<T>::has_value();
-        }
-        bool invalid() const noexcept {
-            return !valid();
-        }
-        T const get() {
-            return std::optional<T>::value_or(T { });
-        }
-    private:
-
-    };
-#else
-struct ResultCode { // type just used as flag when variant does not contain data
-};
-
-template <typename T> struct Result : public std::variant<ResultCode, T> {
+   constexpr Result( T& t ) noexcept
+       : std::optional<T> { t } {
+   }
 
    constexpr Result( T&& t ) noexcept
-       : std::variant<ResultCode, T> { t } {
+       : std::optional<T> { t } {
    }
-   constexpr Result( T& t ) noexcept
-       : std::variant<ResultCode, T> { t } {
+
+   [[nodiscard]] constexpr bool valid() const noexcept {
+      return std::optional<T>::has_value();
    }
-   Result() {
-   }
-   bool valid() const noexcept {
-      return std::holds_alternative<T>( *this );
-   }
-   bool invalid() const noexcept {
+
+   [[nodiscard]] constexpr bool invalid() const noexcept {
       return !valid();
    }
-   T get() {
-      return ( valid() ? std::get<T>( *this ) : T() );
+
+   [[nodiscard]] constexpr auto get() const -> T {
+      return std::optional<T>::value_or( T() );
+   }
+
+   [[nodiscard]] constexpr auto get_or() const noexcept -> T {
+      return std::optional<T>::value_or( T() );
    }
 };
-#endif
 //----------------------------------------------------------------------------------------------------------------------
 using ResultBool = Result<bool>;
 using ResultUInt8 = Result<uint8_t>;
