@@ -74,38 +74,20 @@ void leds_test(rvr::IoLed& led) {
       }                     //
    };
 
-<<<<<<< HEAD
-    mys::tout << code_line;
-=======
    mys::tout << code_line;
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
    //    led.ledsOff(rvr::CommandResponse::resp_yes);
    led.idleLeds(rvr::CommandResponse::resp_yes);
 
    std::this_thread::sleep_for(1000ms);
 
-<<<<<<< HEAD
-    for (auto i { 0 }; i < 10; ++i) {
-        led.allLed(led32, colors[i % 2], rvr::CommandResponse::resp_yes);
-        mys::tout << code_line << "blink";
-        std::this_thread::sleep_for(1000ms);
-    }
-=======
    for(auto i { 0 }; i < 10; ++i) {
       led.allLed(led32, colors[i % 2], rvr::CommandResponse::resp_yes);
       mys::tout << code_line << "blink";
       std::this_thread::sleep_for(1000ms);
    }
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-<<<<<<< HEAD
-    led.idleLeds();
-    std::this_thread::sleep_for(50ms);
-    mys::tout << code_line << mys::nl;
-=======
    led.idleLeds();
    std::this_thread::sleep_for(50ms);
    mys::tout << code_line << mys::nl;
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 }

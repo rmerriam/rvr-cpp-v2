@@ -28,69 +28,34 @@
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void color(rvr::SensorsDirect& sen_d) {
-   mys::tout << code_line;
-
-<<<<<<< HEAD
     mys::tout << code_line;
-=======
-   sen_d.enableColorDetection(); // must preceed color detection to turn on bottom LEDs
-   sen_d.enableColorDetectionNotify(true, 50, 0);
-   std::this_thread::sleep_for(500ms);
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-   sen_d.getRgbcSensorValue();
-   sen_d.getCurrentDectectedColor(); // triggers a notification
-   std::this_thread::sleep_for(100ms);
+    sen_d.enableColorDetection(); // must preceed color detection to turn on bottom LEDs
+    sen_d.enableColorDetectionNotify(true, 50, 0);
+    std::this_thread::sleep_for(500ms);
 
-   auto [c_r, c_g, c_b, c_c] { sen_d.currentRGBValues().get() };
-   auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().get() };
+    sen_d.getRgbcSensorValue();
+    sen_d.getCurrentDectectedColor(); // triggers a notification
+    std::this_thread::sleep_for(100ms);
 
-<<<<<<< HEAD
-    auto [c_r, c_g, c_b, c_c] { sen_d.currentRGBValues().get_or() };
-    auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().get_or() };
-=======
-   mys::tout << code_line << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get();
-   mys::tout << code_line << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get();
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
+    auto [c_r, c_g, c_b, c_c] { sen_d.currentRGBValues().get() };
+    auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().get() };
 
-<<<<<<< HEAD
-    mys::tout << code_line << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get_or();
-    mys::tout << code_line << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get_or();
-=======
-   mys::tout << code_line << "currentRGBValues: " << c_r << mys::sp << c_g << mys::sp << c_b << mys::sp << c_c;
-   mys::tout << code_line << "colorDetectionValues: " << (int)(d_r) << mys::sp << (int)(d_g) << mys::sp << (int)(d_b) << mys::sp
-              << (int)(conf) << mys::sp << (int)(classification);
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
+    mys::tout << code_line << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get();
+    mys::tout << code_line << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get();
 
-<<<<<<< HEAD
     mys::tout << code_line << "currentRGBValues: " << c_r << mys::sp << c_g << mys::sp << c_b << mys::sp << c_c;
     mys::tout << code_line << "colorDetectionValues: " << (int)(d_r) << mys::sp << (int)(d_g) << mys::sp << (int)(d_b)
         << mys::sp << (int)(conf) << mys::sp << (int)(classification);
-=======
-   mys::tout << code_line;
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-<<<<<<< HEAD
     mys::tout << code_line;
-=======
-   sen_d.enableColorDetectionNotify(false, 500, 0);
-   sen_d.disableColorDetection(); // turns off bottom LEDs
-   std::this_thread::sleep_for(50ms);
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-<<<<<<< HEAD
     sen_d.enableColorDetectionNotify(false, 500, 0);
     sen_d.disableColorDetection(); // turns off bottom LEDs
     std::this_thread::sleep_for(50ms);
 
     mys::tout << code_line;
-    mys::tout << code_line << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get_or();
-    mys::tout << code_line << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get_or();
+    mys::tout << code_line << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get();
+    mys::tout << code_line << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get();
     mys::tout << code_line << mys::nl;
-=======
-   mys::tout << code_line;
-   mys::tout << code_line << "isColorDetectionEnabled: " << sen_d.isColorDetectionEnabled().get();
-   mys::tout << code_line << "isColorDetectionNotifyEnabled: " << sen_d.isColorDetectionNotifyEnabled().get();
-   mys::tout << code_line << mys::nl;
->>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 }
