@@ -22,6 +22,7 @@
 //    Created: Jun 10, 2021
 //
 //======================================================================================================================
+#include <thread>
 #include <future>
 
 #include <rvr++.h>
@@ -30,56 +31,88 @@ void color(rvr::SensorsDirect& sen_d);
 void magnetometer(rvr::SensorsDirect& sen_d);
 //---------------------------------------------------------------------------------------------------------------------
 void general(rvr::SensorsDirect& sen_d) {
-    sen_d.enableGyroMaxNotify();
+   sen_d.enableGyroMaxNotify();
 
-    sen_d.resetLocatorXY();
-    sen_d.setLocatorFlags(true);
+   sen_d.resetLocatorXY();
+   sen_d.setLocatorFlags(true);
 
-    sen_d.getAmbientLightSensorValue();
+   sen_d.getAmbientLightSensorValue();
 
-    sen_d.getLeftMotorTemp();
-    sen_d.getRightMotorTemp();
+   sen_d.getLeftMotorTemp();
+   sen_d.getRightMotorTemp();
 
-    sen_d.getThermalProtectionStatus();
-    sen_d.enableThermalProtectionNotify();  // responds when status changes
+   sen_d.getThermalProtectionStatus();
+   sen_d.enableThermalProtectionNotify(); // responds when status changes
 
-    std::this_thread::sleep_for(150ms);
+   std::this_thread::sleep_for(150ms);
 
+<<<<<<< HEAD
     mys::tout << code_line << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get_or();
     mys::tout << code_line << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get_or();
+=======
+   mys::tout << code_line << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get();
+   mys::tout << code_line << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-    std::this_thread::sleep_for(50ms);
+   std::this_thread::sleep_for(50ms);
 
+<<<<<<< HEAD
     mys::tout << code_line << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().get_or();
+=======
+   mys::tout << code_line << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().get_or() };
     mys::tout << code_line << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
         << mys::sp << right_temp << mys::sp << (int)right_status;
+=======
+   auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().get() };
+   mys::tout << code_line << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
+              << mys::sp << right_temp << mys::sp << (int)right_status;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-//        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
-//        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
-//        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
+   //        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
+   //        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
+   //        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
 
+<<<<<<< HEAD
     mys::tout << code_line << "Left Temp: " << sen_d.leftMotorTemp().get_or();
     mys::tout << code_line << "Right Temp: " << sen_d.rightMotorTemp().get_or();
+=======
+   mys::tout << code_line << "Left Temp: " << sen_d.leftMotorTemp().get();
+   mys::tout << code_line << "Right Temp: " << sen_d.rightMotorTemp().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-    sen_d.disableGyroMaxNotify();
-    sen_d.disableThermalProtectionNotify();
-    std::this_thread::sleep_for(50ms);
+   sen_d.disableGyroMaxNotify();
+   sen_d.disableThermalProtectionNotify();
+   std::this_thread::sleep_for(50ms);
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
     mys::tout << code_line << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get_or();
     mys::tout << code_line << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get_or();
+=======
+   mys::tout << code_line << mys::nl;
+   mys::tout << code_line << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get();
+   mys::tout << code_line << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
+=======
+   mys::tout << code_line << mys::nl;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 }
 //---------------------------------------------------------------------------------------------------------------------
 void direct(rvr::SensorsDirect& sen_d) {
+<<<<<<< HEAD
     mys::tout << code_line;
+=======
+   mys::tout << code_line;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-    general(sen_d);
-    color(sen_d);
-//    magnetometer(sen_d);
-
+   general(sen_d);
+   color(sen_d);
+   //    magnetometer(sen_d);
 }
-

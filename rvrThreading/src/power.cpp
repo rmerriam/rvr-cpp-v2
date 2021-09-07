@@ -22,35 +22,55 @@
 //    Created: Jun 10, 2021
 //
 //======================================================================================================================
+#include <thread>
 #include <Trace.h>
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void power(rvr::Power& pow) {
-    pow.batteryPercentage();
-    pow.batteryVoltageState();
+   pow.batteryPercentage();
+   pow.batteryVoltageState();
 
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
-    pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
-    pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
+   pow.batteryVoltage(rvr::Power::VoltageType::CalibratedFiltered);
+   pow.batteryVoltage(rvr::Power::VoltageType::CalibratedUnfiltered);
+   pow.batteryVoltage(rvr::Power::VoltageType::UncalibratedUnfiltered);
 
-    pow.enableBatteryStateChange();
+   pow.enableBatteryStateChange();
 
-    pow.batteryVoltThresholds();
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
-    pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
+   pow.batteryVoltThresholds();
+   pow.batteryMotorCurrent(rvr::Power::MotorSide::left);
+   pow.batteryMotorCurrent(rvr::Power::MotorSide::right);
 
-    std::this_thread::sleep_for(1s);
+   std::this_thread::sleep_for(1s);
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
     mys::tout << code_line << "Power";
+=======
+   mys::tout << code_line << mys::nl;
+   mys::tout << code_line << "Power";
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "VPercent: " << pow.batteryPercent().get_or();
+=======
+   mys::tout << code_line << "VPercent: " << pow.batteryPercent().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get_or();
     mys::tout << code_line << "State: " << (int)pow.voltState().get_or();
+=======
+   mys::tout << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get();
+   mys::tout << code_line << "State: " << (int)pow.voltState().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "Wake Notify: " << pow.isWakeNotify().get_or();
+=======
+   mys::tout << code_line << "Wake Notify: " << pow.isWakeNotify().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "VoltageCF: " << pow.voltsCalibratedFiltered().get_or();
     mys::tout << code_line << "VoltageCUf: " << pow.voltsCalibratedUnfiltered().get_or();
     mys::tout << code_line << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered().get_or();
@@ -59,22 +79,57 @@ void power(rvr::Power& pow) {
     mys::tout << code_line << "Critical Threshold: " << pow.voltThresholdCritical().get_or();
     mys::tout << code_line << "Low Threshold: " << pow.voltThresholdLow().get_or();
     mys::tout << code_line << "Hysteresis Threshold: " << pow.voltThresholdHysteresis().get_or();
+=======
+   mys::tout << code_line << "VoltageCF: " << pow.voltsCalibratedFiltered().get();
+   mys::tout << code_line << "VoltageCUf: " << pow.voltsCalibratedUnfiltered().get();
+   mys::tout << code_line << "VoltageUcUf: " << pow.voltsUncalibratedUnfiltered().get();
+   mys::tout << code_line << "L Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::left).get();
+   mys::tout << code_line << "R Motor Current: " << pow.motorCurrent(rvr::Power::MotorSide::right).get();
+   mys::tout << code_line << "Critical Threshold: " << pow.voltThresholdCritical().get();
+   mys::tout << code_line << "Low Threshold: " << pow.voltThresholdLow().get();
+   mys::tout << code_line << "Hysteresis Threshold: " << pow.voltThresholdHysteresis().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "Wake Notify Set?: " << pow.isWakeNotify().get_or();
+=======
+   mys::tout << code_line << "Wake Notify Set?: " << pow.isWakeNotify().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "Wake Notify Cleared?: " << pow.isWakeNotify().get_or();
+=======
+   mys::tout << code_line << "Wake Notify Cleared?: " << pow.isWakeNotify().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get_or();
+=======
+   mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
     mys::tout << code_line << "disableBatteryStateChange";
+=======
+   mys::tout << code_line << mys::nl;
+   mys::tout << code_line << "disableBatteryStateChange";
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
-    pow.disableBatteryStateChange();
-    std::this_thread::sleep_for(50ms);
+   pow.disableBatteryStateChange();
+   std::this_thread::sleep_for(50ms);
 
+<<<<<<< HEAD
     mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get_or();
+=======
+   mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
+=======
+   mys::tout << code_line << mys::nl;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 #if 0
  pow.sleep().get_or();
 
@@ -82,6 +137,4 @@ void power(rvr::Power& pow) {
  mys:;tinfo<< code_line  << "Did Sleep Notify: " << pow.isDidSleepNotify().get_or();
  mys:;tinfo<< code_line << mys::nl;
 #endif
-
 }
-

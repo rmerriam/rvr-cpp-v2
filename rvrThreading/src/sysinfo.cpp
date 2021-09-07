@@ -22,32 +22,43 @@
 //    Created: Jun 10, 2021
 //
 //======================================================================================================================
-#include <rvr++.h>
+#include <thread>
+
 #include <Trace.h>
+#include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
 
-    // Connection, SysInfo, APIShell
-    cmd.bluetoothName();    //
+   // Connection, SysInfo, APIShell
+   cmd.bluetoothName(); //
 
-    sys.getMainAppVersion();    // alt
-    sys.getBootloaderVersion();    //
-    sys.getBoardRevision();  // ??
-    sys.getMacId();  // ??
-    sys.getStatsId();
-    sys.getProcessorName();  // alt
-    sys.getSku();    // ??
-    sys.getCoreUpTime(); //
-//
-    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
-    api.echo(dead);    // alt
+   sys.getMainAppVersion();    // alt
+   sys.getBootloaderVersion(); //
+   sys.getBoardRevision();     // ??
+   sys.getMacId();             // ??
+   sys.getStatsId();
+   sys.getProcessorName(); // alt
+   sys.getSku();           // ??
+   sys.getCoreUpTime();    //
+                           //
+   rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
+   api.echo(dead); // alt
 
-    std::this_thread::sleep_for(100ms);
+   std::this_thread::sleep_for(100ms);
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
+=======
+   mys::tout << code_line << mys::nl;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
+=======
+   mys::tout << code_line << mys::nl;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "App Version: " << sys.mainAppVersion().get_or();
     mys::tout << code_line << "App Version: " << sys.mainAppVersion2().get_or();
     mys::tout << code_line << "Boot Version: " << sys.bootVersion().get_or();
@@ -59,11 +70,37 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
     mys::tout << code_line << "Processor: " << sys.processorName2().get_or();
     mys::tout << code_line << "SKU: " << sys.sku().get_or();
     mys::tout << code_line << "Up Time: " << sys.coreUpTime().get_or();
+=======
+   mys::tout << code_line << "App Version: " << sys.mainAppVersion().get();
+   mys::tout << code_line << "App Version: " << sys.mainAppVersion2().get();
+   mys::tout << code_line << "Boot Version: " << sys.bootVersion().get();
+   mys::tout << code_line << "Boot Version: " << sys.bootVersion2().get();
+   mys::tout << code_line << "Board Version: " << int(sys.boardVersion().get());
+   mys::tout << code_line << "MAC Addr: " << sys.macAddress().get();
+   mys::tout << code_line << "Stats Id: " << sys.statsId().get();
+   mys::tout << code_line << "Processor: " << sys.processorName().get();
+   mys::tout << code_line << "Processor: " << sys.processorName2().get();
+   mys::tout << code_line << "SKU: " << sys.sku().get();
+   mys::tout << code_line << "Up Time: " << sys.coreUpTime().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "BT Name: " << cmd.name().get_or();
+=======
+   mys::tout << code_line << "BT Name: " << cmd.name().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << "Echo: " << api.echo().get_or();
     mys::tout << code_line << "Echo Alt: " << api.echoAlt().get_or();
+=======
+   mys::tout << code_line << "Echo: " << api.echo().get();
+   mys::tout << code_line << "Echo Alt: " << api.echoAlt().get();
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 
+<<<<<<< HEAD
     mys::tout << code_line << mys::nl;
+=======
+   mys::tout << code_line << mys::nl;
+>>>>>>> branch 'master' of https://rmerriam@bitbucket.org/rmerriam/rvr-cpp-v2.git
 }
