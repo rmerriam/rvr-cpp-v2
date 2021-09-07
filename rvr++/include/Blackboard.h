@@ -32,49 +32,36 @@
 #include "ReadPacket.h"
 
 namespace rvr {
-
-#if 0
-    template <typename T>
+    //------------------------------------------------------------------------ ----------------------------------------------
+    template <typename T>    // size 8 for int, 40 for string
     struct Result : protected std::optional<T> {
-
-        bool valid() const noexcept {
-            return std::optional<T>::has_value();
-        }
-        bool invalid() const noexcept {
-            return !valid();
-        }
-        T const get() {
-            return std::optional<T>::value_or(T { });
-        }
-    private:
-
-    };
-#else
-    struct ResultCode { // type just used as flag when variant does not contain data
-    };
-
-    template <typename T>
-    struct Result : public std::variant<ResultCode, T> {
+        explicit constexpr Result() noexcept = default;
 
         constexpr Result(T&& t) noexcept :
-            std::variant<ResultCode, T> { t } {
+            std::optional<T> { t } {
         }
+
         constexpr Result(T& t) noexcept :
-            std::variant<ResultCode, T> { t } {
+            std::optional<T> { t } {
         }
-        Result() {
+        [[nodiscard]] constexpr bool valid() const noexcept {
+            //        return bool( *this);
+            return std::optional<T>::has_value();
         }
-        bool valid() const noexcept {
-            return std::holds_alternative<T>( *this);
-        }
-        bool invalid() const noexcept {
+
+        [[nodiscard]] constexpr bool invalid() const noexcept {
             return !valid();
         }
-        T get() {
-            return (valid() ? std::get<T>( *this) : T());
+
+        [[nodiscard]] constexpr auto get() const -> T {
+            return std::optional<T>::value();
+        }
+
+        [[nodiscard]] constexpr auto get_or() const noexcept -> T {
+            return std::optional<T>::value_or(T { });
         }
     };
-#endif
+
     //----------------------------------------------------------------------------------------------------------------------
     using ResultBool = Result<bool>;
     using ResultUInt8 = Result<uint8_t>;

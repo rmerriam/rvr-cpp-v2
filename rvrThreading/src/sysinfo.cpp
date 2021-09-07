@@ -44,26 +44,26 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
 
     std::this_thread::sleep_for(100ms);
 
-    mys::tinfo << code_line << mys::nl;
+    mys::tout << code_line << mys::nl;
 
-    mys::tinfo << code_line << mys::nl;
+    mys::tout << code_line << mys::nl;
 
-    mys::tinfo << code_line << "App Version: " << sys.mainAppVersion().get();
-    mys::tinfo << code_line << "App Version: " << sys.mainAppVersion2().get();
-    mys::tinfo << code_line << "Boot Version: " << sys.bootVersion().get();
-    mys::tinfo << code_line << "Boot Version: " << sys.bootVersion2().get();
-    mys::tinfo << code_line << "Board Version: " << int(sys.boardVersion().get());
-    mys::tinfo << code_line << "MAC Addr: " << sys.macAddress().get();
-    mys::tinfo << code_line << "Stats Id: " << sys.statsId().get();
-    mys::tinfo << code_line << "Processor: " << sys.processorName().get();
-    mys::tinfo << code_line << "Processor: " << sys.processorName2().get();
-    mys::tinfo << code_line << "SKU: " << sys.sku().get();
-    mys::tinfo << code_line << "Up Time: " << sys.coreUpTime().get();
+    mys::tout << code_line << "App Version: " << sys.mainAppVersion().get_or();
+    mys::tout << code_line << "App Version: " << sys.mainAppVersion2().get_or();
+    mys::tout << code_line << "Boot Version: " << sys.bootVersion().get_or();
+    mys::tout << code_line << "Boot Version: " << sys.bootVersion2().get_or();
+    mys::tout << code_line << "Board Version: " << int(sys.boardVersion().get_or());
+    mys::tout << code_line << "MAC Addr: " << sys.macAddress().get_or();
+    mys::tout << code_line << "Stats Id: " << sys.statsId().get_or();
+    mys::tout << code_line << "Processor: " << sys.processorName().get_or();
+    mys::tout << code_line << "Processor: " << sys.processorName2().get_or();
+    mys::tout << code_line << "SKU: " << sys.sku().get_or();
+    mys::tout << code_line << "Up Time: " << sys.coreUpTime().get_or();
 
-    mys::tinfo << code_line << "BT Name: " << cmd.name().get();
+    mys::tout << code_line << "BT Name: " << cmd.name().get_or();
 
-    mys::tinfo << code_line << "Echo: " << api.echo().get();
-    mys::tinfo << code_line << "Echo Alt: " << api.echoAlt().get();
+    mys::tout << code_line << "Echo: " << api.echo().get_or();
+    mys::tout << code_line << "Echo Alt: " << api.echoAlt().get_or();
 
-    mys::tinfo << code_line << mys::nl;
+    mys::tout << code_line << mys::nl;
 }

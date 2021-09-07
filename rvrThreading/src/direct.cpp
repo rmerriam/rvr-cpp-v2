@@ -45,38 +45,37 @@ void general(rvr::SensorsDirect& sen_d) {
 
     std::this_thread::sleep_for(150ms);
 
-    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get();
-    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get();
+    mys::tout << code_line << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get_or();
+    mys::tout << code_line << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get_or();
 
     std::this_thread::sleep_for(50ms);
 
-    mys::tinfo << code_loc << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().get();
+    mys::tout << code_line << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().get_or();
 
-    auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().value_or(
-        rvr::ThermalProtection { }) };
-    mys::tinfo << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
-               << mys::sp << right_temp << mys::sp << (int)right_status;
+    auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().get_or() };
+    mys::tout << code_line << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
+        << mys::sp << right_temp << mys::sp << (int)right_status;
 
 //        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
 //        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
 //        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
 
-    mys::tinfo << code_loc << "Left Temp: " << sen_d.leftMotorTemp().get();
-    mys::tinfo << code_loc << "Right Temp: " << sen_d.rightMotorTemp().get();
+    mys::tout << code_line << "Left Temp: " << sen_d.leftMotorTemp().get_or();
+    mys::tout << code_line << "Right Temp: " << sen_d.rightMotorTemp().get_or();
 
     sen_d.disableGyroMaxNotify();
     sen_d.disableThermalProtectionNotify();
     std::this_thread::sleep_for(50ms);
 
-    mys::tinfo << code_loc << mys::nl;
-    mys::tinfo << code_loc << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get();
-    mys::tinfo << code_loc << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get();
+    mys::tout << code_line << mys::nl;
+    mys::tout << code_line << "isGyroMaxNotifyEnabled: " << sen_d.isGyroMaxNotifyEnabled().get_or();
+    mys::tout << code_line << "isThermalProtectionNotifyEnabled: " << sen_d.isThermalProtectionNotifyEnabled().get_or();
 
-    mys::tinfo << code_loc << mys::nl;
+    mys::tout << code_line << mys::nl;
 }
 //---------------------------------------------------------------------------------------------------------------------
 void direct(rvr::SensorsDirect& sen_d) {
-    mys::tinfo << code_loc;
+    mys::tout << code_line;
 
     general(sen_d);
     color(sen_d);

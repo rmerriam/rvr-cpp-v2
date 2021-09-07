@@ -69,7 +69,7 @@ void leds_test(rvr::IoLed& led) {
         }//
     };
 
-    mys::tinfo << code_loc;
+    mys::tout << code_line;
 
 //    led.ledsOff(rvr::CommandResponse::resp_yes);
     led.idleLeds(rvr::CommandResponse::resp_yes);
@@ -78,11 +78,11 @@ void leds_test(rvr::IoLed& led) {
 
     for (auto i { 0 }; i < 10; ++i) {
         led.allLed(led32, colors[i % 2], rvr::CommandResponse::resp_yes);
-        mys::tinfo << code_loc << "blink";
+        mys::tout << code_line << "blink";
         std::this_thread::sleep_for(1000ms);
     }
 
     led.idleLeds();
     std::this_thread::sleep_for(50ms);
-    mys::tinfo << code_loc << mys::nl;
+    mys::tout << code_line << mys::nl;
 }

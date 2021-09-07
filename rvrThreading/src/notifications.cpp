@@ -25,37 +25,37 @@
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void notifications(rvr::SensorsDirect& sen_d) {
-    mys::tinfo << code_loc;
+    mys::tout << code_line;
 
     sen_d.enableColorDetection(); // must preceed color detection to turn on bottom LEDs
     sen_d.enableColorDetectionNotify(true, 50, 0);
     std::this_thread::sleep_for(150ms);
     sen_d.disableColorDetection();
 
-    auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().value_or(rvr::ColorDetection { }) };
-    mys::tinfo << code_loc << "colorDetectionValues: " << (int)(d_r) << mys::sp << (int)(d_g) << mys::sp << (int)(d_b)
-               << mys::sp << (int)(conf) << mys::sp << (int)(classification);
+    auto [d_r, d_g, d_b, conf, classification] { sen_d.colorDetectionValues().get_or() };
+    mys::tout << code_line << "colorDetectionValues: " << (int)(d_r) << mys::sp << (int)(d_g) << mys::sp << (int)(d_b)
+        << mys::sp << (int)(conf) << mys::sp << (int)(classification);
 
     std::this_thread::sleep_for(50ms);
 
 #if 0
     //  can't get these to trigger
-    mys::tinfo << code_loc;
-    mys::tinfo << code_loc;
+    mys::tout << code_line;
+    mys::tout << code_line;
     sen_d.enableGyroMaxNotify();
     std::this_thread::sleep_for(1500ms);
 
-    mys::tinfo << code_loc;
-    mys::tinfo << code_loc;
+    mys::tout << code_line;
+    mys::tout << code_line;
     sen_d.enableThermalProtectionNotify();  // responds when status changes
     std::this_thread::sleep_for(150ms);
-    auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().value_or(
+    auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().get_or(
         rvr::ThermalProtection { }) };
-    mys::tinfo << code_loc << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
+    mys::tout << code_line << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
                << mys::sp << right_temp << mys::sp << (int)right_status;
     sen_d.disableThermalProtectionNotify();
 #endif
 
-    mys::tinfo << code_loc;
+    mys::tout << code_line;
 }
 

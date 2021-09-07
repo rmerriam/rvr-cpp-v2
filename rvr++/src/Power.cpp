@@ -27,7 +27,7 @@ namespace rvr {
     // data access methods
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt16 Power::batteryPercent() const noexcept {
-        return ResultUInt16 { static_cast<uint16_t>(mBlackboard.byteValue(mTarget, mDevice, get_battery_percentage).get()) };
+        return ResultUInt16 { static_cast<uint16_t>(mBlackboard.byteValue(mTarget, mDevice, get_battery_percentage).get_or()) };
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::motorCurrent(MotorSide const ms) const noexcept {
@@ -48,12 +48,12 @@ namespace rvr {
 //----------------------------------------------------------------------------------------------------------------------
     Result<Power::BatteryVoltState> Power::voltState() const noexcept {
         return Result<Power::BatteryVoltState> { //
-        static_cast<BatteryVoltState>(mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).get()) };
+        static_cast<BatteryVoltState>(mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).get_or()) };
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultString Power::voltStateText() const noexcept {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        return ResultString { state[mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).get()] };
+        return ResultString { state[mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).get_or()] };
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltThresholdCritical() const noexcept {

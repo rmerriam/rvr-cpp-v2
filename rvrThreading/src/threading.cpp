@@ -42,11 +42,12 @@ void streaming(rvr::SensorsStream& sen_s);
 void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api);
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-//    mys::TraceOn mys::tdbg_on { mys::tdbg };
-    mys::TraceOff tdbg_off { mys::tdbg };
-    mys::tdbg << code_line << " Opening serial " << argv[1];
 
-    mys::tinfo << code_line << " Opening serial " << argv[1] << mys::nl;
+    mys::TraceOn terr_on { mys::terr };
+    mys::TraceOff tdbg_off { mys::terr };
+
+    mys::terr << code_line << " Opening serial " << argv[1];
+    mys::tout << code_line << " Opening serial " << argv[1];
 
     rvr::SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
@@ -57,7 +58,7 @@ int main(int argc, char* argv[]) {
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
     rvr::Response resp { in_packet, bb, end_future };
-    mys::tdbg << code_line << "----------------" << mys::nl;
+    mys::terr << code_line << "----------------" << mys::nl;
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
     //---------------------------------------------------------------------------------------------------------------------
@@ -71,10 +72,10 @@ int main(int argc, char* argv[]) {
     rvr::SystemInfo sys(bb, req);
 
     pow.awake(rvr::CommandResponse::resp_yes);
-    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().get() << mys::nl;
+//    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
     std::this_thread::sleep_for(500ms);
 
-    mys::tinfo << code_line << "is awake:  " << pow.isWakeNotify().get() << mys::nl;
+    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
 //    bb.m_to_v();
 //    pow.sleep(rvr::CommandResponse::resp_yes);
 //    return 0;
@@ -85,7 +86,7 @@ int main(int argc, char* argv[]) {
 //        direct(sen_d);
 //        leds_test(led);
 //        notifications(sen_d);
-        power(pow);
+//        power(pow);
 //        streaming(sen_s);
 //        sysinfo(sys, cmd, api);
 
@@ -106,7 +107,7 @@ int main(int argc, char* argv[]) {
 //        for (auto i { 0 }; i < 10; ++i) {
 //            drive.drive(75, 25);
 //            std::this_thread::sleep_for(3s);
-//            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
+//            auto [l_x, l_y] { sen_s.locator().get_or(rvr::LocatorData { }) };
 //            mys:;tinfo<< code_line << "locator: " << l_x << mys::sp << l_y;
 //        }
 
@@ -199,7 +200,7 @@ int main(int argc, char* argv[]) {
 #endif
     }
     catch (std::exception& e) {
-        mys::tdbg << code_line << e.what() << "=================================";
+        mys::terr << code_line << e.what() << "=================================";
     }
 
     pow.sleep(rvr::CommandResponse::resp_yes);

@@ -204,18 +204,18 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     std::string Blackboard::entryName(key_t key) {
         std::string s;
-        mys::TraceOff tdbg_ctrl { mys::tdbg };
-        mys::tdbg << code_line << "key: " << std::hex << key;
+        mys::TraceOff tdbg_ctrl { mys::terr };
+        mys::terr << code_line << "key: " << std::hex << key;
 
         auto it { mDictionary.find(key) };
 
         if (it == mDictionary.end()) {
             it = mDictionary.find(key & 0xFFFFFF00);
-            mys::tdbg << code_line << "key: " << std::hex << (key & 0xFFFFFF00);
+            mys::terr << code_line << "key: " << std::hex << (key & 0xFFFFFF00);
         }
         if (it != mDictionary.end()) {
             s = it->second.name;
-            mys::tdbg << code_line << "key: " << std::hex << key << mys::tab << s;
+            mys::terr << code_line << "key: " << std::hex << key << mys::tab << s;
         }
         return s;
     }
@@ -245,10 +245,10 @@ namespace rvr {
     //  Method to put RvrMsg data into dictionary
     //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::msgArray(Blackboard::key_t key, uint8_t const cmd, RvrMsg::iterator begin, RvrMsg::iterator end) {
-        mys::TraceOff tdbg_ctrl { mys::tdbg };
+        mys::TraceOff tdbg_ctrl { mys::terr };
 
         RvrMsg msg { begin, end };
-        mys::tdbg << code_line << mys::tab << msg;
+        mys::terr << code_line << mys::tab << msg;
 
         if (msg.empty()) {
             msg.push_back(0xFF);
@@ -291,7 +291,7 @@ namespace rvr {
             }
 
         }
-        mys::tdbg << code_line << mys::tab << std::hex << key << mys::tab << msg;
+        mys::terr << code_line << mys::tab << std::hex << key << mys::tab << msg;
         addMsgValue(key, msg);
     }
     //======================================================================================================================
@@ -320,7 +320,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultBool Blackboard::boolValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        return ResultBool { (byteValue(target, dev, cmd).get() != 0) };
+        return ResultBool { (byteValue(target, dev, cmd).get_or() != 0) };
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt8 Blackboard::byteValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
@@ -461,7 +461,7 @@ namespace rvr {
         );
 
         for (auto& i : vec) {
-            mys::tinfo << std::hex << std::uppercase << i.key << mys::sp << std::setw(45) << std::setfill(' ') << std::left
+            mys::tout << std::hex << std::uppercase << i.key << mys::sp << std::setw(45) << std::setfill(' ') << std::left
                 << i.be.name <<    //
                 mys::tab << mys::tab << i.be.value;
         }

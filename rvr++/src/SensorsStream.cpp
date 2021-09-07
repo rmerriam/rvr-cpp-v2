@@ -83,13 +83,13 @@ namespace rvr {
         auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, imu_accel_gyro_token) };
         if (x.valid()) {
             auto y {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4, imu_accel_gyro_token).get() };
+                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4, imu_accel_gyro_token).get_or() };
             auto z {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 5, imu_accel_gyro_token).get() };
+                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 5, imu_accel_gyro_token).get_or() };
 
             auto [out_min, out_max] { SensorFactors[accel_token] };
             res = Result<AccelData> { AccelData {
-                normalize(x.get(), out_min, out_max), normalize(y, out_min, out_max), normalize(z, out_min, out_max), } };
+                normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max), normalize(z, out_min, out_max), } };
         }
         return res;
     }
@@ -100,7 +100,7 @@ namespace rvr {
 
         if (value.valid()) {
             auto [out_min, out_max] { SensorFactors[ambient_token] };
-            res = ResultFloat { normalize(static_cast<int32_t>(value.get()), out_min, out_max) };
+            res = ResultFloat { normalize(static_cast<int32_t>(value.get_or()), out_min, out_max) };
         }
         return res;
     }
@@ -112,8 +112,8 @@ namespace rvr {
             ColorStream cs {
                 static_cast<uint8_t>(msg[0]), static_cast<uint8_t>(msg[1]), static_cast<uint8_t>(msg[2]),
                 static_cast<uint8_t>(msg[3]), static_cast<float>(msg[4]) };
-            res = cs;
-//            res = Result<ColorStream> { cs };
+//            res = cs;
+            res = Result<ColorStream> { cs };
         }
         return res;
     }
@@ -124,13 +124,13 @@ namespace rvr {
         if (x.valid()) {
 
             auto y {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 7, imu_accel_gyro_token).get() };
+                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 7, imu_accel_gyro_token).get_or() };
             auto z {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 8, imu_accel_gyro_token).get() };
+                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 8, imu_accel_gyro_token).get_or() };
 
             auto [out_min, out_max] { SensorFactors[gyro_token] };
             res = Result<GyroData> { GyroData {
-                normalize(x.get(), out_min, out_max), normalize(y, out_min, out_max), normalize(z, out_min, out_max), } };
+                normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max), normalize(z, out_min, out_max), } };
         }
         return res;
     }
@@ -141,11 +141,11 @@ namespace rvr {
 
         if (x.valid()) {
             auto y {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, imu_accel_gyro_token).get() };
+                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, imu_accel_gyro_token).get_or() };
             auto z {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_accel_gyro_token).get() };
+                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_accel_gyro_token).get_or() };
             auto [out_min, out_max] { SensorFactors[imu_token] };
-            res = Result<ImuData> { ImuData { normalize(x.get(), out_min, out_max), //
+            res = Result<ImuData> { ImuData { normalize(x.get_or(), out_min, out_max), //
             normalize(y, out_min / 2, out_max / 2), //
             normalize(z, out_min, out_max) } };
         }
@@ -163,10 +163,10 @@ namespace rvr {
 
             auto [out_min, out_max] { SensorFactors[quaternion_token] };
 
-            res = Result<QuatData> { QuatData { normalize(w.get(), out_min, out_max), //
-            normalize(x.get(), out_min, out_max), //
-            normalize(y.get(), out_min / 2, out_max / 2), //
-            normalize(z.get(), out_min, out_max) } //
+            res = Result<QuatData> { QuatData { normalize(w.get_or(), out_min, out_max), //
+            normalize(x.get_or(), out_min, out_max), //
+            normalize(y.get_or(), out_min / 2, out_max / 2), //
+            normalize(z.get_or(), out_min, out_max) } //
             };
         }
         return res;
@@ -178,9 +178,9 @@ namespace rvr {
 
         if (x.valid()) {
             auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4,
-                                             speed_velocity_locator_token).get() };
+                                             speed_velocity_locator_token).get_or() };
             auto [out_min, out_max] { SensorFactors[locator_token] };
-            res = Result<LocatorData> { LocatorData(normalize(x.get(), out_min, out_max), normalize(y, out_min, out_max)) };
+            res = Result<LocatorData> { LocatorData(normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max)) };
         }
         return res;
     }
@@ -191,7 +191,7 @@ namespace rvr {
                                              speed_velocity_locator_token) };
         if (speed.valid()) {
             auto [out_min, out_max] { SensorFactors[speed_token] };
-            res = ResultFloat { normalize(static_cast<int32_t>(speed.get()), out_min, out_max) };
+            res = ResultFloat { normalize(static_cast<int32_t>(speed.get_or()), out_min, out_max) };
         }
         return res;
     }
@@ -202,10 +202,10 @@ namespace rvr {
         if (x.valid()) {
 
             auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2,
-                                             speed_velocity_locator_token).get() };
+                                             speed_velocity_locator_token).get_or() };
 
             auto [out_min, out_max] { SensorFactors[velocity_token] };
-            res = Result<VelocityData> { VelocityData(normalize(x.get(), out_min, out_max), normalize(y, out_min, out_max)) };
+            res = Result<VelocityData> { VelocityData(normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max)) };
         }
         return res;
     }
@@ -215,8 +215,8 @@ namespace rvr {
         auto lower { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, core_time_lower_token) };
         if (lower.valid()) {
             auto upper { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0,
-                                                 core_time_upper_token).get() };
-            res = ResultUInt64 { (static_cast<uint64_t>(upper) << 32) + lower.get() };
+                                                 core_time_upper_token).get_or() };
+            res = ResultUInt64 { (static_cast<uint64_t>(upper) << 32) + lower.get_or() };
         }
         return res;
     }
@@ -226,8 +226,8 @@ namespace rvr {
         auto lower { mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_lower_token) };
         if (lower.valid()) {
             auto upper {
-                mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_upper_token).get() };
-            res = ResultUInt64 { (static_cast<uint64_t>(upper) << 32) + lower.get() };
+                mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_upper_token).get_or() };
+            res = ResultUInt64 { (static_cast<uint64_t>(upper) << 32) + lower.get_or() };
         }
         return res;
     }
