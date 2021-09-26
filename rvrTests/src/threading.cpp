@@ -38,10 +38,7 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api);
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
     //    mys::TraceOn mys::tdbg_on { mys::terr };
-    mys::TraceOff tdbg_off { mys::terr };
-    mys::terr << code_line << " Opening serial " << argv[1];
-
-    mys::tout << code_line << " Opening serial " << argv[1] << mys::nl;
+    mys::tout << code_line << " Opening serial " << argv[1];
 
     rvr::SerialPort serial { argv[1], 115200 };
     rvr::SendPacket req { serial };
@@ -52,7 +49,7 @@ int main(int argc, char* argv[]) {
     std::promise<void> end_tasks;
     std::shared_future<void> end_future(end_tasks.get_future());
     rvr::Response resp { in_packet, bb, end_future };
-    mys::terr << code_line << "----------------" << mys::nl;
+    mys::tout << code_line << "----------------";
 
     auto resp_future = std::async(std::launch::async, std::ref(resp));
     //---------------------------------------------------------------------------------------------------------------------
@@ -66,11 +63,10 @@ int main(int argc, char* argv[]) {
     rvr::SystemInfo sys(bb, req);
 
     pow.awake(rvr::CommandResponse::resp_yes);
-    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
-    std::this_thread::sleep_for(500ms);
 
     mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
-    mys::tout.flush();
+    std::this_thread::sleep_for(500ms);
+    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
     //=====================================================================================================================
     try {
 

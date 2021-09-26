@@ -106,7 +106,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     rvr::Result<ColorStream> SensorsStream::colors() {
-        auto const msg { mBlackboard.msgValue(mTarget, mDevice, streaming_service_data_notify, color_token) };
+        auto const msg { mBlackboard.entryValue(mTarget, mDevice, streaming_service_data_notify, color_token) };
         Result<ColorStream> res;
         if ( !msg.empty()) {
             ColorStream cs {

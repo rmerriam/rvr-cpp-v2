@@ -27,7 +27,7 @@ namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView const& msg { mBlackboard.msgValue(target, mDevice, cmd) };
+        RvrMsgView const& msg { mBlackboard.entryValue(target, mDevice, cmd) };
         ResultString res;
         if ( !msg.empty()) {
             res = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
@@ -70,7 +70,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::macAddress() {
-        RvrMsgView msg { mBlackboard.msgValue(mAltTarget, mDevice, get_mac_address) };
+        RvrMsgView msg { mBlackboard.entryValue(mAltTarget, mDevice, get_mac_address) };
         ResultString res;
 
         if ( !msg.empty()) {

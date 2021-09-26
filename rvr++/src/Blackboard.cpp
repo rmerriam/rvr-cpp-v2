@@ -220,12 +220,8 @@ namespace rvr {
         return s;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::addMsgValue(key_t const key, RvrMsg value) {
+    void Blackboard::addentryValue(key_t const key, RvrMsg value) {
         mDictionary[key].value = value;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    RvrMsgView Blackboard::msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id) {
-        return entryValue(target, dev, cmd, id);
     }
     //----------------------------------------------------------------------------------------------------------------------
     RvrMsgView Blackboard::entryValue(TargetPort const target, Devices const dev, uint8_t const cmd,
@@ -292,7 +288,7 @@ namespace rvr {
 
         }
         mys::terr << code_line << mys::tab << std::hex << key << mys::tab << msg;
-        addMsgValue(key, msg);
+        addentryValue(key, msg);
     }
     //======================================================================================================================
     //  Methods to calculate values from RvrMsg in dictionary
@@ -345,15 +341,16 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     ResultBool Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
         RvrMsgView msg { entryValue(target, dev, cmd) };
-
         ResultBool res;
+
         if ( !msg.empty()) {
             res = ResultBool(msg[1] != 0);
         }
         return res;
-    } //----------------------------------------------------------------------------------------------------------------------
+    }
+    //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        addMsgValue(entryKey(target, dev, cmd, 0), { });
+        addentryValue(entryKey(target, dev, cmd, 0), { });
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt16 Blackboard::uint16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {

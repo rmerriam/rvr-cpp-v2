@@ -39,11 +39,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultMsg ApiShell::echo() const {
-        return mBlackboard.msgValue(mTarget, mDevice, echo_cmd);
+        return mBlackboard.entryValue(mTarget, mDevice, echo_cmd);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultMsg ApiShell::echoAlt() const {
-        return mBlackboard.msgValue(mAltTarget, mDevice, echo_cmd);
+        return mBlackboard.entryValue(mAltTarget, mDevice, echo_cmd);
     }
 
 }

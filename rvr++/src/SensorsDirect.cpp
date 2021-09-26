@@ -26,7 +26,7 @@ namespace rvr {
 
     //----------------------------------------------------------------------------------------------------------------------
     Result<ColorData> SensorsDirect::currentRGBValues() {
-        auto const msg { mBlackboard.msgValue(mAltTarget, mDevice, get_rgbc_sensor_values) };
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, get_rgbc_sensor_values) };
         Result<ColorData> res;
 
         if ( !msg.empty()) {
@@ -44,7 +44,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<ColorDetection> SensorsDirect::colorDetectionValues() {
-        auto const& msg { mBlackboard.msgValue(mAltTarget, mDevice, color_detection_notify) };
+        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, color_detection_notify) };
         Result<ColorDetection> res;
 
         if ( !msg.empty()) {
@@ -62,7 +62,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<ThermalProtection> SensorsDirect::thermalProtectionValues() {
-        auto const& msg { mBlackboard.msgValue(mTarget, mDevice, get_motor_thermal_protection_status) };
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_motor_thermal_protection_status) };
         Result<ThermalProtection> res;
 
         if ( !msg.empty()) {
@@ -77,41 +77,55 @@ namespace rvr {
         }
         return res;
     }
+    //----------------------------------------------------------------------------------------------------------------------
+    ResultBool SensorsDirect::isGyroMaxNotifyEnabled() const {
+        RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, enable_gyro_max_notify) };
+        ResultBool res;
+
+        if ( !msg.empty()) {
+            PayloadDecode<uint8_t, bool> payload(msg);
+            res = payload.get<1>();
+        }
+        return res;
+    }
 //----------------------------------------------------------------------------------------------------------------------
     ResultBool SensorsDirect::isMagnetometerCalibrationDone() const {
-
+        auto const msg { mBlackboard.entryValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
         rvr::ResultBool res;
 
-        auto const msg { mBlackboard.msgValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
         if ( !msg.empty()) {
-            res = ResultBool(static_cast<bool>(msg[0]));
+            PayloadDecode<bool> payload(msg);
+            res = payload.get<0>();
         }
         return res;
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultInt16 SensorsDirect::magnetometerCalibrationYaw() const {
-        auto const msg { mBlackboard.msgValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
+        auto const msg { mBlackboard.entryValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
         ResultInt16 res;
-        if ( !msg.empty()) {
-            res = ResultInt16(static_cast<int16_t>(mBlackboard.uintConvert(msg.begin() + 1, 2)));
-        }
 
+        if ( !msg.empty()) {
+            PayloadDecode<int16_t> payload(msg);
+            res = ResultInt16 { //
+            payload.get<0>(), //
+            };
+        }
         return res;
     }
 //----------------------------------------------------------------------------------------------------------------------
     Result<MagnetometerData> SensorsDirect::magnetometerData() const noexcept {
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_magnetometer_reading) };
         Result<MagnetometerData> res;
-        auto const& msg { mBlackboard.msgValue(mTarget, mDevice, get_magnetometer_reading) };
 
         if ( !msg.empty()) {
-            auto const& begin { msg.begin() };
-            auto const x { mBlackboard.floatConvert(begin) };
-            auto const y { mBlackboard.floatConvert(begin + 2) };
-            auto const z { mBlackboard.floatConvert(begin + 4) };
-            res = Result<MagnetometerData> { MagnetometerData { x, y, z } };
+            PayloadDecode<float, float, float> payload(msg);
+            res = MagnetometerData { //
+            payload.get<0>(), //
+                payload.get<1>(), //
+                payload.get<2>(), //
 
+            };
         }
-
         return res;
     }
 }   // end of rvr

@@ -247,10 +247,7 @@ namespace rvr {
             & 0xFF), confidence };
         mRequest.send(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
-    inline ResultBool SensorsDirect::isGyroMaxNotifyEnabled() const {
-        return mBlackboard.getNotify(mTarget, mDevice, enable_gyro_max_notify);
-    }
+
 //----------------------------------------------------------------------------------------------------------------------
     inline ResultBool SensorsDirect::isThermalProtectionNotifyEnabled() const {
         return mBlackboard.getNotify(mTarget, mDevice, enable_motor_thermal_protection_status_notify);

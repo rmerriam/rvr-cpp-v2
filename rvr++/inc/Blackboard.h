@@ -109,7 +109,6 @@ namespace rvr {
 
         ResultString stringValue(TargetPort const target, Devices const dev, uint8_t const cmd);
 
-        RvrMsgView msgValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
         uint64_t uintConvert(RvrMsgView::const_iterator begin, uint8_t n);
 
         void m_to_v();
@@ -122,6 +121,8 @@ namespace rvr {
         float floatConvert(uint8_t const* begin) const {
             return floatConvert(RvrMsg::const_iterator { begin });
         }
+
+        RvrMsgView entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
 
     private:
         inline static float const NaN { (0.0f / 0.0f) }; // something to return when there is no value for float
@@ -161,10 +162,9 @@ namespace rvr {
         using BBDictionary = std::unordered_map<key_t, BlackboardEntry>;
         static BBDictionary mDictionary;
 
-        void addMsgValue(key_t const key, RvrMsg value);
+        void addentryValue(key_t const key, RvrMsg value);
 
         RvrMsgView entryValue(key_t const key) const;
-        RvrMsgView entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
         static key_t entryKey(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);
         // methods for processing received responses
 
