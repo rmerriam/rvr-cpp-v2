@@ -27,13 +27,12 @@
 
 #include <Trace.h>
 
-#include "Request.h"
-#include "Blackboard.h"
+#include<Blackboard.h>
 
-#include "ApiShell.h"
-#include "Power.h"
-#include "SensorsDirect.h"
-#include "SensorsStream.h"
+#include<ApiShell.h>
+#include<Power.h>
+#include<SensorsDirect.h>
+#include<SensorsStream.h>
 
 namespace rvr {
 
@@ -43,6 +42,7 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     using dev = Devices;
     using bb = Blackboard;
+    using sensor = SensorsStream::Sensor;
 
     Blackboard::BBDictionary Blackboard::mDictionary {                                   //
         { bb::entryKey(bluetoothSOC, dev::api_and_shell, 0x00), bb::BlackboardEntry { "echo" } },                          //
@@ -79,8 +79,6 @@ namespace rvr {
         { bb::entryKey(nordic, dev::power, 0x25, Power::UncalibratedUnfiltered), bb::BlackboardEntry {
             "get_battery_voltage_in_volts" } },    //
         { bb::entryKey(nordic, dev::power, 0x26), bb::BlackboardEntry { "get_battery_voltage_state_thresholds" } },        //
-        { bb::entryKey(nordic, dev::power, 0x26, 1), bb::BlackboardEntry { "get_battery_voltage_state_thresholds" } },     //
-        { bb::entryKey(nordic, dev::power, 0x26, 2), bb::BlackboardEntry { "get_battery_voltage_state_thresholds" } },     //
         { bb::entryKey(bluetoothSOC, dev::power, 0x27), bb::BlackboardEntry { "get_current_sense_amplifier_current left" } }, //
         {
             bb::entryKey(bluetoothSOC, dev::power, 0x27, 1), bb::BlackboardEntry {
@@ -136,14 +134,25 @@ namespace rvr {
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x08), bb::BlackboardEntry { "speed stream" } },                  //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x07), bb::BlackboardEntry { "velocity stream" } },               //
         //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x0C), bb::BlackboardEntry { "imu accel gyro stream" } },         //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, 0x0D), bb::BlackboardEntry { "speed velocity locator token" } },  //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, sensor::imu_accel_gyro_token), bb::BlackboardEntry {
+            "imu accel gyro stream" } },         //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, sensor::velocity_locator_speed_token), bb::BlackboardEntry {
+            "velocity locator Locator token" } },  //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x3D, sensor::encoders_stream_token), bb::BlackboardEntry {
+            "encoders token" } }, //
         //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3E), bb::BlackboardEntry { "enable_robot_infrared_message_notify" } }, //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x3F), bb::BlackboardEntry { "send_infrared_message" } },               //
         //
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x4A, 4), bb::BlackboardEntry { "left_motor_temperature" } },      // left
-        { bb::entryKey(bluetoothSOC, dev::sensors, 0x4A, 5), bb::BlackboardEntry { "right_motor_temperature" } },    // right
+        {
+            bb::entryKey(bluetoothSOC, dev::sensors, 0x4A, (uint8_t)TemperatureIndexes::left_motor_temperature),
+            bb::BlackboardEntry { "left_motor_temperature" } }, // left
+        {
+            bb::entryKey(bluetoothSOC, dev::sensors, 0x4A, (uint8_t)TemperatureIndexes::right_motor_temperature),
+            bb::BlackboardEntry { "right_motor_temperature" } },    // right
+        {
+            bb::entryKey(bluetoothSOC, dev::sensors, 0x4A, (uint8_t)TemperatureIndexes::nordic_die_temperature),
+            bb::BlackboardEntry { "nordic_die_temperature" } },
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x4B), bb::BlackboardEntry { "get_motor_thermal_protection_status" } }, //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x4C), bb::BlackboardEntry {
             "enable_motor_thermal_protection_status_notify" } },          //
@@ -264,21 +273,23 @@ namespace rvr {
                 // message seq has special flags that are not sequence number (> 0x80) or ids (< enable (0x20) - its a hack
                 // because of the protocol
                 switch (seq) {
-                    // special case for motor temperatures
-                    case 4:
-                    case 5:
+                    // special case for temperatures
+                    case (int)TemperatureIndexes::left_motor_temperature:
+                    case (int)TemperatureIndexes::right_motor_temperature:
+                    case (int)TemperatureIndexes::nordic_die_temperature:
                         msg.erase(0, 3);
                         break;
 
-                        // handling enable / disable messages
+                        // the response from enable / disable messages don't report wthe type of the request
+                        // so special sequence numbers are used to indicate the type of request
                     case SpecialSeq::enable:
                         key &= static_cast<Blackboard::key_t>(0xFFFFFF00);
-                        msg[1] = true;
+                        msg[0] = true;
                         break;
 
                     case SpecialSeq::disable:
                         key &= static_cast<Blackboard::key_t>(0xFFFFFF00);
-                        msg[1] = false;
+                        msg[0] = false;
                         break;
                 }
             }
@@ -307,7 +318,8 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     uint64_t Blackboard::uintConvert(RvrMsgView::const_iterator begin, uint8_t const n) {
-        uint64_t res { };
+        uint64_t res {};
+
         for (auto it { begin }; it != begin + n; ++it) {
             res <<= 8;
             res |= *it;
@@ -324,7 +336,7 @@ namespace rvr {
         ResultUInt8 res;
 
         if ( !msg.empty()) {
-            res = static_cast<uint8_t>(msg[0]);
+            res = ResultUInt8(msg[0]);
         }
         return res;
     }
@@ -334,7 +346,7 @@ namespace rvr {
         ResultBool res;
 
         if ( !msg.empty()) {
-            res = bool(msg[0] != 0);
+            res = ResultBool(msg[0] != 0);
         }
         return res;
     }
@@ -344,13 +356,14 @@ namespace rvr {
         ResultBool res;
 
         if ( !msg.empty()) {
-            res = ResultBool(msg[1] != 0);
+            mys::tout << code_line << msg;
+            res = ResultBool(msg[0] == SpecialSeq::enable);
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        addentryValue(entryKey(target, dev, cmd, 0), { });
+        addentryValue(entryKey(target, dev, cmd, 0), {});
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt16 Blackboard::uint16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
@@ -387,7 +400,6 @@ namespace rvr {
         if ( !msg.empty()) {
             auto begin { msg.begin() };
             begin += (pos * sizeof(uint32_t));
-
             res = uintConvert(begin, sizeof(uint32_t));
         }
         return res;

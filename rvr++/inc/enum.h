@@ -27,91 +27,108 @@
 
 namespace rvr {
 // general structs used for data return
-struct TripleFloat {
-   float x;
-   float y;
-   float z;
-};
-struct DoubleFloat {
-   float x;
-   float y;
-};
+    struct TripleFloat {
+        float x;
+        float y;
+        float z;
+    };
+    struct DoubleFloat {
+        float x;
+        float y;
+    };
 
-using AccelData = TripleFloat;
-using GyroData = TripleFloat;
-using LocatorData = DoubleFloat;
-using MagnetometerData = TripleFloat;
-using VelocityData = DoubleFloat;
+    using AccelData = TripleFloat;
+    using GyroData = TripleFloat;
+    using LocatorData = DoubleFloat;
+    using MagnetometerData = TripleFloat;
+    using TemperatureData = DoubleFloat;
+    using VelocityData = DoubleFloat;
+    using VoltageThresholds = TripleFloat;
 
-struct ImuData {
-   float pitch;
-   float roll;
-   float yaw;
-};
+    struct ImuData {
+        float pitch;
+        float roll;
+        float yaw;
+    };
 
-struct QuatData {
-   float w;
-   float x;
-   float y;
-   float z;
-};
+    struct QuatData {
+        float w;
+        float x;
+        float y;
+        float z;
+    };
 
-struct CoreTime {
-   uint32_t upper;
-   uint32_t lower;
-};
-struct ColorData {
-   uint16_t red;
-   uint16_t green;
-   uint16_t blue;
-   uint16_t clear;
-};
+    struct EncodersData {
+        uint32_t left;
+        uint32_t right;
+    };
 
-struct ColorDetection {
-   uint8_t red;
-   uint8_t green;
-   uint8_t blue;
-   uint8_t confidence;
-   uint8_t classification;
-};
+    struct CoreTime {
+        uint32_t upper;
+        uint32_t lower;
+    };
 
-struct ColorStream {
-   uint8_t red;
-   uint8_t green;
-   uint8_t blue;
-   uint8_t index;
-   float confidence;
-};
+    struct ColorData {
+        uint16_t red;
+        uint16_t green;
+        uint16_t blue;
+        uint16_t clear;
+    };
 
-enum struct VoltageType : uint8_t {
-   CalibratedFiltered = 0,   //
-   CalibratedUnfiltered = 1, //
-   UncalibratedUnfiltered = 2,
-};
-enum struct ThermalStatus : uint8_t {
-   okay, //
-   warn, //
-   critical
-};
+    struct ColorDetection {
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+        uint8_t confidence;
+        uint8_t classification;
+    };
 
-struct ThermalProtection {
-   float leftMotorTemp;
-   ThermalStatus leftStatus;
-   float rightMotorTemp;
-   ThermalStatus rightStatus;
-};
+    struct ColorStream {
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+        uint8_t index;
+        float confidence;
+    };
 
-enum struct CommandResponse : uint8_t {
-   resp_no = no_response,       //
-   resp_yes = request_response, //
-   resp_on_error = request_error_response | request_response,
-};
-enum struct MotorIndexes : uint8_t {
-   left_motor_index = 0, //
-   right_motor_index = 1,
-};
+    enum struct VoltageType : uint8_t {
+        CalibratedFiltered = 0,   //
+        CalibratedUnfiltered = 1, //
+        UncalibratedUnfiltered = 2,
+    };
+    enum struct ThermalStatus : uint8_t {
+        okay, //
+        warn, //
+        critical
+    };
 
-enum struct FloatSize : uint8_t { one_byte = 0, two_byte = 2, four_byte = 4 };
+    struct ThermalProtection {
+        float leftMotorTemp;
+        ThermalStatus leftStatus;
+        float rightMotorTemp;
+        ThermalStatus rightStatus;
+    };
+
+    enum struct CommandResponse : uint8_t {
+        resp_no = no_response,       //
+        resp_yes = request_response, //
+        resp_on_error = request_error_response | request_response,
+    };
+
+    enum MotorIndexes : uint8_t {
+        left_motor_index = 0, //
+        right_motor_index = 1
+    };
+
+    enum struct TemperatureIndexes : uint8_t {
+        left_motor_temperature = 4, //
+        right_motor_temperature = 5, //
+        nordic_die_temperature = 8
+    };
+
+    enum struct FloatSize : uint8_t {
+        one_byte = 0, two_byte = 2, four_byte = 4
+    };
 
 } // namespace rvr
 

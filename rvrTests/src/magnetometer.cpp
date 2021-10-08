@@ -28,49 +28,50 @@
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void magnetometer(rvr::SensorsDirect& sen_d) {
-   mys::TraceOn tinfo_ctrl { mys::tout };
-   mys::tout << code_line;
+    mys::TraceOn trace_ctrl { mys::tout };
+    mys::tout << code_line;
 
-   {
-      auto mag_done { sen_d.isMagnetometerCalibrationDone().valid() };
-      mys::tout << code_line << "mag cal done: " << mag_done;
+    {
+        auto mag_done { sen_d.isMagnetometerCalibrationDone().get_or() };
+        mys::tout << code_line << "mag cal done: " << mag_done;
 
-      auto mag_data { sen_d.magnetometerData() };
-      mys::tout << code_line << "mag data valid: " << mag_data.valid();
+        auto mag_data { sen_d.magnetometerData() };
+        mys::tout << code_line << "mag data valid: " << mag_data.invalid();
 
-      //        auto [x, y, z] { mag_data.get() };
-      //        mys::tout << code_line << "mag data: " << x << mys::sp << y << mys::sp << z;
-      //        mys::tout << code_line << mys::nl;
+        auto [x, y, z] { mag_data.get_or() };
+        mys::tout << code_line << "mag data: " << x << mys::sp << y << mys::sp << z;
+        mys::tout << code_line << mys::nl;
 
-      mys::tout << code_line << mys::nl;
-      //        return;
-   }
-   {
-      sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
-      while(sen_d.isMagnetometerCalibrationDone().invalid()) {
-         std::this_thread::sleep_for(50ms);
-      };
+        mys::tout << code_line << mys::nl;
+//        return;
+    }
+    {
+        sen_d.calibrateMagnetometer(rvr::CommandResponse::resp_yes);
+        while (sen_d.isMagnetometerCalibrationDone().invalid()) {
+            std::this_thread::sleep_for(50ms);
+            mys::tout << code_line << "mag cal test: " << sen_d.isMagnetometerCalibrationDone().invalid();
+        };
+        std::this_thread::sleep_for(5000ms);
 
-      sen_d.getMagnetometerData();
+        auto mag_done { sen_d.isMagnetometerCalibrationDone().get_or() };
+        mys::tout << code_line << "mag cal done: " << mag_done;
 
-      auto mag_done { sen_d.isMagnetometerCalibrationDone() };
-      mys::tout << code_line << "mag cal done: " << mag_done.valid();
+        sen_d.getMagnetometerData();
 
-      std::this_thread::sleep_for(50ms);
-      mys::tout << code_line << "mag offset: " << sen_d.magnetometerCalibrationYaw().get();
+        std::this_thread::sleep_for(50ms);
+        mys::tout << code_line << "mag offset: " << sen_d.magnetometerCalibrationYaw().get_or();
 
-      auto mag_data { sen_d.magnetometerData() };
-      auto const [xx, yy, zz] { mag_data.get() };
-      mys::tout << code_line << "mag data: " << xx << mys::sp << yy << mys::sp << zz;
+        auto const [xx, yy, zz] { sen_d.magnetometerData().get_or() };
+        mys::tout << code_line << "mag data: " << xx << mys::sp << yy << mys::sp << zz;
 
-      sen_d.resetMagnetometerCalibration();
-   }
-   {
-      auto mag_done { sen_d.isMagnetometerCalibrationDone() };
-      mys::tout << code_line << "mag cal done: " << mag_done.valid();
-      mys::tout << code_line << mys::nl;
-   }
+        sen_d.resetMagnetometerCalibration();
+    }
+    {
+        auto mag_done { sen_d.isMagnetometerCalibrationDone().get_or() };
+        mys::tout << code_line << "mag cal done: " << mag_done;
 
-   mys::tout << code_line << mys::nl;
-   mys::tout << code_line << mys::nl;
+        mys::tout << code_line << mys::nl;
+    }
+
+    mys::tout << code_line << mys::nl;
 }

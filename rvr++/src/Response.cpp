@@ -57,7 +57,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_flags(uint8_t const f) {
-        std::string flags { };
+        std::string flags {};
 
         if ((f & response) == 0) {
             flags += "notification | ";
@@ -88,58 +88,58 @@ namespace rvr {
                     break;
             }
         }
-        mys::terr << code_line << flags;
+        mys::tout << code_line << flags;
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Response::decode_error(auto err_byte) {
 
         switch (err_byte) {
             case 1: {
-                mys::terr << code_line << "bad_did";
+                mys::tout << code_line << "bad_did";
                 break;
             }
             case 2: {
-                mys::terr << code_line << "bad_cid";
+                mys::tout << code_line << "bad_cid";
                 break;
             }
             case 3: {
-                mys::terr << code_line << "not_yet_implemented";
+                mys::tout << code_line << "not_yet_implemented";
                 break;
             }
             case 4: {
-                mys::terr << code_line << "cannot be executed in current mode";
+                mys::tout << code_line << "cannot be executed in current mode";
                 break;
             }
             case 5: {
-                mys::terr << code_line << "bad_data_length";
+                mys::tout << code_line << "bad_data_length";
                 break;
             }
             case 6: {
-                mys::terr << code_line << "failed for command specific reason";
+                mys::tout << code_line << "failed for command specific reason";
                 break;
             }
             case 7: {
-                mys::terr << code_line << "Bad Parameter Value";
+                mys::tout << code_line << "Bad Parameter Value";
                 break;
             }
             case 8: {
-                mys::terr << code_line << "busy";
+                mys::tout << code_line << "busy";
                 break;
             }
             case 9: {
-                mys::terr << code_line << "bad_tid";
+                mys::tout << code_line << "bad_tid";
                 break;
             }
             case 0xA: {
-                mys::terr << code_line << "target_unavailable";
+                mys::tout << code_line << "target_unavailable";
                 break;
             }
         }
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
-        mys::TraceOff tdbg_ctrl { mys::terr };
-        mys::terr << code_line << "pkt: " << std::hex << packet;
+        mys::TraceOn tdbg_ctrl { mys::tout };
+        mys::tout << code_line << "pkt: " << std::hex << packet;
 
         // typical positions of header bytes when target not present which is the usual case
         uint8_t flags { 0x00 };
@@ -181,23 +181,23 @@ namespace rvr {
         std::string command { mBlackboard.entryName(key) };
 
         if (command.empty()) {
-            mys::terr << code_line << "Command not in decode table " << device //
+            mys::tout << code_line << "Command not in decode table " << device //
                 << mys::sp << std::hex << std::setfill('0') << std::setw(8) << key << mys::sp << packet;
         }
         else {
-            mys::terr << code_line << device << mys::sp << command;
+            mys::tout << code_line << device << mys::sp << command;
 
             if (is_resp && packet[err_code]) {
                 // a response will have a status of either 0 or and error code
                 auto err_byte { packet[err_code] };
-                mys::terr << code_line << "ERROR: " << (uint16_t)err_byte;
+                mys::tout << code_line << "ERROR: " << (uint16_t)err_byte;
                 decode_error(err_byte);
             }
             else {
-                mys::terr << code_line << std::hex << (uint16_t)packet[cmd] << mys::tab << "pkt: " << std::hex << packet;
+                mys::tout << code_line << std::hex << (uint16_t)packet[cmd] << mys::tab << "pkt: " << std::hex << packet;
                 mBlackboard.msgArray(key, packet[cmd], packet.begin() + seq, packet.end());
             }
         }
-        mys::terr << __func__ << " **************";
+        mys::tout << __func__ << " **************" << std::dec;
     }
 }

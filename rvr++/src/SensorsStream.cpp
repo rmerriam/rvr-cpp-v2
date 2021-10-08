@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http:             //www.gnu.org/licenses/>.
 //======================================================================================================================
 //
 //     Author: rmerriam
@@ -20,7 +20,7 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-
+#include <PayloadDecode.h>
 #include "SensorsStream.h"
 
 namespace rvr {
@@ -79,28 +79,29 @@ namespace rvr {
     }
     //======================================================================================================================
     Result<AccelData> SensorsStream::accelerometer() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, imu_accel_gyro_token) };
         Result<AccelData> res;
-        auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, imu_accel_gyro_token) };
-        if (x.valid()) {
-            auto y {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4, imu_accel_gyro_token).get_or() };
-            auto z {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 5, imu_accel_gyro_token).get_or() };
 
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[accel_token] };
-            res = Result<AccelData> { AccelData {
-                normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max), normalize(z, out_min, out_max), } };
+
+            PayloadDecode<uint32_t, uint32_t, uint32_t> payload(msg.substr(3 * sizeof(uint32_t)));
+            res = GyroData { //
+            normalize(payload.get<0>(), out_min, out_max), //
+            normalize(payload.get<1>(), out_min, out_max), //
+            normalize(payload.get<2>(), out_min, out_max), //
+            };
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultFloat SensorsStream::ambient() {
+        auto const msg { mBlackboard.entryValue(mTarget, mDevice, streaming_service_data_notify, ambient_token) };
         ResultFloat res;
-        auto value { mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, ambient_token) };
 
-        if (value.valid()) {
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[ambient_token] };
-            res = ResultFloat { normalize(static_cast<int32_t>(value.get_or()), out_min, out_max) };
+            res = normalize(decode_type<uint32_t>(msg), out_min, out_max);
         }
         return res;
     }
@@ -108,126 +109,155 @@ namespace rvr {
     rvr::Result<ColorStream> SensorsStream::colors() {
         auto const msg { mBlackboard.entryValue(mTarget, mDevice, streaming_service_data_notify, color_token) };
         Result<ColorStream> res;
+
         if ( !msg.empty()) {
-            ColorStream cs {
-                static_cast<uint8_t>(msg[0]), static_cast<uint8_t>(msg[1]), static_cast<uint8_t>(msg[2]),
-                static_cast<uint8_t>(msg[3]), static_cast<float>(msg[4]) };
-//            res = cs;
-            res = Result<ColorStream> { cs };
+            ColorStream cs { //
+            msg[0], //
+                msg[1], //
+                msg[2], //
+                msg[3], //
+                normalize(msg[4], 0.0, 1.0) //
+            };
+            res = cs;
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<GyroData> SensorsStream::gyroscope() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, imu_accel_gyro_token) };
         Result<GyroData> res;
-        auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 6, imu_accel_gyro_token) };
-        if (x.valid()) {
 
-            auto y {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 7, imu_accel_gyro_token).get_or() };
-            auto z {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 8, imu_accel_gyro_token).get_or() };
-
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[gyro_token] };
-            res = Result<GyroData> { GyroData {
-                normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max), normalize(z, out_min, out_max), } };
+
+            PayloadDecode<uint32_t, uint32_t, uint32_t> payload(msg.substr(6 * sizeof(uint32_t)));
+            res = GyroData { //
+            normalize(payload.get<0>(), out_min, out_max), //
+            normalize(payload.get<1>(), out_min, out_max), //
+            normalize(payload.get<2>(), out_min, out_max), //
+            };
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<ImuData> SensorsStream::imu() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, imu_accel_gyro_token) };
         Result<ImuData> res;
-        auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, imu_accel_gyro_token) };
 
-        if (x.valid()) {
-            auto y {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, imu_accel_gyro_token).get_or() };
-            auto z {
-                mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, imu_accel_gyro_token).get_or() };
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[imu_token] };
-            res = Result<ImuData> { ImuData { normalize(x.get_or(), out_min, out_max), //
-            normalize(y, out_min / 2, out_max / 2), //
-            normalize(z, out_min, out_max) } };
+
+            PayloadDecode<uint32_t, uint32_t, uint32_t> payload(msg);
+
+            res = ImuData { //
+            normalize(payload.get<0>(), out_min, out_max), //
+            normalize(payload.get<1>(), out_min / 2, out_max / 2), //
+            normalize(payload.get<2>(), out_min, out_max), //
+            };
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<QuatData> SensorsStream::quaternion() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, quaternion_token) };
         Result<QuatData> res;
-        auto w { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, quaternion_token) };
 
-        if (w.valid()) {
-            auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, quaternion_token) };
-            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2, quaternion_token) };
-            auto z { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, quaternion_token) };
-
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[quaternion_token] };
+            PayloadDecode<uint32_t, uint32_t, uint32_t, uint32_t> payload(msg);
 
-            res = Result<QuatData> { QuatData { normalize(w.get_or(), out_min, out_max), //
-            normalize(x.get_or(), out_min, out_max), //
-            normalize(y.get_or(), out_min / 2, out_max / 2), //
-            normalize(z.get_or(), out_min, out_max) } //
+            res = QuatData { //
+            normalize(payload.get<0>(), out_min, out_max), //
+            normalize(payload.get<1>(), out_min, out_max), //
+            normalize(payload.get<2>(), out_min, out_max), //
+            normalize(payload.get<3>(), out_min, out_max) //
             };
         }
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<LocatorData> SensorsStream::locator() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify,
+                                                velocity_locator_speed_token) };
         Result<LocatorData> res;
-        auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 3, speed_velocity_locator_token) };
 
-        if (x.valid()) {
-            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 4,
-                                             speed_velocity_locator_token).get_or() };
-            auto [out_min, out_max] { SensorFactors[locator_token] };
-            res = Result<LocatorData> { LocatorData(normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max)) };
+        if ( !msg.empty()) {
+            auto [out_min, out_max] { SensorFactors[velocity_token] };
+
+            PayloadDecode<uint32_t, uint32_t> payload(msg.substr(2 * sizeof(uint32_t)));
+            res = LocatorData { //
+            normalize(payload.get<0>(), out_min, out_max), //
+            normalize(payload.get<1>(), out_min, out_max), //
+            };
         }
         return res;
+
     }
     //----------------------------------------------------------------------------------------------------------------------
+    Result<EncodersData> SensorsStream::encoders() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, encoders_stream_token) };
+        Result<EncodersData> res;
+
+        if ( !msg.empty()) {
+            auto [out_min, out_max] { SensorFactors[encoders_token] };
+
+            PayloadDecode<uint32_t, uint32_t> payload(msg);
+            res = EncodersData { //
+            static_cast<uint32_t>(normalize(payload.get<0>(), out_min, out_max)), //
+                static_cast<uint32_t>(normalize(payload.get<1>(), out_min, out_max)), //
+            };
+        }
+        return res;
+
+    }
+//----------------------------------------------------------------------------------------------------------------------
     ResultFloat SensorsStream::speed() {
-        ResultFloat res;
         auto speed { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0,
-                                             speed_velocity_locator_token) };
+                                             velocity_locator_speed_token) };
+        ResultFloat res;
+
         if (speed.valid()) {
             auto [out_min, out_max] { SensorFactors[speed_token] };
             res = ResultFloat { normalize(static_cast<int32_t>(speed.get_or()), out_min, out_max) };
         }
         return res;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     Result<VelocityData> SensorsStream::velocity() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify,
+                                                velocity_locator_speed_token) };
         Result<VelocityData> res;
-        auto x { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 1, speed_velocity_locator_token) };
-        if (x.valid()) {
 
-            auto y { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 2,
-                                             speed_velocity_locator_token).get_or() };
-
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[velocity_token] };
-            res = Result<VelocityData> { VelocityData(normalize(x.get_or(), out_min, out_max), normalize(y, out_min, out_max)) };
+
+            PayloadDecode<uint32_t, uint32_t> payload(msg.substr(0 * sizeof(uint32_t)));
+            res = VelocityData { //
+            normalize(payload.get<0>(), out_min, out_max), //
+            normalize(payload.get<1>(), out_min, out_max), //
+            };
         }
         return res;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultUInt64 SensorsStream::btTime() {
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, core_time_upper_token) };
         ResultUInt64 res;
-        auto lower { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0, core_time_lower_token) };
-        if (lower.valid()) {
-            auto upper { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0,
-                                                 core_time_upper_token).get_or() };
-            res = ResultUInt64 { (static_cast<uint64_t>(upper) << 32) + lower.get_or() };
+
+        if ( !msg.empty()) {
+            auto const msg2 { mBlackboard.entryValue(mTarget, mDevice, streaming_service_data_notify, core_time_lower_token) };
+            res = (static_cast<uint64_t>(decode_type<uint32_t>(msg)) << 32) + decode_type<uint32_t>(msg2);
         }
         return res;
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultUInt64 SensorsStream::nordicTime() {
+        auto const msg { mBlackboard.entryValue(mTarget, mDevice, streaming_service_data_notify, core_time_upper_token) };
         ResultUInt64 res;
-        auto lower { mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_lower_token) };
-        if (lower.valid()) {
-            auto upper {
-                mBlackboard.uint32Value(mTarget, mDevice, streaming_service_data_notify, 0, core_time_upper_token).get_or() };
-            res = ResultUInt64 { (static_cast<uint64_t>(upper) << 32) + lower.get_or() };
+
+        if ( !msg.empty()) {
+            auto const msg2 { mBlackboard.entryValue(mTarget, mDevice, streaming_service_data_notify, core_time_lower_token) };
+            res = (static_cast<uint64_t>(decode_type<uint32_t>(msg)) << 32) + decode_type<uint32_t>(msg2);
         }
         return res;
     }

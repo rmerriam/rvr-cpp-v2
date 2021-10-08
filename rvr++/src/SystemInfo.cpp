@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http:             //www.gnu.org/licenses/>.
 //======================================================================================================================
 //
 //     Author: rmerriam
@@ -22,6 +22,7 @@
 //======================================================================================================================
 
 #include "Blackboard.h"
+#include <PayloadDecode.h>
 #include "SystemInfo.h"
 namespace rvr {
 
@@ -30,9 +31,12 @@ namespace rvr {
         RvrMsgView const& msg { mBlackboard.entryValue(target, mDevice, cmd) };
         ResultString res;
         if ( !msg.empty()) {
-            res = std::to_string(((msg[0] << 8) | msg[1])) + '.' + //
-                std::to_string(((msg[2] << 8) | msg[3])) + '.' + //
-                std::to_string(((msg[4] << 8) | msg[5]));
+
+            PayloadDecode<uint16_t, uint16_t, uint16_t> payload(msg);
+
+            res = std::to_string(payload.get<0>()) + '.' +              //
+                std::to_string(payload.get<1>()) + '.' +              //
+                std::to_string(payload.get<2>());
         }
         return res;
     }
@@ -66,9 +70,10 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt8 SystemInfo::boardVersion() {
-        return mBlackboard.byteValue(mAltTarget, mDevice, get_board_revision);
+        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_board_revision) };
+        return decode_type<uint8_t>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::macAddress() {
         RvrMsgView msg { mBlackboard.entryValue(mAltTarget, mDevice, get_mac_address) };
         ResultString res;
@@ -87,13 +92,15 @@ namespace rvr {
         }
         return res;
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultInt16 SystemInfo::statsId() {
-        return mBlackboard.int16Value(mAltTarget, mDevice, get_stats_id);
+        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_stats_id) };
+        return decode_type<int16_t>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultInt64 SystemInfo::coreUpTime() {
-        return ResultInt64 { mBlackboard.int64Value(mTarget, mDevice, get_core_up_time_in_milliseconds) };
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
+        return decode_type<int64_t>(msg);
     }
 
 }

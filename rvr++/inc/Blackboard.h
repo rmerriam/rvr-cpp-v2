@@ -29,53 +29,11 @@
 #include <variant>
 
 #include "ReadPacket.h"
+#include <Result.h>
 #include <Request.h>
 
 namespace rvr {
-//----------------------------------------------------------------------------------------------------------------------
-    template <typename T> struct Result {
-    public:
-        explicit constexpr Result() noexcept = default;
 
-        constexpr Result(T const& t) :
-            mOptional { t } {
-        }
-
-        constexpr Result(T&& t) :
-            mOptional { t } {
-        }
-
-        [[nodiscard]] constexpr bool valid() const noexcept {
-            return mOptional.has_value();
-        }
-
-        [[nodiscard]] constexpr bool invalid() const noexcept {
-            return !valid();
-        }
-
-        [[nodiscard]] constexpr auto get() const -> T {
-            return mOptional.value();
-        }
-
-        [[nodiscard]] constexpr auto get_or(T const&& value = T { }) const -> T {
-            return mOptional.value_or(value);
-        }
-
-    private:
-        std::optional<T> mOptional;
-    };
-//----------------------------------------------------------------------------------------------------------------------
-    using ResultBool = Result<bool>;
-    using ResultUInt8 = Result<uint8_t>;
-    using ResultInt16 = Result<int16_t>;
-    using ResultUInt16 = Result<uint16_t>;
-    using ResultInt32 = Result<int32_t>;
-    using ResultUInt32 = Result<uint32_t>;
-    using ResultInt64 = Result<int64_t>;
-    using ResultUInt64 = Result<uint64_t>;
-    using ResultFloat = Result<float>;
-    using ResultString = Result<std::string>;
-    using ResultMsg = Result<RvrMsgView>;
 //----------------------------------------------------------------------------------------------------------------------
     class Blackboard {
 

@@ -24,9 +24,7 @@
 using namespace std::literals;
 
 #include <Trace.h>
-
 #include <rvr++.h>
-
 #include <TcpClient.h>
 //---------------------------------------------------------------------------------------------------------------------
 void direct(rvr::SensorsDirect& sen_d);
@@ -37,7 +35,9 @@ void streaming(rvr::SensorsStream& sen_s);
 void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api);
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-    //    mys::TraceOn mys::tdbg_on { mys::terr };
+    mys::TraceOn tdbg_on { mys::terr };
+    mys::terr << code_line << " Opening serial " << argv[1];
+
     mys::tout << code_line << " Opening serial " << argv[1];
 
     rvr::SerialPort serial { argv[1], 115200 };
@@ -64,17 +64,22 @@ int main(int argc, char* argv[]) {
 
     pow.awake(rvr::CommandResponse::resp_yes);
 
-    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
+    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or();
     std::this_thread::sleep_for(500ms);
-    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or() << mys::nl;
+    mys::tout << code_line << "is awake:  " << pow.isWakeNotify().get_or();
     //=====================================================================================================================
     try {
 
-        direct(sen_d);
+//        direct(sen_d);
 //        leds_test(led);
 //        notifications(sen_d);
 //        power(pow);
-//        streaming(sen_s);
+
+        drive.tank_normalized(15, 15);
+
+        streaming(sen_s);
+        std::this_thread::sleep_for(1s);
+        drive.tank_normalized(0, 0);
 //        sysinfo(sys, cmd, api);
 
 #if 0

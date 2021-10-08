@@ -24,6 +24,7 @@
 //
 //======================================================================================================================
 #include <Packet.h>
+#include <Result.h>
 #include <tuple>
 
 namespace rvr {
@@ -56,10 +57,11 @@ namespace rvr {
         }
 
     private:
+
         std::tuple<Ts...> mTup;
         auto converter(RvrMsgView const& msg) {
 
-            int16_t pos { };    // position in msg
+            int16_t pos {};    // position in msg
 
             auto convert = conv_overload { //
 
@@ -89,15 +91,30 @@ namespace rvr {
                 pos += 2;
             },
 
+            [&pos, this](RvrMsgView const& msg, int32_t& value) {
+                value = int_convert<int32_t>( &msg[pos]);
+                pos += sizeof(int32_t);
+            },
+
+            [&pos, this](RvrMsgView const& msg, uint32_t& value) {
+                value = int_convert<uint32_t>( &msg[pos]);
+                pos += sizeof(uint32_t);
+            },
+
+            [&pos, this](RvrMsgView const& msg, int64_t& value) {
+                value = int_convert<int64_t>( &msg[pos]);
+                pos += sizeof(int64_t);
+            },
+
             [&pos](RvrMsgView const& msg, float& value) {
                 union {
                     uint8_t buf[4];
                     float result { 0 };
                 };
-                buf[0] = msg[2];
-                buf[1] = msg[3];
-                buf[2] = msg[1];
-                buf[3] = msg[0];
+                buf[0] = msg[pos + 2];
+                buf[1] = msg[pos + 3];
+                buf[2] = msg[pos + 1];
+                buf[3] = msg[pos + 0];
                 pos += 4;
                 value = result;
             },
@@ -112,5 +129,29 @@ namespace rvr {
                        mTup);
             return mTup;
         }
-    };
+
+        template <typename I>
+        I int_convert(RvrMsgView const& msg) {
+            I res {};
+            for (std::size_t it { 0 }; it < sizeof(I); ++it) {
+                res <<= 8;
+                res |= msg[it];
+            }
+            return res;
+        }
+    }
+    ;
+
+//----------------------------------------------------------------------------------------------------------------------
+    template <typename T>
+    inline static T decode_type(rvr::RvrMsgView const& msg) {
+        T res {};
+        if ( !msg.empty()) {
+            PayloadDecode<T> payload(msg);
+
+            auto tup { payload.values() };
+            res = std::get<0>(tup);
+        }
+        return res;
+    }
 }

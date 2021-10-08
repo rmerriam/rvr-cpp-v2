@@ -39,6 +39,7 @@ void general(rvr::SensorsDirect& sen_d) {
 
     sen_d.getLeftMotorTemp();
     sen_d.getRightMotorTemp();
+    sen_d.getNordicTemp();
 
     sen_d.getThermalProtectionStatus();
     sen_d.enableThermalProtectionNotify(); // responds when status changes
@@ -56,12 +57,9 @@ void general(rvr::SensorsDirect& sen_d) {
     mys::tout << code_line << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //
         << mys::sp << right_temp << mys::sp << (int)right_status;
 
-    //        opt_output("Ambient"s, sen_d.ambient(), -1.0f);
-    //        opt_output("Left Temp:"s, sen_d.leftMotorTemp(), -1.0f);
-    //        opt_output("Right Temp:"s, sen_d.rightMotorTemp(), -1.0f);
-
-    mys::tout << code_line << "Left Temp: " << sen_d.leftMotorTemp().get_or();
-    mys::tout << code_line << "Right Temp: " << sen_d.rightMotorTemp().get_or();
+    mys::tout << code_line << "Left Temps: " << sen_d.leftMotorTemp().get_or();
+    mys::tout << code_line << "right Temps: " << sen_d.rightMotorTemp().get_or();
+    mys::tout << code_line << "Nordic Temp: " << sen_d.nordicTemp().get_or();
 
     sen_d.disableGyroMaxNotify();
     sen_d.disableThermalProtectionNotify();
@@ -78,6 +76,6 @@ void direct(rvr::SensorsDirect& sen_d) {
     mys::tout << code_line;
 
     general(sen_d);
-    color(sen_d);
-    //    magnetometer(sen_d);
+//    color(sen_d);
+//    magnetometer(sen_d);
 }

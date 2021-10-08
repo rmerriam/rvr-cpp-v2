@@ -44,7 +44,7 @@ void nordic_ambient_light(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void nordic_color(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingNordic();
     sen_s.enableColorDetection(rvr::CommandResponse::resp_yes);
@@ -66,7 +66,7 @@ void nordic_color(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void nordic_core_time(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingNordic();
     std::this_thread::sleep_for(50ms);
@@ -85,9 +85,9 @@ void nordic_core_time(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void bt_core_time(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
-    sen_s.disableStreamingNordic();
+    sen_s.disableStreamingBT();
     std::this_thread::sleep_for(50ms);
 
     sen_s.streamBtTime(rvr::CommandResponse::resp_yes);
@@ -104,7 +104,7 @@ void bt_core_time(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void bt_imu_accel_gyro(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingBT();
     std::this_thread::sleep_for(50ms);
@@ -130,24 +130,39 @@ void bt_imu_accel_gyro(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void bt_speed_vel_loc(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingBT();
+    sen_s.clearAllStreaming();
+
     std::this_thread::sleep_for(50ms);
+    mys::tout << code_line << std::dec;
 
-    sen_s.streamSpeedVelocityLocator(rvr::CommandResponse::resp_yes);
-
-    sen_s.startStreamingBT(50, rvr::CommandResponse::resp_yes);
+    sen_s.streamVelocityLocatorSpeed(rvr::CommandResponse::resp_on_error);
     std::this_thread::sleep_for(100ms);
+    mys::tout << code_line << std::dec;
+
+    sen_s.streamEncoders(rvr::CommandResponse::resp_on_error);
+    std::this_thread::sleep_for(100ms);
+    mys::tout << code_line << std::dec;
+
+    sen_s.startStreamingBT(50, rvr::CommandResponse::resp_on_error);
+    std::this_thread::sleep_for(100ms);
+    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingBT();
+    std::this_thread::sleep_for(100ms);
+    mys::tout << code_line << std::dec;
 
     std::this_thread::sleep_for(100ms);
+
+    auto [e_left, e_right] { sen_s.encoders().get_or() };
+    mys::tout << code_line << "encoders: " << e_left << mys::sp << e_right;
 
     auto [l_x, l_y] { sen_s.locator().get_or() };
     mys::tout << code_line << "locator: " << l_x << mys::sp << l_y;
 
-    mys::tout << code_line << "speed: "s << sen_s.speed().get_or();
+//    mys::tout << code_line << "speed: "s << sen_s.speed().get_or();
 
     auto [v_x, v_y] { sen_s.velocity().get_or() };
     mys::tout << code_line << "velocity: " << v_x << mys::sp << v_y;
@@ -155,7 +170,7 @@ void bt_speed_vel_loc(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void bt_quaternion(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingBT();
     std::this_thread::sleep_for(50ms);
@@ -177,19 +192,19 @@ void bt_quaternion(rvr::SensorsStream& sen_s) {
 }
 //---------------------------------------------------------------------------------------------------------------------
 void streaming(rvr::SensorsStream& sen_s) {
-    mys::tout << code_line;
+    mys::tout << code_line << std::dec;
 
     sen_s.disableAllStreaming();
     sen_s.clearAllStreaming();
 
-    nordic_ambient_light(sen_s);
-    nordic_color(sen_s);
-    nordic_core_time(sen_s);
-
-    bt_imu_accel_gyro(sen_s);
+//    nordic_ambient_light(sen_s);
+//    nordic_color(sen_s);
+//    nordic_core_time(sen_s);
+//
+//    bt_imu_accel_gyro(sen_s);
+//    bt_core_time(sen_s);
     bt_speed_vel_loc(sen_s);
-    bt_quaternion(sen_s);
-    bt_core_time(sen_s);
+//    bt_quaternion(sen_s);
 
     sen_s.disableAllStreaming();
     sen_s.clearAllStreaming();

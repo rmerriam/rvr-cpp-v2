@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http:             //www.gnu.org/licenses/>.
 //======================================================================================================================
 //
 //     Author: rmerriam
@@ -20,66 +20,76 @@
 //     Created: May 29, 2021
 //
 //======================================================================================================================
-#include "Power.h"
+#include <PayloadDecode.h>
+#include <Power.h>
 namespace rvr {
-
-    //======================================================================================================================
-    // data access methods
     //----------------------------------------------------------------------------------------------------------------------
-    ResultUInt16 Power::batteryPercent() const noexcept {
-        return ResultUInt16 { static_cast<uint16_t>(mBlackboard.byteValue(mTarget, mDevice, get_battery_percentage).get_or()) };
+    ResultUInt8 Power::batteryPercent() const noexcept {
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_percentage) };
+        return decode_type<uint8_t>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::motorCurrent(MotorSide const ms) const noexcept {
-        return mBlackboard.floatValue(mAltTarget, mDevice, get_current_sense_amplifier_current, 0, ms);
+        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_current_sense_amplifier_current, ms) };
+        return decode_type<float>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltsCalibratedFiltered() const noexcept {
-        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedFiltered);
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_in_volts, CalibratedFiltered) };
+        return decode_type<float>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltsCalibratedUnfiltered() const noexcept {
-        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, CalibratedUnfiltered);
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_in_volts, CalibratedUnfiltered) };
+        return decode_type<float>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltsUncalibratedUnfiltered() const noexcept {
-        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_in_volts, 0, UncalibratedUnfiltered);
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_in_volts, UncalibratedUnfiltered) };
+        return decode_type<float>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     Result<Power::BatteryVoltState> Power::voltState() const noexcept {
-        return Result<Power::BatteryVoltState> { //
-        static_cast<BatteryVoltState>(mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).get_or()) };
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_state) };
+        return BatteryVoltState { decode_type<uint8_t>(msg) };
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultString Power::voltStateText() const noexcept {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        return ResultString { state[mBlackboard.byteValue(mTarget, mDevice, get_battery_voltage_state).get_or()] };
+        return ResultString { state[voltState().get_or()] };
     }
-//----------------------------------------------------------------------------------------------------------------------
-    ResultFloat Power::voltThresholdCritical() const noexcept {
-        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds);
+    //----------------------------------------------------------------------------------------------------------------------
+    Result<VoltageThresholds> Power::voltageThresholds() const noexcept {
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_state_thresholds) };
+        Result<VoltageThresholds> res {};
+
+        if ( !msg.empty()) {
+            PayloadDecode<float, float, float> payload(msg);
+
+            res = VoltageThresholds {              //
+            payload.get<0>(),              //
+                payload.get<1>(),              //
+                payload.get<2>(),              //
+            };
+        }
+        return res;
     }
-//----------------------------------------------------------------------------------------------------------------------
-    ResultFloat Power::voltThresholdLow() const noexcept {
-        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 1);
-    }
-//----------------------------------------------------------------------------------------------------------------------
-    ResultFloat Power::voltThresholdHysteresis() const noexcept {
-        return mBlackboard.floatValue(mTarget, mDevice, get_battery_voltage_state_thresholds, 2);
-    }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isBatteryStateChangeEnabled() const noexcept {
-        return mBlackboard.getNotify(mTarget, mDevice, enable_battery_voltage_state_change_notify);
+        RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, enable_battery_voltage_state_change_notify) };
+        return decode_type<bool>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isDidSleepNotify() const noexcept {
-        return mBlackboard.notifyState(mTarget, mDevice, did_sleep_notify);
+        RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, did_sleep_notify) };
+        return decode_type<bool>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isWakeNotify() const noexcept {
-        return mBlackboard.notifyState(mTarget, mDevice, system_awake_notify);
+        RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, system_awake_notify) };
+        return decode_type<bool>(msg);
     }
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     void Power::resetWakeNotify() const noexcept {
         mBlackboard.resetNotify(mTarget, mDevice, system_awake_notify);
     }
