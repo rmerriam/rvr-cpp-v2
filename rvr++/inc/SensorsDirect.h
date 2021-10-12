@@ -50,16 +50,21 @@ namespace rvr {
 
         void enableGyroMaxNotify(CommandResponse const want_resp = CommandResponse::resp_yes) const;
         void disableGyroMaxNotify(CommandResponse const want_resp = CommandResponse::resp_yes) const;
-        // Gyro Max Notify
         void resetMaxGyroNotify() const;                 // not part of API
 
-        void resetLocatorXY(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
-        void setLocatorFlags(bool const flag, CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        enum struct LocatorFlagsBitmask : uint8_t {
+            none = 0, // reset on yaw reset
+            auto_calibrate = 1, // retain locator from startup
+        };
 
-        //  Get Bot To Bot Infrared Readings
+        void resetLocatorXY(CommandResponse const want_resp = CommandResponse::resp_on_error) const;
+        void setLocatorFlags(LocatorFlagsBitmask const flag,
+            CommandResponse const want_resp = CommandResponse::resp_on_error) const;
 
         void getRgbcSensorValue(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void getEncoderCounts(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
+        //  Get Bot To Bot Infrared Readings
         //  Start Robot To Robot Infrared Broadcasting
         //  Start Robot To Robot Infrared Following
         //  Stop Robot To Robot Infrared Broadcasting
@@ -106,30 +111,27 @@ namespace rvr {
 
         //  Methods to access data
 
-        [[nodiscard]] ResultBool isColorDetectionEnabled() const;
-        [[nodiscard]] ResultBool isColorDetectionNotifyEnabled() const;
-        [[nodiscard]] ResultBool isGyroMaxNotifyEnabled() const;
-        [[nodiscard]] ResultBool isThermalProtectionNotifyEnabled() const;
+        [[nodiscard]] ResultBool isColorDetectionEnabled() const noexcept;
+        [[nodiscard]] ResultBool isColorDetectionNotifyEnabled() const noexcept;
+        [[nodiscard]] ResultBool isGyroMaxNotifyEnabled() const noexcept;
+        [[nodiscard]] ResultBool isThermalProtectionNotifyEnabled() const noexcept;
 
-        [[nodiscard]] ResultBool isMagnetometerCalibrationDone() const;
+        [[nodiscard]] ResultBool isMagnetometerCalibrationDone() const noexcept;
 
-        [[nodiscard]] ResultFloat ambientLight() const;
-        [[nodiscard]] ResultFloat leftMotorTemp() const;
-        [[nodiscard]] ResultFloat rightMotorTemp() const;
-        [[nodiscard]] ResultFloat nordicTemp() const;
-        [[nodiscard]] Result<ColorData> currentRGBValues();
-        [[nodiscard]] Result<ColorDetection> colorDetectionValues();
-        [[nodiscard]] Result<ThermalProtection> thermalProtectionValues();
+        [[nodiscard]] ResultFloat ambientLight() const noexcept;
+        [[nodiscard]] Result<ColorDetection> colorDetectionValues() const noexcept;
+        [[nodiscard]] Result<ColorData> currentRGBValues() const noexcept;
+        [[nodiscard]] Result<EncoderData> encoderCounts() const noexcept;
+        ;
+        [[nodiscard]] ResultFloat leftMotorTemp() const noexcept;
+        [[nodiscard]] ResultFloat rightMotorTemp() const noexcept;
         [[nodiscard]] Result<MagnetometerData> magnetometerData() const noexcept;
-        [[nodiscard]] ResultInt16 magnetometerCalibrationYaw() const;
+        [[nodiscard]] ResultInt16 magnetometerCalibrationYaw() const noexcept;
+        [[nodiscard]] ResultFloat nordicTemp() const noexcept;
+        [[nodiscard]] Result<ThermalProtection> thermalProtectionValues() const noexcept;
 
     private:
         //----------------------------------------------------------------------------------------------------------------------
-
-        enum struct LocatorFlagsBitmask : uint8_t {
-            none = 0, auto_calibrate = 1,
-        };
-
         enum struct IrLocationMake : uint32_t {
             none = 0, front_left = 0x000000FF, front_right = 0x0000FF00, back_right = 0x00FF0000, back_left = 0xFF000000,
         };
@@ -185,8 +187,8 @@ namespace rvr {
         };
     };
     //----------------------------------------------------------------------------------------------------------------------
-    inline void SensorsDirect::setLocatorFlags(bool const flag, CommandResponse const want_resp) const {
-        reqByte(set_locator_flags, flag, want_resp);
+    inline void SensorsDirect::setLocatorFlags(LocatorFlagsBitmask const flag, CommandResponse const want_resp) const {
+        reqByte(set_locator_flags, static_cast<uint8_t>(flag), want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::resetLocatorXY(CommandResponse const want_resp) const {
@@ -215,6 +217,10 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getRgbcSensorValue(CommandResponse const want_resp) const {
         basicAlt(get_rgbc_sensor_values, want_resp);
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    inline void SensorsDirect::getEncoderCounts(CommandResponse const want_resp) const {
+        basic(get_encoder_counts, want_resp);
     }
     //----------------------------------------------------------------------------------------------------------------------
     inline void SensorsDirect::getThermalProtectionStatus(CommandResponse const want_resp) const {

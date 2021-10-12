@@ -30,6 +30,7 @@
 #include<Blackboard.h>
 
 #include<ApiShell.h>
+#include <Drive.h>
 #include<Power.h>
 #include<SensorsDirect.h>
 #include<SensorsStream.h>
@@ -43,6 +44,7 @@ namespace rvr {
     using dev = Devices;
     using bb = Blackboard;
     using sensor = SensorsStream::Sensor;
+    using drv = Drive;
 
     Blackboard::BBDictionary Blackboard::mDictionary {                                   //
         { bb::entryKey(bluetoothSOC, dev::api_and_shell, 0x00), bb::BlackboardEntry { "echo" } },                          //
@@ -57,7 +59,8 @@ namespace rvr {
         { bb::entryKey(bluetoothSOC, dev::drive, 0x26), bb::BlackboardEntry { "motor_stall_notify" } },                    //
         { bb::entryKey(bluetoothSOC, dev::drive, 0x27), bb::BlackboardEntry { "enable_motor_fault_notify" } },             //
         { bb::entryKey(bluetoothSOC, dev::drive, 0x28), bb::BlackboardEntry { "motor_fault_notify" } },                    //
-        { bb::entryKey(bluetoothSOC, dev::drive, 0x29), bb::BlackboardEntry { "get_motor_fault_state" } },
+        { bb::entryKey(bluetoothSOC, dev::drive, 0x29), bb::BlackboardEntry { "get_motor_fault_state" } },                 //
+        { bb::entryKey(bluetoothSOC, dev::drive, 0x3F), bb::BlackboardEntry { "robot has stopped" } }, //
         //
         { bb::entryKey(nordic, dev::io_led, 0x1A), bb::BlackboardEntry { "set_all_leds" } },                               //
         { bb::entryKey(nordic, dev::io_led, 0x4E), bb::BlackboardEntry { "release_led_requests" } },                       //
@@ -160,6 +163,7 @@ namespace rvr {
         //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x51), bb::BlackboardEntry { "magnetometer_calibration_complete_notify" } }, //
         { bb::entryKey(bluetoothSOC, dev::sensors, 0x52), bb::BlackboardEntry { "get_magnetometer_reading" } },            //
+        { bb::entryKey(bluetoothSOC, dev::sensors, 0x53), bb::BlackboardEntry { "get_encoder_counts" } },            //
         //
         { bb::entryKey(bluetoothSOC, dev::system, 0x00), bb::BlackboardEntry { "nordic_main_application_version" } },      //
         { bb::entryKey(nordic, dev::system, 0x00), bb::BlackboardEntry { "bt_main_application_version" } },                //
@@ -229,7 +233,7 @@ namespace rvr {
         return s;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    void Blackboard::addentryValue(key_t const key, RvrMsg value) {
+    void Blackboard::addEntryValue(key_t const key, RvrMsg value) {
         mDictionary[key].value = value;
     }
     //----------------------------------------------------------------------------------------------------------------------
@@ -299,153 +303,11 @@ namespace rvr {
 
         }
         mys::terr << code_line << mys::tab << std::hex << key << mys::tab << msg;
-        addentryValue(key, msg);
+        addEntryValue(key, msg);
     }
     //======================================================================================================================
-    //  Methods to calculate values from RvrMsg in dictionary
-    //----------------------------------------------------------------------------------------------------------------------
-    float Blackboard::floatConvert(RvrMsg::const_iterator begin) const {
-        union {
-            uint8_t buf[4];
-            float result { NaN };
-        };
-        buf[0] = begin[2];
-        buf[1] = begin[3];
-        buf[2] = begin[1];
-        buf[3] = begin[0];
-
-        return result;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    uint64_t Blackboard::uintConvert(RvrMsgView::const_iterator begin, uint8_t const n) {
-        uint64_t res {};
-
-        for (auto it { begin }; it != begin + n; ++it) {
-            res <<= 8;
-            res |= *it;
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultBool Blackboard::boolValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        return ResultBool { (byteValue(target, dev, cmd).get_or() != 0) };
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultUInt8 Blackboard::byteValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-        ResultUInt8 res;
-
-        if ( !msg.empty()) {
-            res = ResultUInt8(msg[0]);
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultBool Blackboard::notifyState(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-        ResultBool res;
-
-        if ( !msg.empty()) {
-            res = ResultBool(msg[0] != 0);
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultBool Blackboard::getNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-        ResultBool res;
-
-        if ( !msg.empty()) {
-            mys::tout << code_line << msg;
-            res = ResultBool(msg[0] == SpecialSeq::enable);
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
     void Blackboard::resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        addentryValue(entryKey(target, dev, cmd, 0), {});
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultUInt16 Blackboard::uint16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
-
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-
-        ResultUInt16 res;
-        if ( !msg.empty()) {
-            auto begin { msg.begin() };
-            begin += (pos * sizeof(uint16_t));
-            res = uintConvert(begin, sizeof(uint16_t));
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultInt16 Blackboard::int16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-
-        ResultInt16 res;
-        if ( !msg.empty()) {
-            auto begin { msg.begin() };
-            begin += (pos * sizeof(int16_t));
-            res = uintConvert(begin, sizeof(int16_t));
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultUInt32 Blackboard::uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos,
-        uint8_t const id) {
-
-        RvrMsgView msg { entryValue(target, dev, cmd, id) };
-        ResultUInt32 res;
-
-        if ( !msg.empty()) {
-            auto begin { msg.begin() };
-            begin += (pos * sizeof(uint32_t));
-            res = uintConvert(begin, sizeof(uint32_t));
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultInt64 Blackboard::int64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-        ResultInt64 res;
-
-        if ( !msg.empty()) {
-            res = static_cast<int64_t>(uintConvert(msg.begin(), sizeof(uint64_t)));
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultUInt64 Blackboard::uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-        ResultUInt64 res;
-
-        if ( !msg.empty()) {
-            res = uintConvert(msg.begin(), sizeof(uint64_t));
-        }
-        return res;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultFloat Blackboard::floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos,
-        uint8_t const id) {
-        RvrMsgView msg { entryValue(target, dev, cmd, id) };
-
-        ResultFloat result;
-        if ( !msg.empty()) {
-            auto begin { msg.begin() };
-            begin += (pos * sizeof(float));
-
-            result = floatConvert(begin);
-        }
-        return result;
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString Blackboard::stringValue(TargetPort const target, Devices const dev, uint8_t const cmd) {
-        RvrMsgView msg { entryValue(target, dev, cmd) };
-        ResultString res;
-        if ( !msg.empty()) {
-            res = std::string(msg.begin(), msg.end() - 1);
-        }
-        return res;
+        addEntryValue(entryKey(target, dev, cmd, 0), {});
     }
     //======================================================================================================================
     std::ostream& operator <<(std::ostream& os, Blackboard::key_s const& k) {

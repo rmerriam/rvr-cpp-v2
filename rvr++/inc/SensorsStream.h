@@ -105,7 +105,7 @@ namespace rvr {
         ResultFloat ambient();
         ResultUInt64 btTime();
         Result<ColorStream> colors();
-        Result<EncodersData> encoders();
+        Result<EncoderData> encoders();
         Result<GyroData> gyroscope();
         Result<ImuData> imu();
         Result<LocatorData> locator();

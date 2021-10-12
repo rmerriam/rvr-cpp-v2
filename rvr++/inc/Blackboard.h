@@ -45,29 +45,7 @@ namespace rvr {
         Blackboard(Blackboard&& other) = delete;
         Blackboard& operator=(Blackboard const& other) = delete;
 
-        ResultBool boolValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-        ResultUInt8 byteValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        ResultInt16 int16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
-        ResultUInt16 uint16Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0);
-
-        ResultUInt32 uint32Value(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
-            uint8_t const id = 0);
-
-        ResultInt64 int64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
-        ResultUInt64 uint64Value(TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        ResultFloat floatValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const pos = 0,
-            uint8_t const id = 0);
-
-        ResultBool notifyState(TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        ResultBool getNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
         void resetNotify(TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        ResultString stringValue(TargetPort const target, Devices const dev, uint8_t const cmd);
-
-        uint64_t uintConvert(RvrMsgView::const_iterator begin, uint8_t n);
 
         void m_to_v();
 
@@ -75,17 +53,13 @@ namespace rvr {
         void msgArray(key_t key, uint8_t const cmd, RvrMsg::iterator begin, RvrMsg::iterator end);
         Blackboard::key_t msgKey(TargetPort const src, Devices const dev, uint8_t const cmd, uint8_t const seq);
 
-        float floatConvert(RvrMsg::const_iterator begin) const;
-        float floatConvert(uint8_t const* begin) const {
-            return floatConvert(RvrMsg::const_iterator { begin });
-        }
-
         RvrMsgView entryValue(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0) const;
 
     private:
         inline static float const NaN { (0.0f / 0.0f) }; // something to return when there is no value for float
 
         /*  =============================================================================================================
+         }
          *  Key stuff is gnarly because of using unorderedmap which uses a hash table
          * but has limited hashing capability The key is "key_t" but is a combination
          * of processor, device, command, and id. That's not easy to deal with so
@@ -106,21 +80,21 @@ namespace rvr {
 
             key_s(TargetPort const proc, Devices const dev, uint8_t const cmd, uint8_t const id);
             operator key_t();
-            uint8_t id { };
-            uint8_t cmd { };
-            Devices dev { };
-            TargetPort proc { };
+            uint8_t id {};
+            uint8_t cmd {};
+            Devices dev {};
+            TargetPort proc {};
         };
 
         struct BlackboardEntry {
             std::string name;
-            RvrMsg value { };
+            RvrMsg value {};
         };
 
         using BBDictionary = std::unordered_map<key_t, BlackboardEntry>;
         static BBDictionary mDictionary;
 
-        void addentryValue(key_t const key, RvrMsg value);
+        void addEntryValue(key_t const key, RvrMsg value);
 
         RvrMsgView entryValue(key_t const key) const;
         static key_t entryKey(TargetPort const target, Devices const dev, uint8_t const cmd, uint8_t const id = 0);

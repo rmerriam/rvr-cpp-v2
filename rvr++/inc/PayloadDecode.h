@@ -13,7 +13,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program.  If not, see <http:             //www.gnu.org/licenses/>.
 //======================================================================================================================
 //
 //		 File: PayloadDecode.h
@@ -29,12 +29,12 @@
 
 namespace rvr {
 
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     template <typename ... Ts>
     struct conv_overload : Ts... {
         using Ts::operator( )...;
     };
-//----------------------------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------------------------
     template <typename ... Ts>
     class PayloadDecode {
     public:
@@ -61,9 +61,9 @@ namespace rvr {
         std::tuple<Ts...> mTup;
         auto converter(RvrMsgView const& msg) {
 
-            int16_t pos {};    // position in msg
+            int16_t pos {};                 // position in msg
 
-            auto convert = conv_overload { //
+            auto convert = conv_overload {              //
 
             [&pos](RvrMsgView const& msg, bool& value) {
                 value = (msg[pos++ ] != 0);
@@ -106,6 +106,11 @@ namespace rvr {
                 pos += sizeof(int64_t);
             },
 
+            [&pos, this](RvrMsgView const& msg, std::string& value) {
+                value = std::string(msg.begin(), msg.end());
+                pos += msg.size();
+            },
+
             [&pos](RvrMsgView const& msg, float& value) {
                 union {
                     uint8_t buf[4];
@@ -139,12 +144,11 @@ namespace rvr {
             }
             return res;
         }
-    }
-    ;
+    };
 
 //----------------------------------------------------------------------------------------------------------------------
     template <typename T>
-    inline static T decode_type(rvr::RvrMsgView const& msg) {
+    inline auto decode_type(rvr::RvrMsgView const& msg) -> T {
         T res {};
         if ( !msg.empty()) {
             PayloadDecode<T> payload(msg);
@@ -154,4 +158,10 @@ namespace rvr {
         }
         return res;
     }
+//----------------------------------------------------------------------------------------------------------------------
+//    template <typename T>
+//    inline T decode_type(rvr::RvrMsgView const& msg) {
+//        return msg.empty() ? T {} : decode_type<typename T::type>(msg);
+//    }
+
 }

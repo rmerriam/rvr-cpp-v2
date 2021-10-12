@@ -27,6 +27,11 @@
 #include <rvr++.h>
 //---------------------------------------------------------------------------------------------------------------------
 void power(rvr::Power& pow) {
+
+    mys::tout << code_line << "power voltsCalibratedFiltered valid? " << pow.voltsCalibratedFiltered().valid();
+    mys::tout << code_line << "VoltageCF: " << pow.voltsCalibratedFiltered().get_or();
+    mys::tout << code_line << "power voltsCalibratedFiltered valid? " << pow.voltsCalibratedFiltered().valid();
+
     pow.batteryPercentage();
     pow.batteryVoltageState();
 
@@ -46,6 +51,8 @@ void power(rvr::Power& pow) {
     mys::tout << code_line << "Power";
 
     mys::tout << code_line << "VPercent: " << pow.batteryPercent().get_or();
+
+    pow.resetSleepNotify();
 
     mys::tout << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get_or();
     mys::tout << code_line << "Wake Notify: " << pow.isWakeNotify().get_or();
@@ -83,12 +90,21 @@ void power(rvr::Power& pow) {
     mys::tout << code_line << "Set State Change Enabled: " << pow.isBatteryStateChangeEnabled().get_or();
 
     mys::tout << code_line << mys::nl;
-#if 1
-    pow.sleep();
 
-    std::this_thread::sleep_for(5000ms);    // have to wait for notification
-    mys::tout << code_line << "Did Sleep Notify: " << pow.isDidSleepNotify().get_or();
+#if 1
+    pow.resetSleepNotify();
+    pow.sleep();
+    mys::tout << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get_or();
+    mys::tout << code_line << "wait for sleep notification";
+
+    while (pow.isDidSleepNotify().invalid()) {
+        std::this_thread::sleep_for(500ms);    // have to wait for notification
+    }
+
+    mys::tout << code_line << "Recieve Sleep Notify: " << pow.isDidSleepNotify().get_or();
     mys::tout << code_line << mys::nl;
+
+//    pow.resetSleepNotify();
 
 #endif
 }

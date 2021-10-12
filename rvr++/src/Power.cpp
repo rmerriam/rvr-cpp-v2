@@ -26,39 +26,40 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt8 Power::batteryPercent() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_percentage) };
+//        return msg.empty() ? ResultUInt8 {} : decode_type<uint8_t>(msg);
         return decode_type<uint8_t>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::motorCurrent(MotorSide const ms) const noexcept {
         auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_current_sense_amplifier_current, ms) };
-        return decode_type<float>(msg);
+        return msg.empty() ? ResultFloat {} : decode_type<float>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltsCalibratedFiltered() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_in_volts, CalibratedFiltered) };
-        return decode_type<float>(msg);
+        return msg.empty() ? ResultFloat {} : decode_type<float>(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltsCalibratedUnfiltered() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_in_volts, CalibratedUnfiltered) };
-        return decode_type<float>(msg);
+        return msg.empty() ? ResultFloat {} : decode_type<float>(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::voltsUncalibratedUnfiltered() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_in_volts, UncalibratedUnfiltered) };
-        return decode_type<float>(msg);
+        return msg.empty() ? ResultFloat {} : decode_type<float>(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     Result<Power::BatteryVoltState> Power::voltState() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_state) };
-        return BatteryVoltState { decode_type<uint8_t>(msg) };
+        return Power::BatteryVoltState { decode_type<uint8_t>(msg) };
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultString Power::voltStateText() const noexcept {
         static char_ptr state[4] { "unknown", "ok", "low", "critical" };
-        return ResultString { state[voltState().get_or()] };
+        return ResultString { state[voltState().get_or(BatteryVoltState::unknown)] };
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     Result<VoltageThresholds> Power::voltageThresholds() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_voltage_state_thresholds) };
         Result<VoltageThresholds> res {};
@@ -74,22 +75,26 @@ namespace rvr {
         }
         return res;
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isBatteryStateChangeEnabled() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, enable_battery_voltage_state_change_notify) };
-        return decode_type<bool>(msg);
+        return msg.empty() ? bool {} : decode_type<bool>(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isDidSleepNotify() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, did_sleep_notify) };
         return decode_type<bool>(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
+    void Power::resetSleepNotify() const noexcept {
+        mBlackboard.resetNotify(mTarget, mDevice, did_sleep_notify);
+    }
+//----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isWakeNotify() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, system_awake_notify) };
         return decode_type<bool>(msg);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void Power::resetWakeNotify() const noexcept {
         mBlackboard.resetNotify(mTarget, mDevice, system_awake_notify);
     }

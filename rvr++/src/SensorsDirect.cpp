@@ -24,7 +24,7 @@
 
 namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
-    Result<ColorData> SensorsDirect::currentRGBValues() {
+    Result<ColorData> SensorsDirect::currentRGBValues() const noexcept {
         auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, get_rgbc_sensor_values) };
         Result<ColorData> res;
 
@@ -41,7 +41,7 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    Result<ColorDetection> SensorsDirect::colorDetectionValues() {
+    Result<ColorDetection> SensorsDirect::colorDetectionValues() const noexcept {
         auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, color_detection_notify) };
         Result<ColorDetection> res;
 
@@ -59,27 +59,27 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultBool SensorsDirect::isColorDetectionEnabled() const {
+    ResultBool SensorsDirect::isColorDetectionEnabled() const noexcept {
         auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, enable_color_detection) };
         return decode_type<bool>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultBool SensorsDirect::isColorDetectionNotifyEnabled() const {
+    ResultBool SensorsDirect::isColorDetectionNotifyEnabled() const noexcept {
         auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, enable_color_detection_notify) };
         return decode_type<bool>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultBool SensorsDirect::isGyroMaxNotifyEnabled() const {
+    ResultBool SensorsDirect::isGyroMaxNotifyEnabled() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, enable_gyro_max_notify) };
         return decode_type<bool>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultBool SensorsDirect::isMagnetometerCalibrationDone() const {
+    ResultBool SensorsDirect::isMagnetometerCalibrationDone() const noexcept {
         auto const msg { mBlackboard.entryValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
         return decode_type<bool>(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    ResultInt16 SensorsDirect::magnetometerCalibrationYaw() const {
+    ResultInt16 SensorsDirect::magnetometerCalibrationYaw() const noexcept {
         auto const msg { mBlackboard.entryValue(mTarget, mDevice, magnetometer_calibration_complete_notify) };
         return decode_type<int16_t>(msg);
     }
@@ -100,7 +100,7 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    Result<ThermalProtection> SensorsDirect::thermalProtectionValues() {
+    Result<ThermalProtection> SensorsDirect::thermalProtectionValues() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_motor_thermal_protection_status) };
         Result<ThermalProtection> res;
 
@@ -117,29 +117,43 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultBool SensorsDirect::isThermalProtectionNotifyEnabled() const {
+    ResultBool SensorsDirect::isThermalProtectionNotifyEnabled() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, enable_motor_thermal_protection_status_notify) };
         return decode_type<bool>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultFloat SensorsDirect::ambientLight() const {
+    ResultFloat SensorsDirect::ambientLight() const noexcept {
         auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_ambient_light_sensor_value) };
-        return decode_type<float>(msg);
+        return decode_type<bool>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultFloat SensorsDirect::leftMotorTemp() const {
+    rvr::Result<EncoderData> SensorsDirect::encoderCounts() const noexcept {
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_encoder_counts) };
+        Result<EncoderData> res;
+
+        if ( !msg.empty()) {
+            PayloadDecode<uint32_t, uint32_t> payload(msg);
+            res = EncoderData { //
+            payload.get<0>(), //
+                payload.get<1>(), //
+            };
+        }
+        return res;
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    ResultFloat SensorsDirect::leftMotorTemp() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_temperature,
                                                  (uint8_t)TemperatureIndexes::left_motor_temperature) };
         return decode_type<float>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultFloat SensorsDirect::rightMotorTemp() const {
+    ResultFloat SensorsDirect::rightMotorTemp() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_temperature,
                                                  (uint8_t)TemperatureIndexes::right_motor_temperature) };
         return decode_type<float>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultFloat SensorsDirect::nordicTemp() const {
+    ResultFloat SensorsDirect::nordicTemp() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_temperature,
                                                  (uint8_t)TemperatureIndexes::nordic_die_temperature) };
         return decode_type<float>(msg);

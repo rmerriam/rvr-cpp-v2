@@ -134,27 +134,16 @@ void bt_speed_vel_loc(rvr::SensorsStream& sen_s) {
 
     sen_s.disableStreamingBT();
     sen_s.clearAllStreaming();
-
     std::this_thread::sleep_for(50ms);
-    mys::tout << code_line << std::dec;
 
     sen_s.streamVelocityLocatorSpeed(rvr::CommandResponse::resp_on_error);
-    std::this_thread::sleep_for(100ms);
-    mys::tout << code_line << std::dec;
-
     sen_s.streamEncoders(rvr::CommandResponse::resp_on_error);
     std::this_thread::sleep_for(100ms);
-    mys::tout << code_line << std::dec;
 
     sen_s.startStreamingBT(50, rvr::CommandResponse::resp_on_error);
     std::this_thread::sleep_for(100ms);
-    mys::tout << code_line << std::dec;
 
     sen_s.disableStreamingBT();
-    std::this_thread::sleep_for(100ms);
-    mys::tout << code_line << std::dec;
-
-    std::this_thread::sleep_for(100ms);
 
     auto [e_left, e_right] { sen_s.encoders().get_or() };
     mys::tout << code_line << "encoders: " << e_left << mys::sp << e_right;

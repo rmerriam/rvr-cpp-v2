@@ -58,7 +58,7 @@ namespace rvr {
         float z;
     };
 
-    struct EncodersData {
+    struct EncoderData {
         uint32_t left;
         uint32_t right;
     };

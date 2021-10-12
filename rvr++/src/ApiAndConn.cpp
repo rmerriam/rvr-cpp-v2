@@ -21,7 +21,7 @@
 //
 //======================================================================================================================
 #include "Blackboard.h"
-
+#include <PayloadDecode.h>
 #include "ApiShell.h"
 #include "Connection.h"
 
@@ -30,18 +30,18 @@ using namespace std::literals;
 namespace rvr {
 
     ResultString Connection::name() {
-        return mBlackboard.stringValue(mTarget, mDevice, get_bluetooth_advertising_name);
+        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_bluetooth_advertising_name));
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     void ApiShell::echo(RvrMsg const& data) const {
         cmdData(echo_cmd, data, CommandResponse::resp_yes);
         cmdDataAlt(echo_cmd, data, CommandResponse::resp_yes);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultMsg ApiShell::echo() const {
         return mBlackboard.entryValue(mTarget, mDevice, echo_cmd);
     }
-    //----------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
     ResultMsg ApiShell::echoAlt() const {
         return mBlackboard.entryValue(mAltTarget, mDevice, echo_cmd);
     }

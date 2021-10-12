@@ -33,12 +33,14 @@ void general(rvr::SensorsDirect& sen_d) {
     sen_d.enableGyroMaxNotify();
 
     sen_d.resetLocatorXY();
-    sen_d.setLocatorFlags(true);
+    sen_d.setLocatorFlags(rvr::SensorsDirect::LocatorFlagsBitmask::auto_calibrate);
 
     sen_d.getAmbientLightSensorValue();
+    sen_d.getEncoderCounts();
 
     sen_d.getLeftMotorTemp();
     sen_d.getRightMotorTemp();
+
     sen_d.getNordicTemp();
 
     sen_d.getThermalProtectionStatus();
@@ -52,6 +54,9 @@ void general(rvr::SensorsDirect& sen_d) {
     std::this_thread::sleep_for(50ms);
 
     mys::tout << code_line << "ambient light: " << std::setprecision(2) << sen_d.ambientLight().get_or();
+
+    auto [left_count, right_count] { sen_d.encoderCounts().get_or() };
+    mys::tout << code_line << "encoderCounts: " << left_count << mys::sp << right_count;
 
     auto [left_temp, left_status, right_temp, right_status] { sen_d.thermalProtectionValues().get_or() };
     mys::tout << code_line << "thermalProtectionValues: " << left_temp << mys::sp << (int)left_status //

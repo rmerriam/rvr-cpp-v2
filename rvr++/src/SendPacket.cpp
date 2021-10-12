@@ -44,7 +44,6 @@ namespace rvr {
         std::copy(payload.begin(), payload.end(), std::back_insert_iterator(mMsg));
 
         mMsg.push_back(EOP);
-        mys::tout << code_line << std::showbase << std::hex << mMsg << std::noshowbase;
         mSerialPort.write(reinterpret_cast<uint8_t*>(mMsg.data()), mMsg.size());
     }
     //----------------------------------------------------------------------------------------------------------------------

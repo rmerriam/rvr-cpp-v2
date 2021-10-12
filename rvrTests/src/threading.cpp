@@ -73,121 +73,107 @@ int main(int argc, char* argv[]) {
 //        direct(sen_d);
 //        leds_test(led);
 //        notifications(sen_d);
-//        power(pow);
-
-        drive.tank_normalized(15, 15);
-
-        streaming(sen_s);
-        std::this_thread::sleep_for(1s);
-        drive.tank_normalized(0, 0);
+        power(pow);
+//        streaming(sen_s);
 //        sysinfo(sys, cmd, api);
 
 #if 0
-        // DRIVE
-        rvr::Drive drive(bb, req);
-        rvr::SensorsStream sen_s(bb, req);
-
         drive.resetYaw();
-//    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-//
-//    drive.stop(90, );
-//    std::this_thread::sleep_for(std::chrono::milliseconds(100000));
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
-//        drive.driveWithHeading(0, 90);
-//        std::this_thread::sleep_for(1s);
-//
-//        for (auto i { 0 }; i < 10; ++i) {
-//            drive.drive(75, 25);
-//            std::this_thread::sleep_for(3s);
-//            auto [l_x, l_y] { sen_s.locator().value_or(rvr::LocatorData { }) };
-//            mys:;tinfo<< code_line << "locator: " << l_x << mys::sp << l_y;
-//        }
+        drive.stop(90);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        drive.driveWithHeading(0, 90);
+        std::this_thread::sleep_for(1s);
+
+        for (auto i { 0 }; i < 10; ++i) {
+            drive.drive(75, 25);
+            std::this_thread::sleep_for(3s);
+            auto [l_x, l_y] { sen_s.locator().get_or() };
+            mys::tout << code_line << "locator: " << l_x << mys::sp << l_y;
+        }
 
         drive.tank_normalized(15, 15);
         std::this_thread::sleep_for(1s);
 
-//    drive.driveWithHeading(0, 20, );
-//    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-//
-//    drive.resetYaw();
-//    std::this_thread::sleep_for(std::chrono::milliseconds(50));
-//
-//    drive.enableMotorStallNotify();
-//    drive.enableMotorFaultNotify();
-//
-//    drive.disableMotorStallNotify();
-//    drive.disableMotorFaultNotify();
-//
-//    drive.getMotorFault();
-//
-//    std::this_thread::sleep_for(100ms);
-//
-//    mys:;tinfo<< code_line;
-//    mys:;tinfo<< code_line;
-//    mys:;tinfo<< code_line << "drive";
-//
-//    mys:;tinfo<< code_line << "Fault Notify State: " << drive.motorFaultState();
-//    mys:;tinfo<< code_line << "Fault Notify Set: " << drive.motorFaultNotifySet();
-//
-//    mys:;tinfo<< code_line << "Stall Notify State: " << drive.motorFaultState();
-//    mys:;tinfo<< code_line << "Stall Notify Set: " << drive.motorStallNotifySet();
-//
-//    mys:;tinfo<< code_line;
-//    mys:;tinfo<< code_line;
+        drive.driveWithHeading(0, 20);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+        drive.resetYaw();
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        drive.enableMotorStallNotify();
+        drive.enableMotorFaultNotify();
+
+        drive.disableMotorStallNotify();
+        drive.disableMotorFaultNotify();
+
+        drive.getMotorFault();
+
+        std::this_thread::sleep_for(100ms);
+
+        mys::tout << code_line;
+        mys::tout << code_line;
+        mys::tout << code_line << "drive";
+
+        mys::tout << code_line << "Fault Notify State: " << drive.motorFaultState().get_or();
+        mys::tout << code_line << "Fault Notify Set: " << drive.motorFaultNotifySet().get_or();
+
+        mys::tout << code_line << "Stall Notify State: " << drive.motorFaultState().get_or();
+        mys::tout << code_line << "Stall Notify Set: " << drive.motorStallNotifySet().get_or();
+
+        mys::tout << code_line;
+        mys::tout << code_line;
 
 #endif
 
 #if 0
-    constexpr float in_to_m { 0.0254 };
+        constexpr float in_to_m { 0.0254 };
 
-    rvr::Drive drive(bb, req);
-    rvr::SensorsStream sen_s(bb, req);
-    rvr::SensorsDirect sen_d(bb, req);
+        sen_d.resetLocatorXY();
+        drive.resetYaw();
+        sen_s.clearAllStreaming();
 
-    sen_d.resetLocatorXY();
-    drive.resetYaw();
-    sen_s.clearAllStreaming();
-    mys::TraceOff toff { mys:;tinfo};
+        sen_s.streamVelocityLocatorSpeed();
+        sen_s.enableStreaming(30);
+        std::this_thread::sleep_for(30ms);
+        mys::tout << code_line << mys::nl;
 
-    sen_s.locatorConfig();
-    sen_s.enableStreaming(30);
-    std::this_thread::sleep_for(30ms);
-    mys:;tinfo<< code_line << mys::nl;
+        rvr::LocatorData l { sen_s.locator().get_or() };
+        mys::tout << code_line << mys::nl;
+        mys::tout << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
-    rvr::LocatorData l { sen_s.locator() };
-    mys:;tinfo << code_line << mys::nl;
-    mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
-
-    float forty_in = -40 * in_to_m;
-    double sp { 25 };
-    while (l.y > forty_in) {
+        float forty_in = -40 * in_to_m;
+        double sp { 25 };
+        while (l.y > forty_in) {
 //        drive.drive(sp, sp);
-        drive.driveWithHeading(sp, 0);
+            drive.driveWithHeading(sp, 0);
+            std::this_thread::sleep_for(30ms);
+            l = sen_s.locator().get_or();
+            mys::tout << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+
+        }
+        drive.stop(0);
+        l = sen_s.locator().get_or();
+        mys::tout << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
         std::this_thread::sleep_for(30ms);
-        l = sen_s.locator();
-        mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
-    }
-    drive.stop(0);
-    l = sen_s.locator();
-    mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
-    std::this_thread::sleep_for(30ms);
+        l = sen_s.locator().get_or();
+        mys::tout << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
-    l = sen_s.locator();
-    mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
-
-    while (l.y < 0) {
-        drive.driveWithHeading( -sp, 0);
+        while (l.y < 0) {
+            drive.driveWithHeading( -sp, 0);
+            std::this_thread::sleep_for(30ms);
+            l = sen_s.locator().get_or();
+        }
+        drive.stop(0);
+        l = sen_s.locator().get_or();
+        mys::tout << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
         std::this_thread::sleep_for(30ms);
-        l = sen_s.locator();
-    }
-    drive.stop(0);
-    l = sen_s.locator();
-    mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
-    std::this_thread::sleep_for(30ms);
 
-    l = sen_s.locator();
-    mys:;tinfo << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
+        l = sen_s.locator().get_or();
+        mys::tout << code_line << "locator: " << l.x / in_to_m << mys::sp << l.y / in_to_m;
 
 #endif
     }

@@ -42,15 +42,16 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::processorName() {
-        return mBlackboard.stringValue(mTarget, mDevice, get_processor_name);
+//        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_processor_name));
+        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_processor_name));
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::processorName2() {
-        return mBlackboard.stringValue(mAltTarget, mDevice, get_processor_name);
+        return decode_type<std::string>(mBlackboard.entryValue(mAltTarget, mDevice, get_processor_name));
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::sku() {
-        return mBlackboard.stringValue(mAltTarget, mDevice, get_sku);
+        return decode_type<std::string>(mBlackboard.entryValue(mAltTarget, mDevice, get_sku));
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::mainAppVersion() {

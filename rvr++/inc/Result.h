@@ -27,7 +27,9 @@ namespace rvr {
 //----------------------------------------------------------------------------------------------------------------------
     template <typename T> struct Result {
     public:
-        explicit constexpr Result() noexcept = default;
+        using type = T;
+        explicit constexpr Result() noexcept {
+        }
 
         constexpr Result(T const& t) :
             mOptional { t } {
@@ -49,12 +51,12 @@ namespace rvr {
             return mOptional.value();
         }
 
-        [[nodiscard]] constexpr auto get_or(T const&& value = T { }) const -> T {
+        [[nodiscard]] constexpr auto get_or(T const&& value = T {}) const -> T {
             return mOptional.value_or(value);
         }
 
     private:
-        std::optional<T> mOptional;
+        std::optional<T> mOptional {};
     };
     //----------------------------------------------------------------------------------------------------------------------
     using ResultBool = Result<bool>;

@@ -138,7 +138,7 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     void Response::decode(RvrMsg packet) {
-        mys::TraceOn tdbg_ctrl { mys::tout };
+        mys::TraceOff tdbg_ctrl { mys::tout };
         mys::tout << code_line << "pkt: " << std::hex << packet;
 
         // typical positions of header bytes when target not present which is the usual case

@@ -93,6 +93,7 @@ namespace rvr {
 
         ResultBool isBatteryStateChangeEnabled() const noexcept;
         ResultBool isDidSleepNotify() const noexcept;
+        void resetSleepNotify() const noexcept;
 
     private:
         enum Cmd : uint8_t {

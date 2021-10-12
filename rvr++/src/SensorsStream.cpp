@@ -101,7 +101,7 @@ namespace rvr {
 
         if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[ambient_token] };
-            res = normalize(decode_type<uint32_t>(msg), out_min, out_max);
+            res = normalize(decode_type<int32_t>(msg), out_min, out_max);
         }
         return res;
     }
@@ -194,15 +194,15 @@ namespace rvr {
 
     }
     //----------------------------------------------------------------------------------------------------------------------
-    Result<EncodersData> SensorsStream::encoders() {
+    Result<EncoderData> SensorsStream::encoders() {
         auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, encoders_stream_token) };
-        Result<EncodersData> res;
+        Result<EncoderData> res;
 
         if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[encoders_token] };
 
             PayloadDecode<uint32_t, uint32_t> payload(msg);
-            res = EncodersData { //
+            res = EncoderData { //
             static_cast<uint32_t>(normalize(payload.get<0>(), out_min, out_max)), //
                 static_cast<uint32_t>(normalize(payload.get<1>(), out_min, out_max)), //
             };
@@ -212,13 +212,17 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultFloat SensorsStream::speed() {
-        auto speed { mBlackboard.uint32Value(mAltTarget, mDevice, streaming_service_data_notify, 0,
-                                             velocity_locator_speed_token) };
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify,
+                                                velocity_locator_speed_token) };
         ResultFloat res;
 
-        if (speed.valid()) {
+        if ( !msg.empty()) {
             auto [out_min, out_max] { SensorFactors[speed_token] };
-            res = ResultFloat { normalize(static_cast<int32_t>(speed.get_or()), out_min, out_max) };
+
+//            PayloadDecode<uint32_t, uint32_t> payload(msg.substr(4 * sizeof(uint32_t))) };
+
+            res = normalize(decode_type<uint32_t>(msg.substr(4 * sizeof(uint32_t))), out_min, out_max);
+
         }
         return res;
     }
