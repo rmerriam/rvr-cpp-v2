@@ -46,9 +46,11 @@ PowerForm::PowerForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendPac
     mBattStateChangeStatus = NField::build_wide_data_item(mFields, "Batt State Enabled?", ++item_row, width, 6);
     mBattStateChangeStatus->invertText();
 
-    mWakeNotify = NField::build_wide_data_item(mFields, " Wake Notify?", ++item_row, width, 6);
+    mWakeNotify = NField::build_wide_data_item(mFields, "Wake Notify?", ++item_row, width, 6);
     mWakeNotify->invertText();
 
+//    ++item_row;
+//    NField::build_subhead(mFields, "Dummy", ++item_row);
     mForm.init();
 }
 //--------------------------------------------------------------------------------------------------------------------------
@@ -77,9 +79,10 @@ void PowerForm::updateScreen() {
     mCalUnfiltered->setData(mPow.voltsCalibratedUnfiltered().get_or());
     mUncalUnfiltered->setData(mPow.voltsUncalibratedUnfiltered().get_or());
 
-    mCriticialVolt->setData(mPow.voltThresholdCritical().get_or());
-    mLowVolt->setData(mPow.voltThresholdLow().get_or());
-    mHysteresisVolt->setData(mPow.voltThresholdHysteresis().get_or());
+    auto [criticial, threshold, hysteresis] = mPow.voltageThresholds().get_or();
+    mCriticialVolt->setData(criticial);
+    mLowVolt->setData(threshold);
+    mHysteresisVolt->setData(hysteresis);
 
     mLeftMotorCurrent->setData(mPow.motorCurrent(rvr::Power::left).get_or());
     mRightMotorCurrent->setData(mPow.motorCurrent(rvr::Power::right).get_or());

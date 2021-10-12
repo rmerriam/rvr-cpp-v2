@@ -26,7 +26,7 @@ DirectForm::DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendP
     int width { 15 };
     NField::build_header(mFields, "Direct Sensor", 1, width + 8);
 
-    mAmbient = NField::build_wide_data_item(mFields, "Ambient:", item_row++, width, 5);
+    mAmbient = NField::build_wide_data_item(mFields, "Ambient LIght:", item_row++, width, 5);
 
     NField::build_subhead(mFields, "ColorSensor", item_row++);
     mColorDetection = NField::build_wide_data_item(mFields, "Enabled:", item_row++, width, 5);
@@ -48,16 +48,16 @@ DirectForm::DirectForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendP
     mRgbClass = NField::build_wide_data_item(mFields, "Class:", item_row++, width, 5);
 
     NField::build_subhead(mFields, "Motor Temperature", item_row++);
-    mLeftMotorTemp = NField::build_wide_data_item(mFields, "Left:", item_row++, width, 5);
-    mRightMotorTemp = NField::build_wide_data_item(mFields, "Right:", item_row++, width, 5);
+    mLeftMotorTemp = NField::build_wide_data_item(mFields, "Left Motor:", item_row++, width, 5);
+    mRightMotorTemp = NField::build_wide_data_item(mFields, "Right Motor:", item_row++, width, 5);
 
     NField::build_subhead(mFields, "Thermal Protection", item_row++);
-    mThermalProtectionNotify = NField::build_wide_data_item(mFields, "Notify:", item_row++, width, 5);
+    mThermalProtectionNotify = NField::build_wide_data_item(mFields, "Thremal Notify:", item_row++, width, 5);
     mThermalProtectionNotify->invertText();
-    mLeftMotorThermal = NField::build_wide_data_item(mFields, "Left:", item_row++, width, 5);
-    mLeftMotorStatus = NField::build_wide_data_item(mFields, "Status:", item_row++, width, 5);
-    mRightMotorThermal = NField::build_wide_data_item(mFields, "Right:", item_row++, width, 5);
-    mRightMotorStatus = NField::build_wide_data_item(mFields, "Status:", item_row++, width, 5);
+    mLeftMotorThermal = NField::build_wide_data_item(mFields, "Left Temp:", item_row++, width, 5);
+    mLeftMotorStatus = NField::build_wide_data_item(mFields, "Left Status:", item_row++, width, 5);
+    mRightMotorThermal = NField::build_wide_data_item(mFields, "Right Temp:", item_row++, width, 5);
+    mRightMotorStatus = NField::build_wide_data_item(mFields, "Right Status:", item_row++, width, 5);
 
     mForm.init();
 }

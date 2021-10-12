@@ -26,8 +26,7 @@ namespace rvr {
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt8 Power::batteryPercent() const noexcept {
         auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_battery_percentage) };
-//        return msg.empty() ? ResultUInt8 {} : decode_type<uint8_t>(msg);
-        return decode_type<uint8_t>(msg);
+        return msg.empty() ? ResultUInt8 {} : decode_type<uint8_t>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultFloat Power::motorCurrent(MotorSide const ms) const noexcept {
@@ -83,7 +82,7 @@ namespace rvr {
 //----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isDidSleepNotify() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, did_sleep_notify) };
-        return decode_type<bool>(msg);
+        return msg.empty() ? bool {} : decode_type<bool>(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Power::resetSleepNotify() const noexcept {
@@ -92,7 +91,7 @@ namespace rvr {
 //----------------------------------------------------------------------------------------------------------------------
     ResultBool Power::isWakeNotify() const noexcept {
         RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, system_awake_notify) };
-        return decode_type<bool>(msg);
+        return msg.empty() ? bool {} : decode_type<bool>(msg);
     }
 //----------------------------------------------------------------------------------------------------------------------
     void Power::resetWakeNotify() const noexcept {

@@ -73,9 +73,9 @@ int main(int argc, char* argv[]) {
 //        direct(sen_d);
 //        leds_test(led);
 //        notifications(sen_d);
-        power(pow);
+//        power(pow);
 //        streaming(sen_s);
-//        sysinfo(sys, cmd, api);
+        sysinfo(sys, cmd, api);
 
 #if 0
         drive.resetYaw();

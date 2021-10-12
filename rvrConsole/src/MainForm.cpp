@@ -43,7 +43,7 @@ rvr::RvrMsg colors[] { //
         0x00, 0x00, 0xFF, }, //
 };
 //---------------------------------------------------------------------------------------------------------------------
-int moused { };
+int moused {};
 //---------------------------------------------------------------------------------------------------------------------
 MainForm::MainForm(rvr::Blackboard& bb, rvr::SendPacket& req) :    //
     mRequest { req }, //
@@ -62,7 +62,7 @@ void MainForm::mouseEvent() {
     MEVENT mevent;
     getmouse( &mevent);
     moused = mevent.x;
-    if ((mevent.y == 17) && ((mevent.x >= 55) & (mevent.x <= 60))) {
+    if ((mevent.y == 17) && ((mevent.x >= 44) & (mevent.x <= 49))) {
         power_form.disableBatt();
     }
 }

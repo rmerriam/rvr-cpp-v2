@@ -48,9 +48,9 @@ StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendP
     mLocatorY = NField::build_wide_data_item(mFields, "Y:", item_row++, width, 5);
 
     ++item_row;
-    mSpeed = NField::build_wide_data_item(mFields, "Speed:", item_row++, width, 5);
 
     NField::build_subhead(mFields, "Velocity", item_row++);
+    mSpeed = NField::build_wide_data_item(mFields, "Speed:", item_row++, width, 5);
     mVelocityX = NField::build_wide_data_item(mFields, "X:", item_row++, width, 5);
     mVelocityY = NField::build_wide_data_item(mFields, "Y:", item_row++, width, 5);
 
@@ -62,7 +62,7 @@ StreamForm::StreamForm(int const y, int const x, rvr::Blackboard& bb, rvr::SendP
 ////    mStream.coreBTConfig();
     mSensors.enableGyroMaxNotify();
     mStream.streamImuAccelGyro();
-    mStream.streamSpeedVelocityLocator();
+    mStream.streamVelocityLocatorSpeed();
 
     mStream.startStreamingBT(50);
     mStream.startStreamingNordic(50);

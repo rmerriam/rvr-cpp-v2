@@ -50,6 +50,7 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
 
     mys::tout << code_line << mys::nl;
 
+    mys::tout << code_line << "BT Name: " << cmd.name().get_or();
     mys::tout << code_line << "App Version: " << sys.mainAppVersion().get_or();
     mys::tout << code_line << "App Version: " << sys.mainAppVersion2().get_or();
     mys::tout << code_line << "Boot Version: " << sys.bootVersion().get_or();
@@ -61,8 +62,6 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
     mys::tout << code_line << "Processor: " << sys.processorName2().get_or();
     mys::tout << code_line << "SKU: " << sys.sku().get_or();
     mys::tout << code_line << "Up Time: " << sys.coreUpTime().get_or();
-
-    mys::tout << code_line << "BT Name: " << cmd.name().get_or();
 
     mys::tout << code_line << "Echo: " << std::hex << api.echo().get_or();
     mys::tout << code_line << "Echo Alt: " << std::hex << api.echoAlt().get_or();
