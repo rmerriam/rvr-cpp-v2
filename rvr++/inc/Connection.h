@@ -26,30 +26,30 @@
 #include <SendPacket.h>
 //----------------------------------------------------------------------------------------------------------------------
 namespace rvr {
-class Blackboard;
+    class Blackboard;
 
-class Connection : protected Request {
-   public:
-   Connection(Blackboard& bb, SendPacket& req)
-       : Request { bb, Devices::connection, req, nordic } {
-   }
-   Connection(Connection const& other) = delete;
-   Connection(Connection&& other) = delete;
-   Connection& operator=(Connection const& other) = delete;
+    class Connection : protected Request {
+    public:
+        Connection(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::connection, req, nordic } {
+        }
+        Connection(Connection const& other) = delete;
+        Connection(Connection&& other) = delete;
+        Connection& operator=(Connection const& other) = delete;
 
-   void bluetoothName(CommandResponse const want_resp = CommandResponse::resp_yes) const;
+        void bluetoothName(CommandResponse const want_resp = CommandResponse::resp_yes) const;
 
-   ResultString name();
+        ResultString name();
 
-   private:
-   enum Cmd : uint8_t {
-      get_bluetooth_advertising_name = 0x05, //
-   };
-};
+    private:
+        enum Cmd : uint8_t {
+            get_bluetooth_advertising_name = 0x05, //
+        };
+    };
 //----------------------------------------------------------------------------------------------------------------------
-inline void Connection::bluetoothName(CommandResponse const want_resp) const {
-   basic(get_bluetooth_advertising_name, want_resp);
-}
+    inline void Connection::bluetoothName(CommandResponse const want_resp) const {
+        basic(get_bluetooth_advertising_name, want_resp);
+    }
 
 } /* namespace rvr */
 

@@ -38,11 +38,11 @@ namespace rvr {
         cmdDataAlt(echo_cmd, data, CommandResponse::resp_yes);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    ResultMsg ApiShell::echo() const {
+    ResultMsg ApiShell::echoBT() const {
         return mBlackboard.entryValue(mTarget, mDevice, echo_cmd);
     }
 //----------------------------------------------------------------------------------------------------------------------
-    ResultMsg ApiShell::echoAlt() const {
+    ResultMsg ApiShell::echoNordic() const {
         return mBlackboard.entryValue(mAltTarget, mDevice, echo_cmd);
     }
 

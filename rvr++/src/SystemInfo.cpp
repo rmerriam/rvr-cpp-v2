@@ -41,42 +41,42 @@ namespace rvr {
         return res;
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::processorName() {
+    ResultString SystemInfo::processorNameBT() {
 //        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_processor_name));
-        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_processor_name));
-    }
-    //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::processorName2() {
         return decode_type<std::string>(mBlackboard.entryValue(mAltTarget, mDevice, get_processor_name));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::sku() {
-        return decode_type<std::string>(mBlackboard.entryValue(mAltTarget, mDevice, get_sku));
+    ResultString SystemInfo::processorNameNordic() {
+        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_processor_name));
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::mainAppVersion() {
+    ResultString SystemInfo::sku() {
+        return decode_type<std::string>(mBlackboard.entryValue(mTarget, mDevice, get_sku));
+    }
+    //----------------------------------------------------------------------------------------------------------------------
+    ResultString SystemInfo::mainAppVersionNordic() {
         return versionValue(mTarget, mDevice, get_main_application_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::mainAppVersion2() {
+    ResultString SystemInfo::mainAppVersionBT() {
         return versionValue(mAltTarget, mDevice, get_main_application_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::bootVersion() {
+    ResultString SystemInfo::bootVersionNordic() {
         return versionValue(mTarget, mDevice, get_bootloader_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
-    ResultString SystemInfo::bootVersion2() {
+    ResultString SystemInfo::bootVersionBT() {
         return versionValue(mAltTarget, mDevice, get_bootloader_version);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultUInt8 SystemInfo::boardVersion() {
-        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_board_revision) };
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_board_revision) };
         return decode_type<uint8_t>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultString SystemInfo::macAddress() {
-        RvrMsgView msg { mBlackboard.entryValue(mAltTarget, mDevice, get_mac_address) };
+        RvrMsgView msg { mBlackboard.entryValue(mTarget, mDevice, get_mac_address) };
         ResultString res;
 
         if ( !msg.empty()) {
@@ -95,12 +95,12 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultInt16 SystemInfo::statsId() {
-        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_stats_id) };
+        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_stats_id) };
         return decode_type<int16_t>(msg);
     }
     //----------------------------------------------------------------------------------------------------------------------
     ResultInt64 SystemInfo::coreUpTime() {
-        auto const& msg { mBlackboard.entryValue(mTarget, mDevice, get_core_up_time_in_milliseconds) };
+        auto const& msg { mBlackboard.entryValue(mAltTarget, mDevice, get_core_up_time_in_milliseconds) };
         return decode_type<int64_t>(msg);
     }
 

@@ -32,6 +32,9 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
     // Connection, SysInfo, APIShell
     cmd.bluetoothName(); //
 
+    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
+    api.echo(dead); // alt
+
     sys.getMainAppVersion();    // alt
     sys.getBootloaderVersion(); //
     sys.getBoardRevision();     // ??
@@ -41,30 +44,28 @@ void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api) {
     sys.getSku();           // ??
     sys.getCoreUpTime();    //
                             //
-    rvr::RvrMsg dead { 0xDE, 0xAD, 0xFE, 0xED };
-    api.echo(dead); // alt
 
-    std::this_thread::sleep_for(100ms);
+    std::this_thread::sleep_for(500ms);
 
-    mys::tout << code_line << mys::nl;
+    mys::tout << code_line;
 
-    mys::tout << code_line << mys::nl;
+    mys::tout << code_line;
 
     mys::tout << code_line << "BT Name: " << cmd.name().get_or();
-    mys::tout << code_line << "App Version: " << sys.mainAppVersion().get_or();
-    mys::tout << code_line << "App Version: " << sys.mainAppVersion2().get_or();
-    mys::tout << code_line << "Boot Version: " << sys.bootVersion().get_or();
-    mys::tout << code_line << "Boot Version: " << sys.bootVersion2().get_or();
+    mys::tout << code_line << "App Version Nordic: " << sys.mainAppVersionNordic().get_or();
+    mys::tout << code_line << "App Version BT: " << sys.mainAppVersionBT().get_or();
+    mys::tout << code_line << "Boot Version Nordic: " << sys.bootVersionNordic().get_or();
+    mys::tout << code_line << "Boot Version BT: " << sys.bootVersionBT().get_or();
     mys::tout << code_line << "Board Version: " << int(sys.boardVersion().get_or());
     mys::tout << code_line << "MAC Addr: " << sys.macAddress().get_or();
     mys::tout << code_line << "Stats Id: " << sys.statsId().get_or();
-    mys::tout << code_line << "Processor: " << sys.processorName().get_or();
-    mys::tout << code_line << "Processor: " << sys.processorName2().get_or();
+    mys::tout << code_line << "Processor BT: " << sys.processorNameBT().get_or();
+    mys::tout << code_line << "Processor Nordic: " << sys.processorNameNordic().get_or();
     mys::tout << code_line << "SKU: " << sys.sku().get_or();
     mys::tout << code_line << "Up Time: " << sys.coreUpTime().get_or();
 
-    mys::tout << code_line << "Echo: " << std::hex << api.echo().get_or();
-    mys::tout << code_line << "Echo Alt: " << std::hex << api.echoAlt().get_or();
+    mys::tout << code_line << "Echo BT: " << std::hex << api.echoBT().get_or();
+    mys::tout << code_line << "Echo Nordic: " << std::hex << api.echoNordic().get_or();
 
-    mys::tout << code_line << mys::nl;
+    mys::tout << code_line;
 }

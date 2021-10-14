@@ -40,12 +40,13 @@ namespace rvr {
 
         void echo(RvrMsg const& data) const;
 
-        ResultMsg echo() const;
-        ResultMsg echoAlt() const;
+        ResultMsg echoBT() const;
+        ResultMsg echoNordic() const;
 
     private:
         enum Cmd : uint8_t {
             echo_cmd = 0x00, //
+            generate_api_error = 0x09,  // generates a specific error **NEW**
         };
     };
 

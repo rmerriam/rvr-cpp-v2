@@ -92,6 +92,7 @@ void power(rvr::Power& pow) {
     mys::tout << code_line << mys::nl;
 
 #if 1
+
     pow.resetSleepNotify();
     pow.sleep();
     mys::tout << code_line << "Sleep Notify: " << pow.isDidSleepNotify().get_or();

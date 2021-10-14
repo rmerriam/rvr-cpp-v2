@@ -177,12 +177,11 @@ namespace rvr {
     }
     //----------------------------------------------------------------------------------------------------------------------
     Result<LocatorData> SensorsStream::locator() {
-        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify,
-                                                velocity_locator_speed_token) };
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, velocity_locator_speed_token) };
         Result<LocatorData> res;
 
         if ( !msg.empty()) {
-            auto [out_min, out_max] { SensorFactors[velocity_token] };
+            auto [out_min, out_max] { SensorFactors[locator_token] };
 
             PayloadDecode<uint32_t, uint32_t> payload(msg.substr(2 * sizeof(uint32_t)));
             res = LocatorData { //
@@ -212,8 +211,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     ResultFloat SensorsStream::speed() {
-        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify,
-                                                velocity_locator_speed_token) };
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, velocity_locator_speed_token) };
         ResultFloat res;
 
         if ( !msg.empty()) {
@@ -228,8 +226,7 @@ namespace rvr {
     }
 //----------------------------------------------------------------------------------------------------------------------
     Result<VelocityData> SensorsStream::velocity() {
-        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify,
-                                                velocity_locator_speed_token) };
+        auto const msg { mBlackboard.entryValue(mAltTarget, mDevice, streaming_service_data_notify, velocity_locator_speed_token) };
         Result<VelocityData> res;
 
         if ( !msg.empty()) {

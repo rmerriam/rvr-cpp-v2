@@ -30,15 +30,15 @@ SystemInfoForm::SystemInfoForm(int const y, int const x, rvr::Blackboard& bb, rv
     mProcName2 = NField::build_data_item(mFields, "Proc Name2:", item_row++, width);
 
     mMacAddr1 = NField::build_data_item(mFields, "BT MAC Addr:", item_row++);
-    mMacAddr2 = NField::build_data_item(mFields, "", item_row++);
-    mMacAddr3 = NField::build_data_item(mFields, "", item_row++);
+    mMacAddr2 = NField::build_data_item(mFields, " ", item_row++);
+    mMacAddr3 = NField::build_data_item(mFields, " ", item_row++);
 
     mStatsId = NField::build_data_item(mFields, "Stats Id:", item_row++, width);
     mSku = NField::build_data_item(mFields, "SKU:", item_row++, width);
 
     ++item_row;
-    mPing = NField::build_data_item(mFields, "Ping:", item_row++, width);
-    mPingAlt = NField::build_data_item(mFields, "Ping2:", item_row++, width);
+    mPing = NField::build_data_item(mFields, "Echo:", item_row++, width);
+    mPingAlt = NField::build_data_item(mFields, "Echo2:", item_row++, width);
 
     mForm.init();
 }
@@ -69,26 +69,26 @@ void SystemInfoForm::onceData() {
 void SystemInfoForm::updateScreen() {
 
     mBoardVer->setData(mSys.boardVersion().get_or());
-    mBootVer->setData(mSys.bootVersion().get_or());
-    mBootVer2->setData(mSys.bootVersion2().get_or());
+    mBootVer->setData(mSys.bootVersionNordic().get_or());
+    mBootVer2->setData(mSys.bootVersionBT().get_or());
 
     std::string m { mSys.macAddress().get_or(std::string { 18 }) };
     mMacAddr1->setData(m.substr(0, 6));
     mMacAddr2->setData(m.substr(6, 6));
     mMacAddr3->setData(m.substr(12, 6));
 
-    mAppVer->setData(mSys.mainAppVersion().get_or());
-    mAppVer2->setData(mSys.mainAppVersion2().get_or());
-    mProcName->setData(mSys.processorName().get_or());
-    mProcName2->setData(mSys.processorName2().get_or());
+    mAppVer->setData(mSys.mainAppVersionNordic().get_or());
+    mAppVer2->setData(mSys.mainAppVersionBT().get_or());
+    mProcName->setData(mSys.processorNameNordic().get_or());
+    mProcName2->setData(mSys.processorNameBT().get_or());
     mStatsId->setData(mSys.statsId().get_or());
     mSku->setData(mSys.sku().get_or());
     mUpTime->setData(mSys.coreUpTime().get_or());
 
     mRvrName->setData(mConn.name().get_or());
 
-//    mPing->setData(mApi.echo());
-//    mPingAlt->setData(mApi.echoAlt());
+    mPing->setData(mApi.echoNordic().get_or());
+    mPingAlt->setData(mApi.echoBT().get_or());
 
     wrefresh(mForm.win());
 }

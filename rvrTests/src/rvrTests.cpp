@@ -35,7 +35,7 @@ void streaming(rvr::SensorsStream& sen_s);
 void sysinfo(rvr::SystemInfo& sys, rvr::Connection& cmd, rvr::ApiShell& api);
 //---------------------------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
-    mys::TraceOn tdbg_on { mys::terr };
+    mys::TraceOff tdbg_on { mys::terr };
     mys::terr << code_line << " Opening serial " << argv[1];
 
     mys::tout << code_line << " Opening serial " << argv[1];
@@ -74,8 +74,8 @@ int main(int argc, char* argv[]) {
 //        leds_test(led);
 //        notifications(sen_d);
 //        power(pow);
-//        streaming(sen_s);
-        sysinfo(sys, cmd, api);
+        streaming(sen_s);
+//        sysinfo(sys, cmd, api);
 
 #if 0
         drive.resetYaw();

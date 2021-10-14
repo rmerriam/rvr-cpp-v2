@@ -58,9 +58,9 @@ namespace rvr {
             core_time_upper_token = 0x09, //
             encoders_token = 0x0B,        //
 
-            imu_accel_gyro_token = 0x01,         //
-            velocity_locator_speed_token = 0x2, //
-            encoders_stream_token = 0x3, //
+            imu_accel_gyro_token = 0x0E,         //
+            velocity_locator_speed_token = 0xF, //
+            encoders_stream_token = 0xD, //
         };
 
         SensorsStream(Blackboard& bb, SendPacket& req) :
@@ -151,8 +151,8 @@ namespace rvr {
             //
             start_robot_to_robot_infrared_broadcasting = 0x27, start_robot_to_robot_infrared_following = 0x28,
             stop_robot_to_robot_infrared_broadcasting = 0x29, robot_to_robot_infrared_message_received_notify = 0x2C,
-            get_ambient_light_sensor_value = 0x30, stop_robot_to_robot_infrared_following = 0x32,
-            start_robot_to_robot_infrared_evading = 0x33, stop_robot_to_robot_infrared_evading = 0x34,
+            get_ambient_light_sensor_value = 0x30, stop_robot_to_robot_infrared_following = 0x32, start_robot_to_robot_infrared_evading = 0x33,
+            stop_robot_to_robot_infrared_evading = 0x34,
             //
             enable_color_detection_notify = 0x35, //
             color_detection_notify = 0x36, //

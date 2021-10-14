@@ -28,87 +28,87 @@
 using namespace std::literals;
 
 namespace rvr {
-class Blackboard;
+    class Blackboard;
 
-class SystemInfo : protected Request {
-   public:
-   SystemInfo(Blackboard& bb, SendPacket& req)
-       : Request { bb, Devices::system, req, bluetoothSOC } {
-   }
-   SystemInfo(SystemInfo const& other) = delete;
-   SystemInfo(SystemInfo&& other) = delete;
-   SystemInfo& operator=(SystemInfo const& other) = delete;
+    class SystemInfo : protected Request {
+    public:
+        SystemInfo(Blackboard& bb, SendPacket& req) :
+            Request { bb, Devices::system, req, nordic } {
+        }
+        SystemInfo(SystemInfo const& other) = delete;
+        SystemInfo(SystemInfo&& other) = delete;
+        SystemInfo& operator=(SystemInfo const& other) = delete;
 
-   void getMainAppVersion(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getBootloaderVersion(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getBoardRevision(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getMacId(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getStatsId(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getProcessorName(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getSku(CommandResponse const want_resp = CommandResponse::resp_yes);
-   void getCoreUpTime(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getMainAppVersion(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getBootloaderVersion(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getBoardRevision(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getMacId(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getStatsId(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getProcessorName(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getSku(CommandResponse const want_resp = CommandResponse::resp_yes);
+        void getCoreUpTime(CommandResponse const want_resp = CommandResponse::resp_yes);
 
-   ResultUInt8 boardVersion();
-   ResultString bootVersion();
-   ResultString bootVersion2();
-   ResultString macAddress();
-   ResultString mainAppVersion();
-   ResultString mainAppVersion2();
-   ResultString processorName();
-   ResultString processorName2();
-   ResultInt16 statsId();
-   ResultString sku();
-   ResultInt64 coreUpTime();
+        ResultUInt8 boardVersion();
+        ResultString bootVersionNordic();
+        ResultString bootVersionBT();
+        ResultString macAddress();
+        ResultString mainAppVersionNordic();
+        ResultString mainAppVersionBT();
+        ResultString processorNameBT();
+        ResultString processorNameNordic();
+        ResultInt16 statsId();
+        ResultString sku();
+        ResultInt64 coreUpTime();
 
-   private:
-   enum Cmd : uint8_t {
-      get_main_application_version = 0x00,     //
-      get_bootloader_version = 0x01,           //
-      get_board_revision = 0x03,               //
-      get_mac_address = 0x06,                  //
-      get_stats_id = 0x13,                     //
-      get_processor_name = 0x1F,               //
-      get_sku = 0x38,                          //
-      get_core_up_time_in_milliseconds = 0x39, //
-   };
+    private:
+        enum Cmd : uint8_t {
+            get_main_application_version = 0x00,     //
+            get_bootloader_version = 0x01,           //
+            get_board_revision = 0x03,               //
+            get_mac_address = 0x06,                  //
+            get_stats_id = 0x13,                     //
+            get_processor_name = 0x1F,               //
+            get_sku = 0x38,                          //
+            get_core_up_time_in_milliseconds = 0x39, //
+        };
 
-   ResultString versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
-};
+        ResultString versionValue(rvr::TargetPort const target, Devices const dev, uint8_t const cmd);
+    };
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {
-   basic(get_main_application_version, want_resp);
-   basicAlt(get_main_application_version, want_resp);
-}
+    inline void SystemInfo::getMainAppVersion(CommandResponse const want_resp) {
+        basic(get_main_application_version, want_resp);
+        basicAlt(get_main_application_version, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getBootloaderVersion(CommandResponse const want_resp) {
-   basic(get_bootloader_version, want_resp);
-   basicAlt(get_bootloader_version, want_resp);
-}
+    inline void SystemInfo::getBootloaderVersion(CommandResponse const want_resp) {
+        basic(get_bootloader_version, want_resp);
+        basicAlt(get_bootloader_version, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getBoardRevision(CommandResponse const want_resp) {
-   basicAlt(get_board_revision, want_resp);
-}
+    inline void SystemInfo::getBoardRevision(CommandResponse const want_resp) {
+        basic(get_board_revision, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getMacId(CommandResponse const want_resp) {
-   basicAlt(get_mac_address, want_resp);
-}
+    inline void SystemInfo::getMacId(CommandResponse const want_resp) {
+        basic(get_mac_address, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getStatsId(CommandResponse const want_resp) {
-   basicAlt(get_stats_id, want_resp);
-}
+    inline void SystemInfo::getStatsId(CommandResponse const want_resp) {
+        basic(get_stats_id, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getProcessorName(CommandResponse const want_resp) {
-   basic(get_processor_name, want_resp);
-   basicAlt(get_processor_name, want_resp);
-}
+    inline void SystemInfo::getProcessorName(CommandResponse const want_resp) {
+        basic(get_processor_name, want_resp);
+        basicAlt(get_processor_name, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getCoreUpTime(CommandResponse const want_resp) {
-   basic(get_core_up_time_in_milliseconds, want_resp);
-}
+    inline void SystemInfo::getCoreUpTime(CommandResponse const want_resp) {
+        basicAlt(get_core_up_time_in_milliseconds, want_resp);
+    }
 //----------------------------------------------------------------------------------------------------------------------
-inline void SystemInfo::getSku(CommandResponse const want_resp) {
-   basicAlt(get_sku, want_resp);
-}
+    inline void SystemInfo::getSku(CommandResponse const want_resp) {
+        basic(get_sku, want_resp);
+    }
 
 } /* namespace rvr */
 
